@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>BRIDGE COMMANDER — GM console</title>
+    <link rel="stylesheet" href="/admin.css" />
+  </head>
+  <body>
+    <header>
+      <div>
+        <span class="eyebrow">BRIDGE COMMANDER / ADMIN</span>
+        <h1>Game Master Console</h1>
+      </div>
+      <span id="status" class="status">offline</span>
+    </header>
+    <main>
+      <section id="login" class="card">
+        <h2>Connect to admin port</h2>
+        <p>Enter the configured admin token to inspect active bridge rooms.</p>
+        <form id="login-form">
+          <input id="token" type="password" placeholder="ADMIN_TOKEN" required />
+          <button title="Connect to the admin socket with the configured ADMIN_TOKEN">CONNECT</button>
+        </form>
+        <p id="error" class="error"></p>
+      </section>
+
+      <section id="console" hidden>
+        <div class="toolbar card">
+          <label>ROOM <select id="room"><option value="">No rooms</option></select></label>
+          <button id="refresh" title="Re-list the active rooms and available campaigns">REFRESH</button>
+          <button id="subscribe" title="Subscribe to live state broadcasts for the selected room">WATCH ROOM</button>
+          <span class="toolbar-divider"></span>
+          <label>CAMPAIGN <select id="campaign"><option value="">Default</option></select></label>
+          <label>CREW SHIP <select id="crew-ship"></select></label>
+          <button id="new-engagement" title="Reset the selected room to a fresh engagement using the chosen campaign and crew ship">START NEW ENGAGEMENT</button>
+          <button id="set-ship" title="Change the crew hull in the running engagement without resetting it">SET CREW SHIP (LIVE)</button>
+          <button id="freeze" title="Hold the clock so you can move contacts and inject events; advance is blocked until you release it">FREEZE TIME</button>
+        </div>
+
+        <section class="card map-card">
+          <div class="section-head">
+            <h2>Tactical map</h2>
+            <span id="map-hint" class="muted">Drag a contact to move it. Freeze time first.</span>
+          </div>
+          <svg id="tac-map" viewBox="0 0 520 520" preserveAspectRatio="xMidYMid meet"></svg>
+        </section>
+
+        <div class="grid">
+          <section class="card">
+            <div class="section-head"><h2>Players online</h2><span class="muted">Remove abusive sessions</span></div>
+            <div id="players" class="empty">No players connected.</div>
+          </section>
+          <section class="card">
+            <div class="section-head"><h2>Room state</h2><span id="room-meta" class="muted">—</span></div>
+            <div id="state" class="empty">Select a room and watch it.</div>
+          </section>
+
+          <section class="card">
+            <div class="section-head"><h2>Opposition contacts</h2></div>
+            <div id="spawn" class="spawn-form">
+              <label>TYPE <select id="spawn-type"></select></label>
+              <label>SHIP <select id="spawn-ship"></select></label>
+              <label>X <input id="spawn-x" type="number" value="20" /></label>
+              <label>Y <input id="spawn-y" type="number" value="0" /></label>
+              <label class="check"><input id="spawn-hostile" type="checkbox" /> HOSTILE</label>
+              <button id="spawn-btn" title="Place the configured opposition contact on the tactical map">SPAWN CONTACT</button>
+            </div>
+            <div id="contacts" class="empty">No room selected.</div>
+          </section>
+
+          <section class="card">
+            <div class="section-head"><h2>Crew skills</h2><span class="muted">0-99 WCRPG scores</span></div>
+            <div class="spawn-form">
+              <label>SEAT <select id="skill-seat">
+                <option value="command">Command</option>
+                <option value="ops">Ops</option>
+                <option value="sensor">Sensors</option>
+                <option value="comms">Comms/Weapons</option>
+              </select></label>
+              <label>SKILL <select id="skill-name"></select></label>
+              <label>SCORE <input id="skill-score" type="number" min="0" max="99" value="55" /></label>
+              <button id="skill-btn" title="Set this station's score in the chosen skill; other scores are kept">SET SKILL</button>
+            </div>
+            <div id="skills" class="empty">No room selected.</div>
+          </section>
+        </div>
+      </section>
+    </main>
+    <script src="/admin.js"></script>
+  </body>
+</html>

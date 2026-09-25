@@ -1,0 +1,26 @@
+{
+  "default": "standard",
+  "drives": {
+    "standard": {
+      "name": "Standard D-Drive",
+      "spoolRate": 1.0,
+      "fuelMultiplier": 1.0,
+      "misjumpFloor": 0.35,
+      "note": "The fleet workhorse: predictable and unremarkable."
+    },
+    "morvan": {
+      "name": "Morvan Drive",
+      "spoolRate": 0.8,
+      "fuelMultiplier": 1.2,
+      "misjumpFloor": 0.4,
+      "note": "Long-legged and fussy: slow to align and thirsty, but hard to misjump."
+    },
+    "akwende": {
+      "name": "Akwende Drive",
+      "spoolRate": 1.3,
+      "fuelMultiplier": 0.85,
+      "misjumpFloor": 0.3,
+      "note": "Fast and frugal, and unforgiving if rushed."
+    }
+  }
+}

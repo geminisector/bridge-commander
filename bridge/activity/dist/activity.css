@@ -1,0 +1,363 @@
+/* BRIDGE COMMANDER — Gemini Sector styling.
+   Palette, typography and card language follow the Gemini Sector Hub
+   (geminisector.github.io): deep-space background with the shared starfield,
+   cyan glow accents, Zen Dots headings over Share Tech Mono readouts. */
+
+@import url('https://fonts.googleapis.com/css2?family=Zen+Dots&family=Share+Tech+Mono&display=swap');
+
+:root{
+  --bg:#0b0d17;
+  --bg-deep:#000004;
+  --panel:#151928;
+  --panel-2:#1a2034;
+  --line:#2a3350;
+  --text:#e0e6f3;
+  --text-dim:#a0a8c0;
+  --accent:#00f0ff;
+  --accent-hover:#4efffe;
+  --glow:0 0 8px rgba(0,240,255,.35);
+  --glow-hover:0 0 15px rgba(78,255,254,.75),0 0 25px rgba(78,255,254,.35);
+  --radius:8px;
+  /* legacy names kept so existing markup keeps resolving */
+  --cyan:var(--accent);
+  --dim:#7a88aa;
+  --amber:#f9d71c;
+  --red:#ff6b73;
+  --green:#21d054;
+  --active:#0d3646;
+}
+
+*{box-sizing:border-box}
+html{min-height:100%;background:var(--bg-deep)}
+
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:'Share Tech Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:15px;
+  line-height:1.6;
+  color:var(--text);
+  background-color:var(--bg);
+  /* The Gemini Sector starfield, tiled and pinned. */
+  background-image:url('./starfield.svg');
+  background-repeat:repeat;
+  background-attachment:fixed;
+  background-size:760px 760px;
+}
+
+/* Nebula wash + vignette layered over the stars, under the content. */
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:
+    radial-gradient(1000px 620px at 84% -12%,rgba(0,240,255,.12),transparent 62%),
+    radial-gradient(760px 520px at 6% 108%,rgba(138,43,226,.14),transparent 66%),
+    radial-gradient(120% 90% at 50% 50%,transparent 55%,rgba(0,0,4,.55) 100%);
+}
+
+main{
+  max-width:1240px;
+  margin:auto;
+  padding:26px 22px 40px;
+  position:relative;
+}
+
+/* ---- hero header ---- */
+header,
+.watch,
+.card{
+  border:1px solid rgba(0,240,255,.3);
+  background:linear-gradient(180deg,rgba(21,25,40,.94),rgba(13,16,28,.94));
+  border-radius:var(--radius);
+  box-shadow:var(--glow),inset 0 1px 0 rgba(255,255,255,.03);
+}
+.contact,
+.catalogue-entry{
+  border:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(21,25,40,.94),rgba(13,16,28,.94));
+  border-radius:var(--radius);
+  box-shadow:0 0 6px rgba(0,240,255,.12);
+}
+
+header{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  gap:8px;
+  padding:34px 22px 28px;
+  overflow:hidden;
+}
+header::after{
+  content:'';
+  position:absolute;
+  left:10%;right:10%;bottom:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  opacity:.6;
+}
+
+small,.label,.muted{color:var(--dim);font:700 .68rem 'Share Tech Mono',ui-monospace,monospace;letter-spacing:.14em}
+.muted{font-weight:400}
+
+h1{
+  margin:6px 0 2px;
+  font-family:'Zen Dots',system-ui,sans-serif;
+  font-size:clamp(1.7rem,4.4vw,2.8rem);
+  font-weight:700;
+  letter-spacing:.16em;
+  color:var(--accent);
+  text-shadow:0 0 6px var(--accent),0 0 20px rgba(0,240,255,.45);
+}
+h1.danger{color:var(--red);text-shadow:0 0 6px var(--red),0 0 20px rgba(255,107,115,.45)}
+h1.good{color:var(--green);text-shadow:0 0 6px var(--green),0 0 20px rgba(33,208,84,.45)}
+
+#status{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font:700 .72rem 'Share Tech Mono',ui-monospace,monospace;
+  letter-spacing:.16em;
+  color:var(--accent);
+}
+#status::before{
+  content:'';
+  width:8px;height:8px;border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 8px var(--accent);
+  animation:pulse 1.8s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:.35;transform:scale(.85)}50%{opacity:1;transform:scale(1.15)}}
+
+/* ---- controls ---- */
+button,select{
+  border:1px solid var(--accent);
+  border-radius:var(--radius);
+  background:rgba(0,240,255,.06);
+  color:var(--text);
+  padding:9px 13px;
+  font-family:'Share Tech Mono',ui-monospace,monospace;
+  font-size:.8rem;
+  letter-spacing:.06em;
+  cursor:pointer;
+  transition:background-color .2s ease,color .2s ease,box-shadow .2s ease,border-color .2s ease,transform .2s ease;
+  box-shadow:0 0 6px rgba(0,240,255,.18);
+}
+button:hover:not(:disabled),select:hover{
+  background:var(--accent);
+  color:var(--bg-deep);
+  border-color:var(--accent-hover);
+  box-shadow:var(--glow-hover);
+}
+button:active:not(:disabled){transform:translateY(1px)}
+button:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
+
+/* ---- watch readout strip ---- */
+.watch{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+  padding:12px 14px;
+  margin:16px 0;
+}
+.watch strong{color:var(--accent);text-shadow:0 0 6px rgba(0,240,255,.4)}
+.watch button.active{
+  background:var(--active);
+  border-color:var(--accent);
+  color:var(--accent);
+  box-shadow:0 0 0 1px #42d9e744 inset,var(--glow);
+}
+
+/* ---- station tabs ---- */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:16px 0}
+.tabs button{
+  font-family:'Zen Dots',system-ui,sans-serif;
+  font-size:.72rem;
+  letter-spacing:.12em;
+  padding:10px 15px;
+}
+.tabs button.active{
+  background:var(--accent);
+  color:var(--bg-deep);
+  border-color:var(--accent-hover);
+  box-shadow:var(--glow-hover);
+}
+
+/* ---- panels ---- */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:14px;
+}
+.card{
+  padding:16px;
+  transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;
+}
+.card:hover{
+  transform:translateY(-4px);
+  border-color:var(--accent-hover);
+  box-shadow:var(--glow-hover);
+}
+.card h2,.card h3{
+  margin:0 0 12px;
+  font-family:'Zen Dots',system-ui,sans-serif;
+  color:var(--accent);
+  font-size:.84rem;
+  letter-spacing:.12em;
+  text-shadow:0 0 6px rgba(0,240,255,.35);
+}
+
+.contact{padding:12px;margin:8px 0;cursor:pointer;transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease}
+.contact:hover{border-color:var(--accent-hover)}
+.contact.focus{border-color:var(--accent);box-shadow:var(--glow-hover)}
+.contact strong{display:block;color:var(--text)}
+
+/* Hull picture: generic silhouette until a firing solution is LOCKED. */
+.contact-head{display:flex;gap:12px;align-items:center;margin-bottom:8px}
+.contact-head p{margin:0}
+.contact-thumb{
+  width:58px;
+  height:44px;
+  object-fit:contain;
+  background:var(--bg-deep);
+  border:1px solid var(--accent);
+  border-radius:6px;
+  box-shadow:var(--glow);
+}
+.contact-thumb.unknown{opacity:.4;filter:grayscale(1);border-color:var(--line);box-shadow:none}
+.board-thumb{
+  width:34px;
+  height:26px;
+  object-fit:contain;
+  background:var(--bg-deep);
+  border:1px solid var(--line);
+  border-radius:4px;
+  margin-right:8px;
+  vertical-align:middle;
+}
+
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+/* ---- meters ---- */
+.bar{
+  height:9px;
+  background:var(--bg-deep);
+  border:1px solid var(--line);
+  border-radius:9px;
+  overflow:hidden;
+  margin:8px 0;
+}
+.bar i{display:block;height:100%;background:var(--accent);box-shadow:0 0 10px var(--accent)}
+.bar.red i{background:var(--red);box-shadow:0 0 10px var(--red)}
+.bar.amber i{background:var(--amber);box-shadow:0 0 10px var(--amber)}
+.bar.good i{background:var(--green);box-shadow:0 0 10px var(--green)}
+
+/* ---- plots ---- */
+.plot{
+  width:100%;
+  height:150px;
+  background:var(--bg-deep);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+}
+.plot rect{fill:var(--accent)}
+.navmap{
+  width:100%;
+  height:360px;
+  background:var(--bg-deep);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+}
+.navmap text{font:10px 'Share Tech Mono',ui-monospace,monospace;fill:var(--dim)}
+
+/* ---- gravidar heat scope ---- */
+.gravscope{
+  width:100%;
+  height:210px;
+  display:block;
+  background:var(--bg-deep);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  margin-bottom:8px;
+}
+
+/* ---- sensor cards ---- */
+.sensor-card{min-height:180px}
+.sensor-card h3{color:var(--accent);font-size:.82rem;letter-spacing:.1em}
+.readout{
+  font:700 .75rem 'Share Tech Mono',ui-monospace,monospace;
+  color:var(--text-dim);
+  line-height:1.85;
+}
+
+/* ---- catalogue ---- */
+.catalogue{max-height:65vh;overflow:auto}
+.catalogue-entry{
+  display:grid;
+  grid-template-columns:90px 1fr;
+  gap:12px;
+  padding:10px;
+  margin:8px 0;
+  transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;
+}
+.catalogue-entry:hover{transform:translateY(-3px);border-color:var(--accent-hover);box-shadow:var(--glow-hover)}
+.catalogue-entry img{
+  width:90px;
+  height:70px;
+  object-fit:contain;
+  background:var(--bg-deep);
+  border-radius:6px;
+}
+/* Carousel: one hull at a time, no inner scroll to lose. */
+.catalogue-entry.carousel{grid-template-columns:130px 1fr}
+.catalogue-entry.carousel img{width:130px;height:105px}
+.carousel-nav{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-top:12px;
+}
+.candidate{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  border-bottom:1px solid var(--line);
+  padding:7px 0;
+}
+.candidate>span:first-child{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.candidate>span:last-child{flex:0 0 auto;white-space:nowrap}
+.candidate button{padding:4px 9px}
+
+/* ---- state colours ---- */
+.danger{color:var(--red)}
+.good{color:var(--green)}
+
+/* ---- footer ---- */
+.legal-disclaimer{
+  margin-top:32px;
+  padding:20px;
+  text-align:center;
+  font-size:.72rem;
+  letter-spacing:.06em;
+  line-height:1.9;
+  color:var(--text-dim);
+  border-top:1px solid var(--line);
+  background:rgba(11,13,23,.55);
+}
+.legal-disclaimer a{color:var(--accent);text-decoration:none}
+.legal-disclaimer a:hover{color:var(--accent-hover);text-decoration:underline}
+
+@media(max-width:600px){
+  main{padding:12px}
+  header{padding:26px 14px 22px}
+  .catalogue-entry{grid-template-columns:65px 1fr}
+  .catalogue-entry img{width:65px}
+  .grid{grid-template-columns:1fr}
+}

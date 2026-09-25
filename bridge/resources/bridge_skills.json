@@ -1,0 +1,38 @@
+{
+  "categories": {
+    "Power": ["Three-Dimensional Maneuvers", "Brawling", "Lifting"],
+    "Finesse": ["Dexterous Maneuvers", "Dodge", "Hiding and Seeking"],
+    "Physique": ["Stamina", "Concentration", "Recuperation"],
+    "Intellect": ["Knowledge", "Resourcefulness", "Cunning"],
+    "Acumen": ["Perception", "Performance", "Survival"],
+    "Charm": ["Personality", "Leadership", "Diplomacy"],
+    "Command": ["Strategy", "Coordination", "Guidance", "Security", "Inspire"],
+    "Science": ["Planetology", "Technology", "Archaeology", "Geology", "Typhonology"],
+    "Navigation": ["Astrogation", "Starship Piloting", "Orientation", "Vehicle Piloting", "Stealth"],
+    "Tactical": ["Targeting", "Marksmanship", "Ballistics", "Combat Maneuvers", "Evasive Maneuvers"],
+    "Engineering": ["Damage Control", "Internal Systems", "Defenses", "Mechanics", "Faster-Than-Light Mechanics"],
+    "Communications": ["Translate", "Rapport", "Intimidate", "Negotiate", "Distress"],
+    "Medicine": ["Intensive Care", "Treatment", "Xenobiology", "Specialized Medicine", "Psychology"]
+  },
+  "stations": {
+    "command": ["Strategy", "Coordination", "Guidance", "Security", "Inspire", "Leadership", "Diplomacy", "Damage Control", "Internal Systems", "Defenses", "Mechanics", "Faster-Than-Light Mechanics"],
+    "ops": ["Astrogation", "Starship Piloting", "Orientation", "Vehicle Piloting", "Stealth"],
+    "sensor": ["Technology", "Planetology", "Typhonology", "Perception", "Concentration"],
+    "comms": ["Translate", "Distress", "Rapport", "Negotiate", "Intimidate", "Targeting", "Marksmanship", "Ballistics", "Combat Maneuvers", "Evasive Maneuvers"]
+  },
+  "difficulties": {
+    "trivial": 12,
+    "easy": 14,
+    "routine": 16,
+    "hard": 19,
+    "formidable": 23,
+    "impossible": 28
+  },
+  "defaults": {
+    "green": 50,
+    "crew": 60,
+    "competent": 70,
+    "veteran": 80,
+    "ace": 90
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "home": {"action": "/img/action/fralthi.png", "vdu": "/img/vdu/fralthi-vdu.gif"},
+  "venture-corvette": {"action": "/img/action/venture.png", "vdu": "/img/vdu/venture-vdu.gif"},
+  "drayman-transport": {"action": "/img/action/drayman.png", "vdu": "/img/vdu/drayman-vdu.gif"},
+  "tarsus-prospector": {"action": "/img/action/tarsus.png", "vdu": "/img/vdu/tarsus-vdu.gif"},
+  "longhaul-freighter": {"action": "/img/action/longhaul.png", "vdu": "/img/vdu/longhaul-vdu.png"},
+  "kamekh-escort": {"action": "/img/action/kamekh.png", "vdu": "/img/vdu/kamekh-vdu.gif"},
+  "salthi-fighter": {"action": "/img/action/salthi.png", "vdu": "/img/vdu/salthi-vdu.gif"},
+  "grikath-fighter": {"action": "/img/action/grikath.png", "vdu": "/img/vdu/grikath-vdu.gif"},
+  "ralatha-destroyer": {"action": "/img/action/ralatha.png", "vdu": "/img/vdu/ralatha-vdu.gif"},
+  "fralthi-carrier": {"action": "/img/action/fralthi.png", "vdu": "/img/vdu/fralthi-vdu.gif"},
+  "dorkathi-transport": {"action": "/img/action/dorkathi.png", "vdu": "/img/vdu/dorkathi-vdu.gif"},
+  "bengal-carrier": {"action": "/img/action/bengal.png", "vdu": "/img/vdu/bengal-vdu.gif"},
+  "bristol-cruiser": {"action": "/img/action/bristol.png", "vdu": "/img/vdu/bristol-vdu.gif"},
+  "raptor-medium": {"action": "/img/action/raptor.png", "vdu": "/img/vdu/raptor-vdu.gif"},
+  "broadsword-bomber": {"action": "/img/action/broadsword.png", "vdu": "/img/vdu/broadsword-vdu.gif"}
+}

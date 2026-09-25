@@ -1,0 +1,62 @@
+{
+  "iron-collar": [
+    {"atMinute": 40, "template": "fleetnet"},
+    {"atMinute": 95, "template": "unmarked"},
+    {"atMinute": 150, "template": "distress"},
+    {"atMinute": 200, "template": "orders"},
+    {"atMinute": 280, "template": "probe"},
+    {"atMinute": 340, "template": "weapons-warning"}
+  ],
+  "whale-road": [
+    {"atMinute": 45, "template": "orders"},
+    {"atMinute": 110, "template": "unmarked"},
+    {"atMinute": 190, "template": "fleetnet"},
+    {"atMinute": 250, "template": "probe"},
+    {"atMinute": 320, "template": "distress"},
+    {"atMinute": 380, "template": "orders"}
+  ],
+  "capship-sniff": [
+    {"atMinute": 60, "template": "fleetnet"},
+    {"atMinute": 130, "template": "probe"},
+    {"atMinute": 210, "template": "unmarked"},
+    {"atMinute": 300, "template": "orders"},
+    {"atMinute": 360, "template": "fleetnet"}
+  ],
+  "lima-drift": [
+    {"atMinute": 35, "template": "unmarked"},
+    {"atMinute": 120, "template": "orders"},
+    {"atMinute": 200, "template": "probe"},
+    {"atMinute": 260, "template": "distress"},
+    {"atMinute": 330, "template": "orders"}
+  ],
+  "rubble-run": [
+    {"atMinute": 50, "template": "fleetnet"},
+    {"atMinute": 120, "template": "unmarked"},
+    {"atMinute": 190, "template": "probe"},
+    {"atMinute": 260, "template": "orders"},
+    {"atMinute": 330, "template": "fleetnet"}
+  ],
+  "sumn-tpka": [
+    {"atMinute": 60, "template": "probe"},
+    {"atMinute": 160, "template": "unmarked"},
+    {"atMinute": 270, "template": "orders"}
+  ],
+  "silent-vigil": [
+    {"atMinute": 55, "template": "probe"},
+    {"atMinute": 145, "template": "challenge"},
+    {"atMinute": 235, "template": "relay"},
+    {"atMinute": 310, "template": "unmarked"}
+  ],
+  "empty-lane": [
+    {"atMinute": 80, "template": "false-surrender"},
+    {"atMinute": 170, "template": "civilian"},
+    {"atMinute": 250, "template": "probe"},
+    {"atMinute": 330, "template": "orders"}
+  ],
+  "full-sweep": [
+    {"atMinute": 45, "template": "fleetnet"},
+    {"atMinute": 125, "template": "unmarked"},
+    {"atMinute": 205, "template": "challenge"},
+    {"atMinute": 290, "template": "probe"}
+  ]
+}

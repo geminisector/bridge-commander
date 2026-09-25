@@ -1,0 +1,167 @@
+{
+  "hulls": {
+    "home": {
+      "shipType": "Fralthi",
+      "gunners": 2,
+      "cargoHold": 1000.0,
+      "hardpoints": [
+        {"id": "HL1-FB", "arc": "fore", "kind": "gun"},
+        {"id": "HL1-SB", "arc": "port", "kind": "gun"}
+      ]
+    },
+    "venture-corvette": {
+      "shipType": "Venture",
+      "gunners": 2,
+      "cargoHold": 300.0,
+      "hardpoints": [
+        {"id": "V-LT", "arc": "port", "kind": "gun"},
+        {"id": "V-RT", "arc": "starboard", "kind": "gun"}
+      ]
+    },
+    "drayman-transport": {
+      "shipType": "Drayman",
+      "gunners": 1,
+      "cargoHold": 1000.0,
+      "hardpoints": [{"id": "Fk-L", "arc": "fore", "kind": "gun"}]
+    },
+    "tarsus-prospector": {
+      "shipType": "Tarsus",
+      "gunners": 0,
+      "cargoHold": 125.0,
+      "hardpoints": [
+        {"id": "fore-gun", "arc": "fore", "kind": "gun"},
+        {"id": "fore-missile", "arc": "fore", "kind": "missile"}
+      ]
+    },
+    "longhaul-freighter": {
+      "shipType": "Longhaul",
+      "gunners": 1,
+      "cargoHold": 54.0,
+      "hardpoints": [
+        {"id": "fore-gun", "arc": "fore", "kind": "gun"},
+        {"id": "fore-missile", "arc": "fore", "kind": "missile"}
+      ]
+    },
+    "kamekh-escort": {
+      "shipType": "Kamekh",
+      "gunners": 1,
+      "cargoHold": 420.0,
+      "hardpoints": [{"id": "Fk-M", "arc": "fore", "kind": "gun"}]
+    },
+    "salthi-fighter": {
+      "shipType": "Salthi",
+      "gunners": 0,
+      "cargoHold": 2.0,
+      "hardpoints": [
+        {"id": "fore-gun", "arc": "fore", "kind": "gun"},
+        {"id": "fore-missile", "arc": "fore", "kind": "missile"}
+      ]
+    },
+    "grikath-fighter": {
+      "shipType": "Grikath",
+      "gunners": 1,
+      "cargoHold": 15.0,
+      "hardpoints": [{"id": "A", "arc": "all", "kind": "gun"}]
+    },
+    "ralatha-destroyer": {
+      "shipType": "Ralatha",
+      "gunners": 2,
+      "cargoHold": 750.0,
+      "hardpoints": [
+        {"id": "Fk-L", "arc": "fore", "kind": "gun"},
+        {"id": "Fk-Lb", "arc": "fore", "kind": "gun"}
+      ]
+    },
+    "fralthi-carrier": {
+      "shipType": "Fralthi",
+      "gunners": 2,
+      "cargoHold": 1000.0,
+      "hardpoints": [
+        {"id": "HL1-FB", "arc": "fore", "kind": "gun"},
+        {"id": "HL1-SB", "arc": "port", "kind": "gun"}
+      ]
+    },
+    "dorkathi-transport": {
+      "shipType": "Dorkathi",
+      "gunners": 1,
+      "cargoHold": 3000.0,
+      "hardpoints": [{"id": "Fk-M", "arc": "fore", "kind": "gun"}]
+    },
+    "bengal-carrier": {
+      "shipType": "Bengal",
+      "role": "Fleet carrier",
+      "contactType": "capship",
+      "massKt": 19000.0,
+      "profile": 0.92,
+      "stealth": 0.1,
+      "emission": 0.85,
+      "sensorQuality": 0.8,
+      "crew": 2400,
+      "blurb": "A flying airbase: the biggest thing in the sector, and it knows it.",
+      "gunners": 5,
+      "cargoHold": 2200.0,
+      "hardpoints": [
+        {"id": "HL1-LB", "arc": "port", "kind": "gun"},
+        {"id": "HL1-RB", "arc": "port", "kind": "gun"},
+        {"id": "HL2-FB", "arc": "fore", "kind": "gun"},
+        {"id": "HL2-CB", "arc": "port", "kind": "gun"},
+        {"id": "HL2-AB", "arc": "aft", "kind": "gun"}
+      ]
+    },
+    "bristol-cruiser": {
+      "shipType": "Bristol",
+      "role": "Light cruiser",
+      "contactType": "capship",
+      "massKt": 7600.0,
+      "profile": 0.78,
+      "stealth": 0.2,
+      "emission": 0.7,
+      "sensorQuality": 0.75,
+      "crew": 680,
+      "blurb": "A cruiser that can still make a turn: the escort commander's problem.",
+      "gunners": 2,
+      "cargoHold": 900.0,
+      "hardpoints": [
+        {"id": "HL2-FB", "arc": "fore", "kind": "gun"},
+        {"id": "HL2-CB", "arc": "port", "kind": "gun"}
+      ]
+    },
+    "raptor-medium": {
+      "shipType": "Raptor",
+      "role": "Medium fighter",
+      "contactType": "fighter",
+      "massKt": 14.0,
+      "profile": 0.35,
+      "stealth": 0.6,
+      "emission": 0.5,
+      "sensorQuality": 0.6,
+      "crew": 1,
+      "blurb": "The old workhorse fighter: guns, missiles, and not much else.",
+      "gunners": 0,
+      "cargoHold": 5.0,
+      "hardpoints": [
+        {"id": "fore-gun", "arc": "fore", "kind": "gun"},
+        {"id": "fore-missile", "arc": "fore", "kind": "missile"}
+      ]
+    },
+    "broadsword-bomber": {
+      "shipType": "Broadsword",
+      "role": "Heavy fighter",
+      "contactType": "fighter",
+      "massKt": 22.0,
+      "profile": 0.55,
+      "stealth": 0.4,
+      "emission": 0.6,
+      "sensorQuality": 0.55,
+      "crew": 3,
+      "blurb": "A bomber with turrets and a magazine: slow, loud, and lethal to capitals.",
+      "gunners": 3,
+      "cargoHold": 6.0,
+      "hardpoints": [
+        {"id": "A", "arc": "all", "kind": "gun"},
+        {"id": "L", "arc": "port", "kind": "gun"},
+        {"id": "R", "arc": "starboard", "kind": "gun"}
+      ]
+    }
+  }
+}

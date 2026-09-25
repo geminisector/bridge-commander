@@ -1,0 +1,12 @@
+{
+  "iron-collar": [
+    {"id": "collar-picket", "name": "Collar Picket", "ax": -30, "ay": -80, "bx": 70, "by": -40, "sensitivity": 0.6, "faction": "enemy", "note": "A listening line across the southern approach."}
+  ],
+  "full-sweep": [
+    {"id": "sweep-line-north", "name": "North Picket", "ax": -80, "ay": 60, "bx": 40, "by": 80, "sensitivity": 0.7, "faction": "enemy", "note": "Mines and sensors along the grid's northern edge."},
+    {"id": "sweep-line-south", "name": "South Picket", "ax": -60, "ay": -70, "bx": 80, "by": -50, "sensitivity": 0.55, "faction": "enemy", "note": "Thinner coverage; a gap the locals use."}
+  ],
+  "empty-lane": [
+    {"id": "lane-picket", "name": "Lane Picket", "ax": -20, "ay": -60, "bx": 60, "by": -20, "sensitivity": 0.65, "faction": "enemy", "note": "Convoy route picket line."}
+  ]
+}

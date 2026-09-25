@@ -1,0 +1,49 @@
+{
+  "modules": {
+    "shield-booster": {
+      "name": "Shield booster",
+      "power": 3,
+      "massKt": 4.0,
+      "cargo": 0,
+      "system": "shields",
+      "shieldMultiplier": 1.25,
+      "note": "Stiffens every arc, and gives the enemy one more thing to shoot."
+    },
+    "long-range-array": {
+      "name": "Long-range sensor array",
+      "power": 2,
+      "massKt": 3.0,
+      "cargo": 0,
+      "system": "radar",
+      "sensorBonus": 0.15,
+      "note": "Sees further; a mast the enemy can see too."
+    },
+    "auxiliary-tankage": {
+      "name": "Auxiliary tankage",
+      "power": 0,
+      "massKt": 6.0,
+      "cargo": 0,
+      "system": "engines",
+      "fuelBonus": 3.0,
+      "note": "More legs, more mass, slower turns."
+    },
+    "machine-shop": {
+      "name": "Machine shop",
+      "power": 2,
+      "massKt": 5.0,
+      "cargo": 40,
+      "system": "flightDeck",
+      "sparesBonus": 3,
+      "note": "Field spares and the tools to use them."
+    },
+    "ablative-plating": {
+      "name": "Ablative plating",
+      "power": 1,
+      "massKt": 8.0,
+      "cargo": 0,
+      "system": "defenses",
+      "armorMultiplier": 1.3,
+      "note": "More armour, at the cost of everything else."
+    }
+  }
+}

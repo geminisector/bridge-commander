@@ -1,0 +1,25 @@
+{
+  "iron-collar": [
+    {"id": "ion-front", "type": "ionized-nebula", "title": "Ionized nebula front", "startMinute": 70, "endMinute": 150, "intensity": 0.7, "noise": 0.035, "exposure": 0.4, "concealment": 0.15}
+  ],
+  "whale-road": [
+    {"id": "dust-lane", "type": "dust-front", "title": "Thermal dust front", "startMinute": 120, "endMinute": 230, "intensity": 0.8, "noise": 0.025, "exposure": 0.2, "concealment": 0.25}
+  ],
+  "capship-sniff": [
+    {"id": "radiation-storm", "type": "radiation-storm", "title": "Radiation storm", "startMinute": 180, "endMinute": 260, "intensity": 0.9, "noise": 0.05, "exposure": 0.5, "concealment": 0.1}
+  ],
+  "lima-drift": [],
+  "rubble-run": [
+    {"id": "rubble-mouth", "type": "debris-field", "title": "Rubble field mouth", "startMinute": 0, "endMinute": null, "intensity": 0.8, "noise": 0.02, "exposure": 0.1, "concealment": 0.3}
+  ],
+  "sumn-tpka": [],
+  "silent-vigil": [
+    {"id": "rift-veil", "type": "ionized-nebula", "title": "Rift veil", "startMinute": 0, "endMinute": 200, "intensity": 0.6, "noise": 0.02, "exposure": 0.2, "concealment": 0.35}
+  ],
+  "empty-lane": [
+    {"id": "holding-dust", "type": "dust-front", "title": "Holding-box dust", "startMinute": 60, "endMinute": 220, "intensity": 0.7, "noise": 0.02, "exposure": 0.15, "concealment": 0.25}
+  ],
+  "full-sweep": [
+    {"id": "bex-rubble", "type": "debris-field", "title": "Bex rubble field", "startMinute": 0, "endMinute": null, "intensity": 0.7, "noise": 0.015, "exposure": 0.1, "concealment": 0.3}
+  ]
+}
