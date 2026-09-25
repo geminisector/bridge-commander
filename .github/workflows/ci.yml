@@ -1,0 +1,153 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install development tools
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+      - name: Run Ruff
+        run: ruff check bridge tests
+      - name: Run mypy
+        run: mypy bridge
+      - name: Check browser JavaScript
+        run: |
+          node --check bridge/activity/dist/activity.js
+          node --check bridge/server/admin-ui/admin.js
+
+  test:
+    name: Tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.12"
+          - "3.13"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - name: Install project
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+      - name: Run test suite
+        run: python -m pytest
+
+  package:
+    name: Build and smoke-test distributions
+    needs:
+      - quality
+      - test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - name: Install build and test tools
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+      - name: Build sdist and wheel
+        run: python -m build
+      - name: Install the built wheel
+        run: python -m pip install --force-reinstall --no-deps dist/*.whl
+      - name: Smoke-test the installed wheel
+        working-directory: /tmp
+        run: |
+          python - <<'PY'
+          import struct
+          import sys
+          from pathlib import Path
+
+          from fastapi.testclient import TestClient
+
+          import bridge
+          from bridge.paths import PACKAGE_ROOT, asset_root, resource_path
+          from bridge.server.main import app
+          from bridge.shared import SHIP_ART, SHIP_CLASSES, campaign_for
+
+          assert "site-packages" in bridge.__file__
+          assert Path(sys.executable).with_name("bridge").is_file()
+          assert len(SHIP_CLASSES) == 15
+          assert SHIP_ART["home"][0] == "/img/action/fralthi.png"
+          assert campaign_for("full-sweep").events
+          assert resource_path("bridge_hulls.json").is_file()
+          assert (PACKAGE_ROOT / "CREDITS.md").is_file()
+          assert (PACKAGE_ROOT / "MANUAL.md").is_file()
+          assert (PACKAGE_ROOT / ".env.example").is_file()
+
+          for path in asset_root().rglob("*"):
+              if path.suffix.lower() not in {".gif", ".png"}:
+                  continue
+              header = path.read_bytes()[:24]
+              if path.suffix.lower() == ".png":
+                  assert header[:8] == b"\x89PNG\r\n\x1a\n"
+                  size = struct.unpack(">II", header[16:24])
+              else:
+                  assert header[:6] in {b"GIF87a", b"GIF89a"}
+                  size = struct.unpack("<HH", header[6:10])
+              assert size == (128, 128), path
+
+          client = TestClient(app)
+          for path in (
+              "/",
+              "/health",
+              "/activity.js",
+              "/img/action/fralthi.png",
+              "/img/vdu/fralthi-vdu.gif",
+              "/img/brief/unknown.png",
+          ):
+              response = client.get(path)
+              assert response.status_code == 200, (path, response.status_code)
+          print(bridge.__file__)
+          PY
+      - name: Upload distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: bridge-commander-distributions
+          path: |
+            dist/*.whl
+            dist/*.tar.gz
+          if-no-files-found: error
