@@ -56,7 +56,7 @@ from the contact’s true class.
 After tagging, show:
 
 ```text
-TAGGED: KAMEKH
+TAGGED: ENEMY ESCORT
 CONFIDENCE: 61%
 VERIFICATION: UNAVAILABLE
 ```
@@ -75,7 +75,7 @@ Use the player’s tag when appropriate for:
 
 Examples of dangerous mistakes:
 
-- Tagging a Fralthi as a Kamekh produces an inadequate engagement plan.
+- Tagging an `Enemy_Cruiser` as an `Enemy_Escort` produces an inadequate engagement plan.
 - Tagging an escort as a freighter lets it close or launch fighters.
 - Tagging a neutral ship as hostile creates political or mission consequences.
 - Tagging a hostile ship as neutral delays weapons preparation.

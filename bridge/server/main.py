@@ -119,8 +119,9 @@ def _asset_dir() -> Path | None:
     """Locate the static image tree served at ``/img``.
 
     The activity UI references contact art by absolute URL (for example
-    ``/img/action/tarsus.png`` and ``/img/brief/unknown.png``); those files live
-    in the CombatBot repo's ``img/`` tree rather than inside the built bundle.
+    ``/img/action/enemy-fighter.png`` and ``/img/brief/unknown.png``); those
+    files live in the CombatBot repo's ``img/`` tree rather than inside the
+    built bundle.
     """
     if ASSET_DIR:
         override = Path(ASSET_DIR).expanduser()

@@ -16,9 +16,10 @@
 6. **Feedback:** the chosen tag flows into weapon prep, comms procedure, and
    the engagement handoff.
 
-**The "why":** the player should be able to say "I tagged it Kamekh because
-the low-band signature matched and the mid-band was still too thin to rule
-out Fralthi" — a defensible read of ambiguous evidence, not a fast click.
+**The "why":** the player should be able to say "I tagged it `Enemy_Escort`
+because the low-band signature matched and the mid-band was still too thin to
+rule out `Enemy_Cruiser`" — a defensible read of ambiguous evidence, not a fast
+click.
 
 ## The board
 
@@ -28,8 +29,9 @@ A visual corkboard, not a dropdown:
   bands as they fill in (reuses the existing `frequencyProfile` accrual),
   any EW intercept notes, any IFF challenge results.
 - Right side: a **rack of catalogue silhouettes**, grouped into the
-  `SENSORS_EW_MINIGAME_PLAN` similarity clusters (e.g., Fralthi/Ralatha
-  sit adjacent, Kamekh/Drayman sit adjacent) so the visual grouping itself
+  `SENSORS_EW_MINIGAME_PLAN` similarity clusters (e.g., `Enemy_Cruiser` /
+  `Enemy_Destroyer` sit adjacent, `Enemy_Escort` / `Friendly_Transport` sit
+  adjacent) so the visual grouping itself
   teaches which ships are genuinely hard to tell apart.
 - The player **drags a band segment onto a candidate silhouette** to compare
   it against that ship's reference profile; the board shows an overlay

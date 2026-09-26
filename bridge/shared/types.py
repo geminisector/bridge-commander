@@ -579,7 +579,7 @@ class ShipState(WireModel):
     buoyCount: int = 2
     noisemakers: int = 2
     # --- ship-class driven properties (set by the GM at scenario build) ------
-    shipClass: str = "lance-corvette"
+    shipClass: str = "friendly-corvette"
     profile: float = 0.45
     stealth: float = 0.5
     emission: float = 0.35

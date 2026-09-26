@@ -1,7 +1,7 @@
 {
   "hulls": {
     "home": {
-      "shipType": "Fralthi",
+      "shipType": "Friendly_Cruiser",
       "gunners": 2,
       "cargoHold": 1000.0,
       "hardpoints": [
@@ -9,8 +9,8 @@
         {"id": "HL1-SB", "arc": "port", "kind": "gun"}
       ]
     },
-    "venture-corvette": {
-      "shipType": "Venture",
+    "friendly-corvette": {
+      "shipType": "Friendly_Corvette",
       "gunners": 2,
       "cargoHold": 300.0,
       "hardpoints": [
@@ -18,14 +18,14 @@
         {"id": "V-RT", "arc": "starboard", "kind": "gun"}
       ]
     },
-    "drayman-transport": {
-      "shipType": "Drayman",
+    "friendly-transport": {
+      "shipType": "Friendly_Transport",
       "gunners": 1,
       "cargoHold": 1000.0,
       "hardpoints": [{"id": "Fk-L", "arc": "fore", "kind": "gun"}]
     },
-    "tarsus-prospector": {
-      "shipType": "Tarsus",
+    "friendly-prospector": {
+      "shipType": "Friendly_Prospector",
       "gunners": 0,
       "cargoHold": 125.0,
       "hardpoints": [
@@ -33,8 +33,8 @@
         {"id": "fore-missile", "arc": "fore", "kind": "missile"}
       ]
     },
-    "longhaul-freighter": {
-      "shipType": "Longhaul",
+    "friendly-freighter": {
+      "shipType": "Friendly_Freighter",
       "gunners": 1,
       "cargoHold": 54.0,
       "hardpoints": [
@@ -42,14 +42,14 @@
         {"id": "fore-missile", "arc": "fore", "kind": "missile"}
       ]
     },
-    "kamekh-escort": {
-      "shipType": "Kamekh",
+    "enemy-escort": {
+      "shipType": "Enemy_Escort",
       "gunners": 1,
       "cargoHold": 420.0,
       "hardpoints": [{"id": "Fk-M", "arc": "fore", "kind": "gun"}]
     },
-    "salthi-fighter": {
-      "shipType": "Salthi",
+    "enemy-fighter": {
+      "shipType": "Enemy_Fighter",
       "gunners": 0,
       "cargoHold": 2.0,
       "hardpoints": [
@@ -57,14 +57,14 @@
         {"id": "fore-missile", "arc": "fore", "kind": "missile"}
       ]
     },
-    "grikath-fighter": {
-      "shipType": "Grikath",
+    "enemy-heavy-fighter": {
+      "shipType": "Enemy_HeavyFighter",
       "gunners": 1,
       "cargoHold": 15.0,
       "hardpoints": [{"id": "A", "arc": "all", "kind": "gun"}]
     },
-    "ralatha-destroyer": {
-      "shipType": "Ralatha",
+    "enemy-destroyer": {
+      "shipType": "Enemy_Destroyer",
       "gunners": 2,
       "cargoHold": 750.0,
       "hardpoints": [
@@ -72,8 +72,8 @@
         {"id": "Fk-Lb", "arc": "fore", "kind": "gun"}
       ]
     },
-    "fralthi-carrier": {
-      "shipType": "Fralthi",
+    "enemy-cruiser": {
+      "shipType": "Enemy_Cruiser",
       "gunners": 2,
       "cargoHold": 1000.0,
       "hardpoints": [
@@ -81,14 +81,15 @@
         {"id": "HL1-SB", "arc": "port", "kind": "gun"}
       ]
     },
-    "dorkathi-transport": {
-      "shipType": "Dorkathi",
+    "enemy-heavy-transport": {
+      "shipType": "Enemy_HeavyTransport",
       "gunners": 1,
       "cargoHold": 3000.0,
       "hardpoints": [{"id": "Fk-M", "arc": "fore", "kind": "gun"}]
     },
-    "bengal-carrier": {
-      "shipType": "Bengal",
+    "friendly-carrier": {
+      "shipType": "Friendly_Carrier",
+      "name": "Friendly_Carrier",
       "role": "Fleet carrier",
       "contactType": "capship",
       "massKt": 19000.0,
@@ -108,8 +109,9 @@
         {"id": "HL2-AB", "arc": "aft", "kind": "gun"}
       ]
     },
-    "bristol-cruiser": {
-      "shipType": "Bristol",
+    "friendly-light-cruiser": {
+      "shipType": "Friendly_LightCruiser",
+      "name": "Friendly_LightCruiser",
       "role": "Light cruiser",
       "contactType": "capship",
       "massKt": 7600.0,
@@ -126,8 +128,9 @@
         {"id": "HL2-CB", "arc": "port", "kind": "gun"}
       ]
     },
-    "raptor-medium": {
-      "shipType": "Raptor",
+    "enemy-medium-fighter": {
+      "shipType": "Enemy_MediumFighter",
+      "name": "Enemy_MediumFighter",
       "role": "Medium fighter",
       "contactType": "fighter",
       "massKt": 14.0,
@@ -144,9 +147,10 @@
         {"id": "fore-missile", "arc": "fore", "kind": "missile"}
       ]
     },
-    "broadsword-bomber": {
-      "shipType": "Broadsword",
-      "role": "Heavy fighter",
+    "enemy-bomber": {
+      "shipType": "Enemy_Bomber",
+      "name": "Enemy_Bomber",
+      "role": "Bomber",
       "contactType": "fighter",
       "massKt": 22.0,
       "profile": 0.55,

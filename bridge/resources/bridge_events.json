@@ -36,7 +36,7 @@
     {"atMinute": 260, "template": "orders"},
     {"atMinute": 330, "template": "fleetnet"}
   ],
-  "sumn-tpka": [
+  "sector-9-anomaly": [
     {"atMinute": 60, "template": "probe"},
     {"atMinute": 160, "template": "unmarked"},
     {"atMinute": 270, "template": "orders"}

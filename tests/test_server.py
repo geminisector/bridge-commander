@@ -93,17 +93,21 @@ def test_db_round_trip_preserves_state():
 def test_db_rejects_stale_schema():
     state = create_state("chan-1", "inst-1", campaign_for(None))
     db.save_room("chan-1", state)
+    assert STATE_SCHEMA_VERSION == 4
 
     conn = db._conn
     assert conn is not None
     raw = json.loads(conn.execute("SELECT state FROM rooms WHERE channel='chan-1'").fetchone()[0])
-    raw["schema"] = 1
+    raw["schema"] = 3
     conn.execute(
         "UPDATE rooms SET state = ? WHERE channel = 'chan-1'", (json.dumps(raw),)
     )
     conn.commit()
 
     assert db.load_room("chan-1") is None
+    # The caller then mints a fresh room at the current schema.
+    fresh = create_state("chan-1", "inst-1", campaign_for(None))
+    assert fresh.schemaVersion == STATE_SCHEMA_VERSION
 
 
 def test_db_load_missing_channel_is_none():
@@ -436,8 +440,8 @@ def test_packaged_activity_and_art_are_served():
         ("/", "text/html"),
         ("/activity.js", "text/javascript"),
         ("/favicon.png", "image/png"),
-        ("/img/action/fralthi.png", "image/png"),
-        ("/img/vdu/fralthi-vdu.gif", "image/gif"),
+        ("/img/action/friendly-cruiser.png", "image/png"),
+        ("/img/vdu/friendly-cruiser-vdu.gif", "image/gif"),
         ("/img/brief/unknown.png", "image/png"),
     ):
         response = client.get(path)
@@ -549,15 +553,15 @@ def test_admin_snapshot_lists_ships_and_can_dictate_the_crew_hull():
                     {
                         "type": "admin.setShip",
                         "channelId": "chan-admin-ship",
-                        "shipId": "fralthi-carrier",
+                        "shipId": "enemy-cruiser",
                     }
                 )
             )
             st = ws.receive_json()
             assert st["type"] == "admin.state"
-            assert st["state"]["ship"]["shipClass"] == "fralthi-carrier"
+            assert st["state"]["ship"]["shipClass"] == "enemy-cruiser"
             assert st["state"]["ship"]["massKt"] == 320
-    assert room.state.ship.shipClass == "fralthi-carrier"
+    assert room.state.ship.shipClass == "enemy-cruiser"
 
 
 def test_admin_can_spawn_a_contact_with_a_chosen_hull():
@@ -578,7 +582,7 @@ def test_admin_can_spawn_a_contact_with_a_chosen_hull():
                         "channelId": "chan-admin-spawn",
                         "contact": {
                             "type": "capship",
-                            "shipClass": "fralthi-carrier",
+                            "shipClass": "enemy-cruiser",
                             "x": 15,
                             "y": 0,
                             "heading": 0,
@@ -594,7 +598,7 @@ def test_admin_can_spawn_a_contact_with_a_chosen_hull():
             assert st["type"] == "admin.state"
     assert len(room.state.contacts) == before + 1
     spawned = room.state.contacts[-1]
-    assert spawned.shipClass == "fralthi-carrier"
+    assert spawned.shipClass == "enemy-cruiser"
     assert spawned.massKt == 320
     assert spawned.profile == 0.95
 
@@ -615,14 +619,14 @@ def test_admin_reset_takes_a_crew_hull():
                         "type": "admin.reset",
                         "channelId": "chan-admin-reset",
                         "campaignId": "iron-collar",
-                        "shipId": "kamekh-escort",
+                        "shipId": "enemy-escort",
                     }
                 )
             )
             st = ws.receive_json()
             assert st["type"] == "admin.state"
-            assert st["state"]["ship"]["shipClass"] == "kamekh-escort"
-            assert st["state"]["ship"]["name"] == "KIS Bloodfang"
+            assert st["state"]["ship"]["shipClass"] == "enemy-escort"
+            assert st["state"]["ship"]["name"] == "Enemy_Escort-01"
 
 
 def test_admin_can_freeze_and_release_the_clock():

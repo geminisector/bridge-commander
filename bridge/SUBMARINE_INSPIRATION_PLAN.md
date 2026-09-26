@@ -169,7 +169,7 @@ layers, and the handoff pack.
 Under-ice navigation, wire-guided torpedo steering, and full sonar-propagation
 models (convergence zones, bottom bounce, ray tracing) — they are magnificent in
 a sim and unreadable in a browser watch. Also do not import real-world
-classification levels or weapons details; this is a Gemini Sector fan game, not
+classification levels or weapons details; this is a fan game, not
 a training aid.
 
 ## Data, protocol, UI

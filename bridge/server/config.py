@@ -31,7 +31,7 @@ DATA_DIR: str = os.getenv("DATA_DIR", "./data")
 # the repo checkout; see ``main._activity_dist``.
 ACTIVITY_DIST: str = os.getenv("ACTIVITY_DIST", "")
 # Optional explicit path to the static image tree served at ``/img`` (the
-# contact art referenced by the activity UI, e.g. ``/img/action/tarsus.png``).
+# contact art referenced by the activity UI, e.g. ``/img/action/enemy-fighter.png``).
 # When unset the server uses the packaged ``bridge/img`` tree.
 ASSET_DIR: str = os.getenv("ASSET_DIR", "")
 # ``Number(process.env.ADMIN_PORT) || 0`` — an unset/blank/invalid value is 0.

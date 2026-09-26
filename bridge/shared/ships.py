@@ -44,39 +44,39 @@ def ship_bands(ship_id: str) -> list[float]:
 
 _HULL_STATS: dict[str, dict[str, float]] = {
     "home": {"shieldFore": 300, "shieldAft": 200, "shieldRefresh": 150, "armorFore": 35, "armorAft": 25, "armorPort": 5, "armorStarboard": 5, "body": 330, "fuelCapacity": 6},
-    "venture-corvette": {"shieldFore": 25, "shieldAft": 25, "shieldRefresh": 15, "armorFore": 15, "armorAft": 15, "armorPort": 5, "armorStarboard": 5, "body": 175, "fuelCapacity": 5},
-    "drayman-transport": {"shieldFore": 17, "shieldAft": 15, "shieldRefresh": 9.6, "armorFore": 10, "armorAft": 10, "armorPort": 5, "armorStarboard": 5, "body": 110, "fuelCapacity": 6},
-    "tarsus-prospector": {"shieldFore": 6, "shieldAft": 6, "shieldRefresh": 3.6, "armorFore": 8, "armorAft": 8, "armorPort": 6.5, "armorStarboard": 6.5, "body": 30, "fuelCapacity": 3},
-    "longhaul-freighter": {"shieldFore": 5, "shieldAft": 5, "shieldRefresh": 4.8, "armorFore": 6, "armorAft": 8, "armorPort": 8, "armorStarboard": 8, "body": 22, "fuelCapacity": 1},
-    "kamekh-escort": {"shieldFore": 30, "shieldAft": 30, "shieldRefresh": 18, "armorFore": 20, "armorAft": 20, "armorPort": 5, "armorStarboard": 5, "body": 175, "fuelCapacity": 6},
-    "salthi-fighter": {"shieldFore": 3.5, "shieldAft": 3.5, "shieldRefresh": 2.1, "armorFore": 3, "armorAft": 2, "armorPort": 1.5, "armorStarboard": 1.5, "body": 15, "fuelCapacity": 2},
-    "grikath-fighter": {"shieldFore": 11, "shieldAft": 11, "shieldRefresh": 6.6, "armorFore": 16, "armorAft": 16, "armorPort": 15, "armorStarboard": 15, "body": 40, "fuelCapacity": 1},
-    "ralatha-destroyer": {"shieldFore": 400, "shieldAft": 400, "shieldRefresh": 240, "armorFore": 50, "armorAft": 50, "armorPort": 5, "armorStarboard": 5, "body": 240, "fuelCapacity": 6},
-    "fralthi-carrier": {"shieldFore": 300, "shieldAft": 200, "shieldRefresh": 150, "armorFore": 35, "armorAft": 25, "armorPort": 5, "armorStarboard": 5, "body": 330, "fuelCapacity": 6},
-    "dorkathi-transport": {"shieldFore": 19, "shieldAft": 19, "shieldRefresh": 11.4, "armorFore": 17, "armorAft": 17, "armorPort": 5, "armorStarboard": 5, "body": 130, "fuelCapacity": 5},
-    "bengal-carrier": {"shieldFore": 500, "shieldAft": 500, "shieldRefresh": 300, "armorFore": 60, "armorAft": 60, "armorPort": 5, "armorStarboard": 5, "body": 400, "fuelCapacity": 6},
-    "bristol-cruiser": {"shieldFore": 200, "shieldAft": 200, "shieldRefresh": 135, "armorFore": 18, "armorAft": 18, "armorPort": 5, "armorStarboard": 5, "body": 220, "fuelCapacity": 5},
-    "raptor-medium": {"shieldFore": 9, "shieldAft": 9, "shieldRefresh": 5.4, "armorFore": 10, "armorAft": 10, "armorPort": 8, "armorStarboard": 8, "body": 40, "fuelCapacity": 1},
-    "broadsword-bomber": {"shieldFore": 30, "shieldAft": 30, "shieldRefresh": 18, "armorFore": 25, "armorAft": 25, "armorPort": 23, "armorStarboard": 23, "body": 50, "fuelCapacity": 1},
+    "friendly-corvette": {"shieldFore": 25, "shieldAft": 25, "shieldRefresh": 15, "armorFore": 15, "armorAft": 15, "armorPort": 5, "armorStarboard": 5, "body": 175, "fuelCapacity": 5},
+    "friendly-transport": {"shieldFore": 17, "shieldAft": 15, "shieldRefresh": 9.6, "armorFore": 10, "armorAft": 10, "armorPort": 5, "armorStarboard": 5, "body": 110, "fuelCapacity": 6},
+    "friendly-prospector": {"shieldFore": 6, "shieldAft": 6, "shieldRefresh": 3.6, "armorFore": 8, "armorAft": 8, "armorPort": 6.5, "armorStarboard": 6.5, "body": 30, "fuelCapacity": 3},
+    "friendly-freighter": {"shieldFore": 5, "shieldAft": 5, "shieldRefresh": 4.8, "armorFore": 6, "armorAft": 8, "armorPort": 8, "armorStarboard": 8, "body": 22, "fuelCapacity": 1},
+    "enemy-escort": {"shieldFore": 30, "shieldAft": 30, "shieldRefresh": 18, "armorFore": 20, "armorAft": 20, "armorPort": 5, "armorStarboard": 5, "body": 175, "fuelCapacity": 6},
+    "enemy-fighter": {"shieldFore": 3.5, "shieldAft": 3.5, "shieldRefresh": 2.1, "armorFore": 3, "armorAft": 2, "armorPort": 1.5, "armorStarboard": 1.5, "body": 15, "fuelCapacity": 2},
+    "enemy-heavy-fighter": {"shieldFore": 11, "shieldAft": 11, "shieldRefresh": 6.6, "armorFore": 16, "armorAft": 16, "armorPort": 15, "armorStarboard": 15, "body": 40, "fuelCapacity": 1},
+    "enemy-destroyer": {"shieldFore": 400, "shieldAft": 400, "shieldRefresh": 240, "armorFore": 50, "armorAft": 50, "armorPort": 5, "armorStarboard": 5, "body": 240, "fuelCapacity": 6},
+    "enemy-cruiser": {"shieldFore": 300, "shieldAft": 200, "shieldRefresh": 150, "armorFore": 35, "armorAft": 25, "armorPort": 5, "armorStarboard": 5, "body": 330, "fuelCapacity": 6},
+    "enemy-heavy-transport": {"shieldFore": 19, "shieldAft": 19, "shieldRefresh": 11.4, "armorFore": 17, "armorAft": 17, "armorPort": 5, "armorStarboard": 5, "body": 130, "fuelCapacity": 5},
+    "friendly-carrier": {"shieldFore": 500, "shieldAft": 500, "shieldRefresh": 300, "armorFore": 60, "armorAft": 60, "armorPort": 5, "armorStarboard": 5, "body": 400, "fuelCapacity": 6},
+    "friendly-light-cruiser": {"shieldFore": 200, "shieldAft": 200, "shieldRefresh": 135, "armorFore": 18, "armorAft": 18, "armorPort": 5, "armorStarboard": 5, "body": 220, "fuelCapacity": 5},
+    "enemy-medium-fighter": {"shieldFore": 9, "shieldAft": 9, "shieldRefresh": 5.4, "armorFore": 10, "armorAft": 10, "armorPort": 8, "armorStarboard": 8, "body": 40, "fuelCapacity": 1},
+    "enemy-bomber": {"shieldFore": 30, "shieldAft": 30, "shieldRefresh": 18, "armorFore": 25, "armorAft": 25, "armorPort": 23, "armorStarboard": 23, "body": 50, "fuelCapacity": 1},
 }
 
-# Used only when the DB is unavailable.  These are the DB's own filenames.
+# Used only when the DB is unavailable.  These are the bundled placeholder filenames.
 _FALLBACK_ACTION: dict[str, str] = {
-    "home": "fralthi.png",
-    "venture-corvette": "venture.png",
-    "drayman-transport": "drayman.png",
-    "tarsus-prospector": "tarsus.png",
-    "longhaul-freighter": "longhaul.png",
-    "kamekh-escort": "kamekh.png",
-    "salthi-fighter": "salthi.png",
-    "grikath-fighter": "grikath.png",
-    "ralatha-destroyer": "ralatha.png",
-    "fralthi-carrier": "fralthi.png",
-    "dorkathi-transport": "dorkathi.png",
-    "bengal-carrier": "bengal.png",
-    "bristol-cruiser": "bristol.png",
-    "raptor-medium": "raptor.png",
-    "broadsword-bomber": "broadsword.png",
+    "home": "friendly-cruiser.png",
+    "friendly-corvette": "friendly-corvette.png",
+    "friendly-transport": "friendly-transport.png",
+    "friendly-prospector": "friendly-prospector.png",
+    "friendly-freighter": "friendly-freighter.png",
+    "enemy-escort": "enemy-escort.png",
+    "enemy-fighter": "enemy-fighter.png",
+    "enemy-heavy-fighter": "enemy-heavy-fighter.png",
+    "enemy-destroyer": "enemy-destroyer.png",
+    "enemy-cruiser": "enemy-cruiser.png",
+    "enemy-heavy-transport": "enemy-heavy-transport.png",
+    "friendly-carrier": "friendly-carrier.png",
+    "friendly-light-cruiser": "friendly-light-cruiser.png",
+    "enemy-medium-fighter": "enemy-medium-fighter.png",
+    "enemy-bomber": "enemy-bomber.png",
 }
 
 # Terrain contacts: the DB has asteroid/debris rows; the rest reuse the closest.
@@ -105,8 +105,8 @@ def _url_exists(url: str) -> bool:
 def _candidate_urls(url: str) -> list[str]:
     """The URL plus same-basename siblings with a swapped extension.
 
-    The DB is not always in step with the files on disk (e.g. it lists
-    ``longhaul-vdu.gif`` while the tree holds ``longhaul-vdu.png``).
+    The data file is not always in step with the files on disk, so a stale
+    extension in ``bridge_ship_art.json`` still resolves to the real file.
     """
     url = _as_url(url)
     if not url:
@@ -222,7 +222,7 @@ def ship_art(ship_id: str | None) -> tuple[str, str]:
 SHIP_CLASSES: dict[str, ShipClass] = {
     "home": ShipClass(
         id="home",
-        name="Fralthi-Class Cruiser",
+        name="Friendly_Cruiser",
         role="Home Carrier",
         contactType="carrier",
         massKt=28.8,
@@ -235,9 +235,9 @@ SHIP_CLASSES: dict[str, ShipClass] = {
         crew=280,
         blurb="Fast, quiet and sensor-rich. The tripwire hull: see first, be seen last.",
     ),
-    "venture-corvette": ShipClass(
-        id="venture-corvette",
-        name="Venture-class corvette",
+    "friendly-corvette": ShipClass(
+        id="friendly-corvette",
+        name="Friendly_Corvette",
         role="Corvette",
         contactType="escort",
         massKt=6.5,
@@ -250,9 +250,9 @@ SHIP_CLASSES: dict[str, ShipClass] = {
         crew=60,
         blurb="General-purpose escort. Loud enough to be found, tough enough to leave.",
     ),
-    "drayman-transport": ShipClass(
-        id="drayman-transport",
-        name="Drayman-class transport",
+    "friendly-transport": ShipClass(
+        id="friendly-transport",
+        name="Friendly_Transport",
         role="Transport",
         contactType="freighter",
         massKt=18,
@@ -265,9 +265,9 @@ SHIP_CLASSES: dict[str, ShipClass] = {
         crew=24,
         blurb="Slow, broad and radiating. Passive will find it before it finds you.",
     ),
-    "tarsus-prospector": ShipClass(
-        id="tarsus-prospector",
-        name="Tarsus-class prospector",
+    "friendly-prospector": ShipClass(
+        id="friendly-prospector",
+        name="Friendly_Prospector",
         role="Prospector",
         contactType="prospector",
         massKt=2.5,
@@ -280,9 +280,9 @@ SHIP_CLASSES: dict[str, ShipClass] = {
         crew=4,
         blurb="Mining rig with a hot plant. Small, but it chatters on the grill.",
     ),
-    "longhaul-freighter": ShipClass(
-        id="longhaul-freighter",
-        name="Longhaul-class freighter",
+    "friendly-freighter": ShipClass(
+        id="friendly-freighter",
+        name="Friendly_Freighter",
         role="Freighter",
         contactType="freighter",
         massKt=2,
@@ -295,10 +295,10 @@ SHIP_CLASSES: dict[str, ShipClass] = {
         crew=18,
         blurb="A city block of cargo with engines. Visible on every sensor ever built.",
     ),
-    "kamekh-escort": ShipClass(
-        id="kamekh-escort",
-        name="KAMEKH-class corvette",
-        role="Kilrathi corvette",
+    "enemy-escort": ShipClass(
+        id="enemy-escort",
+        name="Enemy_Escort",
+        role="Escort",
         contactType="escort",
         massKt=12,
         profile=0.5,
@@ -308,11 +308,11 @@ SHIP_CLASSES: dict[str, ShipClass] = {
         cruiseSpeed=CRUISE_KPS,
         maxSpeed=FLANK_KPS,
         crew=120,
-        blurb="Kilrathi escort. Runs dark when hunting; hot when it wants to be found.",
+        blurb="Hostile escort. Runs dark when hunting; hot when it wants to be found.",
     ),
-    "salthi-fighter": ShipClass(
-        id="salthi-fighter",
-        name="Salthi-class light fighter",
+    "enemy-fighter": ShipClass(
+        id="enemy-fighter",
+        name="Enemy_Fighter",
         role="Fighter",
         contactType="fighter",
         massKt=0.9,
@@ -325,10 +325,10 @@ SHIP_CLASSES: dict[str, ShipClass] = {
         crew=1,
         blurb="Tiny radar cross-section, huge afterburner. Active barely sees it; passive hears it scream.",
     ),
-    "grikath-fighter": ShipClass(
-        id="grikath-fighter",
-        name="GRIKATH-class heavy fighter",
-        role="Kilrathi heavy fighter",
+    "enemy-heavy-fighter": ShipClass(
+        id="enemy-heavy-fighter",
+        name="Enemy_HeavyFighter",
+        role="Heavy fighter",
         contactType="fighter",
         massKt=2.4,
         profile=0.38,
@@ -338,11 +338,11 @@ SHIP_CLASSES: dict[str, ShipClass] = {
         cruiseSpeed=CRUISE_KPS,
         maxSpeed=FLANK_KPS,
         crew=2,
-        blurb="Kilrathi heavy fighter. Patient hunter: runs quiet, then pounces.",
+        blurb="Hostile heavy fighter. Patient hunter: runs quiet, then pounces.",
     ),
-    "ralatha-destroyer": ShipClass(
-        id="ralatha-destroyer",
-        name="RALATHA-class destroyer",
+    "enemy-destroyer": ShipClass(
+        id="enemy-destroyer",
+        name="Enemy_Destroyer",
         role="Destroyer",
         contactType="capship",
         massKt=200,
@@ -355,10 +355,10 @@ SHIP_CLASSES: dict[str, ShipClass] = {
         crew=600,
         blurb="A wall of armour and emitters. Gravidar reads it clear across the basin.",
     ),
-    "fralthi-carrier": ShipClass(
-        id="fralthi-carrier",
-        name="FRALTHI-class fleet carrier",
-        role="Fleet carrier",
+    "enemy-cruiser": ShipClass(
+        id="enemy-cruiser",
+        name="Enemy_Cruiser",
+        role="Carrier",
         contactType="carrier",
         massKt=320,
         profile=0.95,
@@ -370,10 +370,10 @@ SHIP_CLASSES: dict[str, ShipClass] = {
         crew=1400,
         blurb="The big quiet one: enormous mass, disciplined emissions. Find it by patience.",
     ),
-    "dorkathi-transport": ShipClass(
-        id="dorkathi-transport",
-        name="DORKATHI-class transport",
-        role="Kilrathi transport",
+    "enemy-heavy-transport": ShipClass(
+        id="enemy-heavy-transport",
+        name="Enemy_HeavyTransport",
+        role="Transport",
         contactType="freighter",
         massKt=120,
         profile=0.8,
@@ -428,36 +428,38 @@ for _hull in SHIP_CLASSES.values():
 
 DEFAULT_SHIP_CLASS = "home"
 
-# Registry/proper names used when a hull is flown by the crew.
+# Registry/proper names used when a hull is flown by the crew.  Enemy hulls reuse
+# their callsign-pool entry so a hull the crew flies and the same hull met as a
+# contact agree on the name.
 SHIP_NAMES: dict[str, str] = {
-    "home": "TCS Rakshasha",
-    "venture-corvette": "TCS Venture",
-    "drayman-transport": "MV Grey Drayman",
-    "tarsus-prospector": "MV Lucky Tarsus",
-    "longhaul-freighter": "MV Long Haul",
-    "kamekh-escort": "KIS Bloodfang",
-    "salthi-fighter": "KIS Sting",
-    "grikath-fighter": "KIS Grikath",
-    "ralatha-destroyer": "KIS Ralatha",
-    "fralthi-carrier": "KIS Fury",
-    "dorkathi-transport": "KIS Pack Mule",
-    "bengal-carrier": "CSV Bengal",
-    "bristol-cruiser": "TCS Bristol",
-    "raptor-medium": "KIS Raptor",
-    "broadsword-bomber": "KIS Broadsword",
+    "home": "CS Audacity",
+    "friendly-corvette": "CS Resolute",
+    "friendly-transport": "MV Grey Falcon",
+    "friendly-prospector": "MV Lucky Star",
+    "friendly-freighter": "MV Long Haul",
+    "enemy-escort": "Enemy_Escort-01",
+    "enemy-fighter": "Enemy_Fighter-01",
+    "enemy-heavy-fighter": "Enemy_HeavyFighter-01",
+    "enemy-destroyer": "Enemy_Destroyer-01",
+    "enemy-cruiser": "Enemy_Cruiser-01",
+    "enemy-heavy-transport": "Enemy_HeavyTransport-01",
+    "friendly-carrier": "CSV Vanguard",
+    "friendly-light-cruiser": "CSV Lancaster",
+    "enemy-medium-fighter": "Enemy_MediumFighter-01",
+    "enemy-bomber": "Enemy_Bomber-01",
 }
 
 # When a campaign or GM template names no hull, derive one from its contact type
 # so the sensor physics still has real numbers to work with.
 DEFAULT_BY_TYPE: dict[ContactType, str] = {
     "unknown": DEFAULT_SHIP_CLASS,
-    "prospector": "tarsus-prospector",
-    "freighter": "drayman-transport",
-    "liner": "drayman-transport",
-    "escort": "venture-corvette",
-    "capship": "ralatha-destroyer",
-    "fighter": "salthi-fighter",
-    "carrier": "fralthi-carrier",
+    "prospector": "friendly-prospector",
+    "freighter": "friendly-transport",
+    "liner": "friendly-transport",
+    "escort": "friendly-corvette",
+    "capship": "enemy-destroyer",
+    "fighter": "enemy-fighter",
+    "carrier": "enemy-cruiser",
     "asteroid": "",
     "nebula": "",
     "debris": "",

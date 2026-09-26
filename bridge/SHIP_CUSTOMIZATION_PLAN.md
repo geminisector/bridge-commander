@@ -16,9 +16,10 @@ everything a customization system needs:
 | `ship_weapons_link` | 583 | which weapon tags a hull can carry |
 | `weapons` | 131 | tag, type, `ShieldByPass`, `LockTime`, `Spoofability`, `TurretArcSq`, and `hull_/shield_/armor_/system_damage` |
 
-All the hulls named as examples are present: **Venture**, **Bristol**,
-**Bengal**, **Fralthi** (plus Ralatha, Kamekh, Drayman, Tarsus, Longhaul, and
-variants like `Fralthi-CL`, `Sabre-T`, `RapierII-WW`, `Kamekh-S`).
+The hulls the bridge flies are all present, re-authored under the neutral
+role/faction names in `resources/bridge_hulls.json` (`Friendly_Corvette`,
+`Friendly_Carrier`, `Friendly_LightCruiser`, `Enemy_Cruiser` and the rest), with
+the source table's variants available for later expansion.
 
 So this plan is not "invent a ship system"; it is **surface the chassis and
 loadout data we already own, and give it a refit loop**.
@@ -62,8 +63,8 @@ carry, honouring:
 
 ### 3. Modules, power and sensors
 WCRPG §7.2.2 accessories over the DB component map: ECM module, SWACS, repair
-bay, auxiliary reactor, backup shield/sensor/comms, FTL drive (D/Morvan/
-Akwende), fuel tank, cloaking device, countermeasure pods, ITTS, tracking
+bay, auxiliary reactor, backup shield/sensor/comms, FTL drive
+(Standard/Heavy/Rapid), fuel tank, cloaking device, countermeasure pods, ITTS, tracking
 computer, gun cooler, shield regenerator, plus the fuel/maintenance hooks.
 
 Each module occupies **power, mass/space, and a component slot**, and some add a
@@ -96,10 +97,10 @@ A fit is only interesting if something has to give. Constraints:
 
 | Hull | Class / role | Sketch (DB) | Playstyle |
 |---|---|---|---|
-| **Venture** | Corvette | agility 3, body 175, shields 25/25, 2 turrets (`V-LT`/`V-RT`), `FF/10` + `TP/10`, fuel 5, cargo 300 | light, fast, thin shields; scouting, screening, running |
-| **Bristol** | Destroyer | body 220, shields 200/200, `HL2-FB`/`HL2-CB` + `HL-3` + `TP/20`, 2 gunners, fuel 5, cargo 900 | gun platform; poor agility, strong arcs |
-| **Bengal** | Strike Carrier | body 400, shields 500/500, 5 turrets/hardpoints, `FDeck`, cargo 2200, 5 gunners, fuel 6 | fighter ops, hangar launch/recover window |
-| **Fralthi** | Kilrathi Cruiser | body 330, shields 300/200, `HL1-FB`/`HL1-SB` + `AMG-2` (shield-bypass) + `TP-B/2`, sensors 60, fuel 6 | balanced raider; AMG threatens through shields |
+| **Friendly_Corvette** | Corvette | agility 3, body 175, shields 25/25, 2 turrets (`V-LT`/`V-RT`), `FF/10` + `TP/10`, fuel 5, cargo 300 | light, fast, thin shields; scouting, screening, running |
+| **Friendly_LightCruiser** | Light cruiser | body 220, shields 200/200, `HL2-FB`/`HL2-CB` + `HL-3` + `TP/20`, 2 gunners, fuel 5, cargo 900 | gun platform; poor agility, strong arcs |
+| **Friendly_Carrier** | Fleet carrier | body 400, shields 500/500, 5 turrets/hardpoints, `FDeck`, cargo 2200, 5 gunners, fuel 6 | fighter ops, hangar launch/recover window |
+| **Enemy_Cruiser** | Hostile cruiser | body 330, shields 300/200, `HL1-FB`/`HL1-SB` + `AMG-2` (shield-bypass) + `TP-B/2`, sensors 60, fuel 6 | balanced raider; AMG threatens through shields |
 
 These four alone give four genuinely different watches, which is the point:
 hull choice is scenario design.

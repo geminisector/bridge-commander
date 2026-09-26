@@ -595,7 +595,7 @@ class TestEMSensors:
     def test_em_reads_course_and_speed_of_a_detected_contact(self):
         import bridge.server.engine as engine
 
-        s = make_ship_state([_ship_contact("freighter", "longhaul-freighter", x=14)])
+        s = make_ship_state([_ship_contact("freighter", "friendly-freighter", x=14)])
         s.campaign.sun = None
         engine._em_detect(s)
         c = s.contacts[0]
@@ -607,7 +607,7 @@ class TestEMSensors:
         import bridge.server.engine as engine
         from bridge.shared import Vec
 
-        s = make_ship_state([_ship_contact("freighter", "longhaul-freighter", x=14, y=0)])
+        s = make_ship_state([_ship_contact("freighter", "friendly-freighter", x=14, y=0)])
         s.campaign.sun = None
         engine._em_detect(s)
         clear = s.contacts[0].sensor.emQuality
@@ -621,7 +621,7 @@ class TestEMSensors:
 
         s = make_ship_state(
             [
-                _ship_contact("freighter", "longhaul-freighter", x=20),
+                _ship_contact("freighter", "friendly-freighter", x=20),
                 ContactTemplate(x=10, y=0, heading=0, speed=0, type="dust", faction="neutral", hostile=False, emitting=False),
             ]
         )
@@ -689,10 +689,10 @@ class TestShipCatalog:
             assert hull.name and hull.role and hull.blurb
 
     def test_contacts_inherit_the_hull_properties(self):
-        s = make_ship_state([_ship_contact("freighter", "longhaul-freighter")])
+        s = make_ship_state([_ship_contact("freighter", "friendly-freighter")])
         c = s.contacts[0]
-        hull = SHIP_CLASSES["longhaul-freighter"]
-        assert c.shipClass == "longhaul-freighter"
+        hull = SHIP_CLASSES["friendly-freighter"]
+        assert c.shipClass == "friendly-freighter"
         assert c.massKt == hull.massKt
         assert c.profile == hull.profile
         assert c.emission == hull.emission
@@ -708,11 +708,11 @@ class TestShipCatalog:
     def test_set_ship_class_updates_the_crew_hull(self):
         s = make_ship_state([], ship_id="home")
         assert s.ship.shipClass == "home"
-        assert s.ship.name == "TCS Rakshasha"
-        set_ship_class(s, "fralthi-carrier")
-        hull = SHIP_CLASSES["fralthi-carrier"]
-        assert s.ship.shipClass == "fralthi-carrier"
-        assert s.ship.name == "KIS Fury"
+        assert s.ship.name == "CS Audacity"
+        set_ship_class(s, "enemy-cruiser")
+        hull = SHIP_CLASSES["enemy-cruiser"]
+        assert s.ship.shipClass == "enemy-cruiser"
+        assert s.ship.name == "Enemy_Cruiser-01"
         assert s.ship.massKt == hull.massKt
         assert s.ship.profile == hull.profile
         assert s.ship.maxSpeed == hull.maxSpeed
@@ -724,7 +724,7 @@ class TestShipCatalog:
 
 class TestModeReturns:
     def test_gravidar_gives_a_mass_arc_and_an_ok_distance(self):
-        s = make_ship_state([_ship_contact("freighter", "longhaul-freighter", x=20)])
+        s = make_ship_state([_ship_contact("freighter", "friendly-freighter", x=20)])
         set_mode(s, "cruise")
         grav_scan(s)
         c = s.contacts[0]
@@ -741,8 +741,8 @@ class TestModeReturns:
     def test_a_heavier_hull_paints_a_tighter_arc(self):
         s = make_ship_state(
             [
-                _ship_contact("fighter", "salthi-fighter", x=20),
-                _ship_contact("capship", "fralthi-carrier", x=20, y=4),
+                _ship_contact("fighter", "enemy-fighter", x=20),
+                _ship_contact("capship", "enemy-cruiser", x=20, y=4),
             ]
         )
         set_mode(s, "cruise")
@@ -752,7 +752,7 @@ class TestModeReturns:
         assert heavy.halfWidth < light.halfWidth
 
     def test_active_radar_returns_a_range_for_a_large_hull(self):
-        s = make_ship_state([_ship_contact("freighter", "longhaul-freighter", x=20)])
+        s = make_ship_state([_ship_contact("freighter", "friendly-freighter", x=20)])
         active_sweep(s)
         c = s.contacts[0]
         assert c.sensor.activeRange is not None
@@ -760,15 +760,15 @@ class TestModeReturns:
         assert c.estimated is not None
 
     def test_a_low_profile_fighter_hides_from_active_radar(self):
-        s = make_ship_state([_ship_contact("fighter", "salthi-fighter", x=30)])
+        s = make_ship_state([_ship_contact("fighter", "enemy-fighter", x=30)])
         active_sweep(s)
         assert s.contacts[0].sensor.activeRange is None
 
     def test_passive_resolves_a_loud_hull_over_a_stealthy_one(self):
         s = make_ship_state(
             [
-                _ship_contact("freighter", "longhaul-freighter", x=9),
-                _ship_contact("fighter", "salthi-fighter", x=9, y=3),
+                _ship_contact("freighter", "friendly-freighter", x=9),
+                _ship_contact("fighter", "enemy-fighter", x=9, y=3),
             ]
         )
         s.noise = 1.5
@@ -778,7 +778,7 @@ class TestModeReturns:
         assert s.contacts[0].sensor.passiveType == "freighter"
 
     def test_passive_leaves_no_range_estimate(self):
-        s = make_ship_state([_ship_contact("freighter", "longhaul-freighter", x=9)])
+        s = make_ship_state([_ship_contact("freighter", "friendly-freighter", x=9)])
         s.noise = 1.5
         advance(s, 240)
         passive_samples = [b for b in s.contacts[0].bearingHistory if b.source == "passive"]
@@ -791,7 +791,7 @@ class TestSensorObstacles:
     def _ice_between(self) -> GameState:
         return make_ship_state(
             [
-                _ship_contact("freighter", "longhaul-freighter", x=20),
+                _ship_contact("freighter", "friendly-freighter", x=20),
                 ContactTemplate(x=10, y=0, heading=0, speed=0, type="ice", faction="neutral", hostile=False, emitting=False),
             ]
         )
@@ -808,14 +808,14 @@ class TestSensorObstacles:
     def test_no_shadow_when_terrain_is_off_axis(self):
         s = make_ship_state(
             [
-                _ship_contact("freighter", "longhaul-freighter", x=20),
+                _ship_contact("freighter", "friendly-freighter", x=20),
                 ContactTemplate(x=10, y=60, heading=0, speed=0, type="ice", faction="neutral", hostile=False, emitting=False),
             ]
         )
         assert obstacle_shadow(s, s.contacts[0]) == (0.0, 0.0, 0.0)
 
     def test_passive_snr_is_attenuated_by_an_intervening_obstacle(self):
-        clear = make_ship_state([_ship_contact("freighter", "longhaul-freighter", x=20)])
+        clear = make_ship_state([_ship_contact("freighter", "friendly-freighter", x=20)])
         blocked = self._ice_between()
         clear.noise = blocked.noise = 8.0  # keep both below the SNR cap
         engine = __import__("bridge.server.engine", fromlist=["_passive_snr"])
@@ -909,7 +909,7 @@ class TestSpeedScale:
             assert hull.maxSpeed == FLANK_KPS
 
     def test_campaign_contact_speeds_are_in_range(self):
-        for cid in ("iron-collar", "whale-road", "sumn-tpka"):
+        for cid in ("iron-collar", "whale-road", "sector-9-anomaly"):
             for t in campaign_for(cid).contacts:
                 assert 0 <= t.speed <= 100
 
@@ -924,8 +924,8 @@ class TestFrequencyProfile:
         assert len(seen) == len(SHIP_CLASSES)
 
     def test_contacts_carry_their_hull_profile(self):
-        s = make_ship_state([_ship_contact("fighter", "grikath-fighter")])
-        assert s.contacts[0].frequencyProfile == SHIP_CLASSES["grikath-fighter"].bands
+        s = make_ship_state([_ship_contact("fighter", "enemy-heavy-fighter")])
+        assert s.contacts[0].frequencyProfile == SHIP_CLASSES["enemy-heavy-fighter"].bands
 
     def test_terrain_has_a_profile_too(self):
         s = make_ship_state(
@@ -934,7 +934,7 @@ class TestFrequencyProfile:
         assert len(s.contacts[0].frequencyProfile) == FREQ_BANDS
 
     def test_passive_paints_the_barcode_over_time(self):
-        s = make_ship_state([_ship_contact("freighter", "longhaul-freighter", x=8)])
+        s = make_ship_state([_ship_contact("freighter", "friendly-freighter", x=8)])
         s.noise = 1.0
         advance(s, 180)
         bands = s.contacts[0].sensor.bands
@@ -967,22 +967,57 @@ class TestTimeFreeze:
         assert msg.frozen is True
 
 
-class TestSumnTpkaScenario:
-    def test_scenario_is_registered_and_flies_the_rakshasha(self):
-        c = campaign_for("sumn-tpka")
-        assert c.title == "Sumn Tp'ka"
+class TestSector9AnomalyScenario:
+    def test_scenario_is_registered_and_flies_the_home_cruiser(self):
+        c = campaign_for("sector-9-anomaly")
+        assert c.title == "Sector 9 Anomaly"
         assert c.shipClass == "home"
         s = create_state("c", "i", c)
         assert s.ship.shipClass == "home"
-        assert s.ship.name == "TCS Rakshasha"
+        assert s.ship.name == "CS Audacity"
 
     def test_hunter_killer_group_and_terrain(self):
-        c = campaign_for("sumn-tpka")
+        c = campaign_for("sector-9-anomaly")
         classes = [t.shipClass for t in c.contacts]
-        assert classes.count("grikath-fighter") == 3
-        assert classes.count("ralatha-destroyer") == 2
+        assert classes.count("enemy-heavy-fighter") == 3
+        assert classes.count("enemy-destroyer") == 2
         types = {t.type for t in c.contacts}
         assert {"debris", "dust", "ice"} <= types
+
+    def test_callsign_variants_stay_distinct_within_a_scenario(self):
+        from bridge.shared import FIGHTER_CLASSES
+
+        contacts = [
+            ContactTemplate(
+                x=i * 5,
+                y=0,
+                heading=0,
+                speed=0,
+                type="fighter",
+                faction="enemy",
+                hostile=True,
+                emitting=True,
+                shipClass="enemy-fighter",
+            )
+            for i in range(len(FIGHTER_CLASSES))
+        ]
+        campaign = CampaignSeed(
+            id="pool",
+            title="Pool",
+            theater="Test Reach",
+            brief="brief",
+            target="target",
+            startHour=0,
+            patrol=Patrol(center=Vec(x=0, y=0, z=0), radiusKlik=60),
+            clutter=0.0,
+            escalation=10,
+            contacts=contacts,
+            events=[],
+        )
+        s = create_state("chan-pool", "inst-pool", campaign)
+        names = [c.trueName for c in s.contacts]
+        assert len(set(names)) == len(names) == len(FIGHTER_CLASSES)
+        assert set(names) == set(FIGHTER_CLASSES)
 
 
 class TestEmissionProfile:
@@ -1027,8 +1062,8 @@ class TestEmissionProfile:
 
         s = make_ship_state(
             [
-                _ship_contact("freighter", "longhaul-freighter", x=20, y=0),
-                _ship_contact("freighter", "longhaul-freighter", x=-20, y=0),
+                _ship_contact("freighter", "friendly-freighter", x=20, y=0),
+                _ship_contact("freighter", "friendly-freighter", x=-20, y=0),
             ]
         )
         set_mode(s, "cruise")
@@ -1041,7 +1076,7 @@ class TestEmissionProfile:
     def test_stern_dazzle_is_zero_when_stopped(self):
         import bridge.server.engine as engine
 
-        s = make_ship_state([_ship_contact("freighter", "longhaul-freighter", x=-20, y=0)])
+        s = make_ship_state([_ship_contact("freighter", "friendly-freighter", x=-20, y=0)])
         s.ship.heading = 90
         set_speed(s, 0)
         assert engine.stern_dazzle(s, s.contacts[0]) == 0.0
@@ -1148,7 +1183,7 @@ class TestReleaseHardening:
     def test_changing_a_contact_hull_refreshes_its_signature_and_art(self):
         s = make_state()
         contact = s.contacts[0]
-        expected = SHIP_CLASSES["kamekh-escort"]
+        expected = SHIP_CLASSES["enemy-escort"]
 
         assert patch_opposition(s, contact.id, ContactPatch(shipClass=expected.id))
 
@@ -1169,16 +1204,16 @@ class TestReleaseHardening:
 
 class TestShipArt:
     def test_contacts_carry_their_hull_art(self):
-        s = make_ship_state([_ship_contact("capship", "kamekh-escort")])
+        s = make_ship_state([_ship_contact("capship", "enemy-escort")])
         c = s.contacts[0]
-        assert c.image == "/img/action/kamekh.png"
-        assert c.image == SHIP_CLASSES["kamekh-escort"].image
-        assert c.vdu.endswith("kamekh-vdu.gif")
+        assert c.image == "/img/action/enemy-escort.png"
+        assert c.image == SHIP_CLASSES["enemy-escort"].image
+        assert c.vdu.endswith("enemy-escort-vdu.gif")
 
-    def test_the_rakhasha_crew_hull_has_art(self):
+    def test_the_home_crew_hull_has_art(self):
         s = make_ship_state([], ship_id="home")
         assert s.ship.shipClass == "home"
-        assert SHIP_CLASSES["home"].image.endswith("fralthi.png")
+        assert SHIP_CLASSES["home"].image.endswith("friendly-cruiser.png")
 
     def test_terrain_contacts_carry_terrain_art(self):
         s = make_ship_state(
@@ -1186,8 +1221,8 @@ class TestShipArt:
         )
         assert s.contacts[0].image == "/img/action/asteroid.png"
 
-    def test_a_drayman_has_action_and_vdu_art(self):
-        s = make_ship_state([_ship_contact("freighter", "drayman-transport")])
+    def test_a_transport_has_action_and_vdu_art(self):
+        s = make_ship_state([_ship_contact("freighter", "friendly-transport")])
         c = s.contacts[0]
-        assert c.image.endswith("drayman.png")
-        assert c.vdu.endswith("drayman-vdu.gif")
+        assert c.image.endswith("friendly-transport.png")
+        assert c.vdu.endswith("friendly-transport-vdu.gif")

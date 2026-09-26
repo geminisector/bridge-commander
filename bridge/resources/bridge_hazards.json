@@ -12,7 +12,7 @@
   "rubble-run": [
     {"id": "rubble-mouth", "type": "debris-field", "title": "Rubble field mouth", "startMinute": 0, "endMinute": null, "intensity": 0.8, "noise": 0.02, "exposure": 0.1, "concealment": 0.3}
   ],
-  "sumn-tpka": [],
+  "sector-9-anomaly": [],
   "silent-vigil": [
     {"id": "rift-veil", "type": "ionized-nebula", "title": "Rift veil", "startMinute": 0, "endMinute": 200, "intensity": 0.6, "noise": 0.02, "exposure": 0.2, "concealment": 0.35}
   ],

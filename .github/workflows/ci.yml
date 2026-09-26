@@ -38,6 +38,8 @@ jobs:
         run: ruff check bridge tests
       - name: Run mypy
         run: mypy bridge
+      - name: Check for retired universe names
+        run: python -m pytest tests/test_no_wing_commander_names.py -q
       - name: Check browser JavaScript
         run: |
           node --check bridge/activity/dist/activity.js
@@ -111,7 +113,7 @@ jobs:
           assert "site-packages" in bridge.__file__
           assert Path(sys.executable).with_name("bridge").is_file()
           assert len(SHIP_CLASSES) == 15
-          assert SHIP_ART["home"][0] == "/img/action/fralthi.png"
+          assert SHIP_ART["home"][0] == "/img/action/friendly-cruiser.png"
           assert campaign_for("full-sweep").events
           assert resource_path("bridge_hulls.json").is_file()
           assert (PACKAGE_ROOT / "CREDITS.md").is_file()
@@ -135,8 +137,8 @@ jobs:
               "/",
               "/health",
               "/activity.js",
-              "/img/action/fralthi.png",
-              "/img/vdu/fralthi-vdu.gif",
+              "/img/action/friendly-cruiser.png",
+              "/img/vdu/friendly-cruiser-vdu.gif",
               "/img/brief/unknown.png",
           ):
               response = client.get(path)

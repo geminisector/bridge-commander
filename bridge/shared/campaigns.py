@@ -28,10 +28,19 @@ from .types import (
 _ADJ = ["GRAY", "BLUE", "LONG", "RED", "RUST", "STILL", "SLOW", "BROKEN", "COLD", "HARD", "SOFT", "FAT"]
 _NOUN = ["VEGA", "TRITON", "APOLLO", "MERIDIAN", "PERSEUS", "SOLACE", "JANUS", "CYGNUS", "AURORA", "HARVEST", "TITAN", "VULCAN", "LYRA"]
 
-# Kilrathi hull classes used for enemy opposition.
-ESCORT_CLASSES = ["KAMEKH", "TARGU", "GOTHRI", "RALARI"]
-CAPSHIP_CLASSES = ["FRALTHI", "RALATHA", "DORKATHI", "GORATHI"]
-FIGHTER_CLASSES = ["SALTHI", "JALTHI", "GRATHA", "DRALTHI", "HHRISS", "KRANT", "DRAKHRI"]
+# Hostile callsign pools.  Each pool holds numbered variants of one role, so two
+# hostile contacts of the same role do not read identically on the plot.
+ESCORT_CLASSES = ["Enemy_Escort-01", "Enemy_Escort-02", "Enemy_Escort-03", "Enemy_Escort-04"]
+CAPSHIP_CLASSES = ["Enemy_Cruiser-01", "Enemy_Destroyer-01", "Enemy_HeavyTransport-01", "Enemy_Cruiser-02"]
+FIGHTER_CLASSES = [
+    "Enemy_Fighter-01",
+    "Enemy_Fighter-02",
+    "Enemy_Fighter-03",
+    "Enemy_Fighter-04",
+    "Enemy_Fighter-05",
+    "Enemy_Fighter-06",
+    "Enemy_Fighter-07",
+]
 
 
 def _round(x: float) -> int:
@@ -45,9 +54,21 @@ def vessel_name(seed: int) -> str:
     return f"MV {adj} {noun}"
 
 
-def military_name(pool: list[str], i: int) -> str:
-    cls = pool[i % len(pool)]
-    return cls if i <= 0 else f"{cls}-{i + 1}"
+def military_name(pool: list[str], i: int, used: set[str] | None = None) -> str:
+    """Pick a callsign variant from a numbered pool.
+
+    ``i`` is the caller's running index.  When ``used`` names the contacts
+    already in the scenario, the next free variant is taken so two contacts of
+    the same role never share a callsign.
+    """
+    if not pool:
+        return ""
+    start = (max(i, 1) - 1) % len(pool)
+    for offset in range(len(pool)):
+        candidate = pool[(start + offset) % len(pool)]
+        if used is None or candidate not in used:
+            return candidate
+    return pool[start]
 
 
 def _circ(a: int, camp_seed: int) -> Vec:
@@ -258,7 +279,7 @@ def _capship_sniff(s: int) -> CampaignSeed:
         title="Capship Sniff",
         theater="Deep Quartet Basin",
         brief=(
-            "A Kilrathi fleet carrier is believed to be slipping dark through this "
+            "A hostile fleet carrier is believed to be slipping dark through this "
             "basin. Do not sprint, do not scan. Find the big quiet one by patience and "
             "geometry alone."
         ),
@@ -285,7 +306,7 @@ def _lima_drift(s: int) -> CampaignSeed:
     return CampaignSeed(
         id="lima-drift",
         title="Lima Drift",
-        theater="Kilrah Approaches",
+        theater="Hostile Approaches",
         brief=(
             "Tight patrol lanes, a lot of traffic masking people who do not want to be "
             "seen. Get into your loiter box, monitor the resupply axis, then ease out."
@@ -329,13 +350,13 @@ def _rubble_run(s: int) -> CampaignSeed:
     )
 
 
-def _sumn_tpka(s: int) -> CampaignSeed:
+def _sector_9_anomaly(s: int) -> CampaignSeed:
     contacts = [
-        _mk(s, 1, "fighter", "enemy", True, True, 12, ship_class="grikath-fighter"),
-        _mk(s, 2, "fighter", "enemy", True, True, 13, ship_class="grikath-fighter"),
-        _mk(s, 3, "fighter", "enemy", True, True, 11, ship_class="grikath-fighter"),
-        _mk(s, 4, "capship", "enemy", True, False, 6, ship_class="ralatha-destroyer"),
-        _mk(s, 5, "capship", "enemy", True, False, 5, ship_class="ralatha-destroyer"),
+        _mk(s, 1, "fighter", "enemy", True, True, 12, ship_class="enemy-heavy-fighter"),
+        _mk(s, 2, "fighter", "enemy", True, True, 13, ship_class="enemy-heavy-fighter"),
+        _mk(s, 3, "fighter", "enemy", True, True, 11, ship_class="enemy-heavy-fighter"),
+        _mk(s, 4, "capship", "enemy", True, False, 6, ship_class="enemy-destroyer"),
+        _mk(s, 5, "capship", "enemy", True, False, 5, ship_class="enemy-destroyer"),
         # Sensor terrain: scatter with the dust and debris, refract with the ice.
         ContactTemplate(x=-34, y=18, heading=0, speed=0, type="debris", faction="neutral", hostile=False, emitting=False),
         ContactTemplate(x=26, y=42, heading=0, speed=0, type="dust", faction="neutral", hostile=False, emitting=False),
@@ -343,18 +364,18 @@ def _sumn_tpka(s: int) -> CampaignSeed:
         ContactTemplate(x=-52, y=-24, heading=0, speed=0, type="asteroid", faction="neutral", hostile=False, emitting=False),
     ]
     return CampaignSeed(
-        id="sumn-tpka",
-        title="Sumn Tp'ka",
-        theater="Kilrathi Frontier",
+        id="sector-9-anomaly",
+        title="Sector 9 Anomaly",
+        theater="Hostile Outer Reach",
         brief=(
-            "You have the Rakshasha. A Kilrathi hunter-killer group is sweeping the "
-            "drift — three Grikath flying the screen and two Ralatha holding the "
-            "lane. You cannot fight them. Use the debris, dust and ice to break "
-            "their sensor picture and slip past unseen."
+            "You have CS Audacity. A hostile hunter-killer group is sweeping the "
+            "drift — three heavy fighters flying the screen and two destroyers "
+            "holding the lane. You cannot fight them. Use the debris, dust and ice "
+            "to break their sensor picture and slip past unseen."
         ),
         target=(
-            "Avoid detection. Cross the drift without being fixed by the Grikath "
-            "screen or the Ralatha picket. Run dark and let the terrain lie for you."
+            "Avoid detection. Cross the drift without being fixed by the heavy-fighter "
+            "screen or the destroyer picket. Run dark and let the terrain lie for you."
         ),
         startHour=22,
         patrol=Patrol(center=Vec(x=0, y=0, z=0), radiusKlik=110),
@@ -364,7 +385,7 @@ def _sumn_tpka(s: int) -> CampaignSeed:
         sun=Vec(x=210, y=-140, z=0),
         sunRadiusKlik=40.0,
         contacts=contacts,
-        events=_external_events(s, "sumn-tpka"),
+        events=_external_events(s, "sector-9-anomaly"),
     )
 
 
@@ -376,19 +397,19 @@ def _silent_vigil(s: int) -> CampaignSeed:
         # whole fight is emissions discipline, not gunnery.
         ContactTemplate(
             x=-150, y=90, heading=90, speed=70, type="escort",
-            faction="enemy", hostile=True, emitting=True, shipClass="kamekh-escort",
+            faction="enemy", hostile=True, emitting=True, shipClass="enemy-escort",
         ),
         ContactTemplate(
             x=-120, y=-100, heading=0, speed=55, type="escort",
-            faction="enemy", hostile=True, emitting=False, shipClass="kamekh-escort",
+            faction="enemy", hostile=True, emitting=False, shipClass="enemy-escort",
         ),
         ContactTemplate(
             x=-70, y=80, heading=90, speed=90, type="fighter",
-            faction="enemy", hostile=True, emitting=True, shipClass="grikath-fighter",
+            faction="enemy", hostile=True, emitting=True, shipClass="enemy-heavy-fighter",
         ),
         ContactTemplate(
             x=40, y=-60, heading=180, speed=40, type="prospector",
-            faction="neutral", hostile=False, emitting=False, shipClass="tarsus-prospector",
+            faction="neutral", hostile=False, emitting=False, shipClass="friendly-prospector",
         ),
     ]
     return CampaignSeed(
@@ -396,7 +417,7 @@ def _silent_vigil(s: int) -> CampaignSeed:
         title="Silent Vigil",
         theater="Ransom Rift",
         brief=(
-            "A Kilrathi hunter-killer screen is sweeping the rift for six hours "
+            "A hostile hunter-killer screen is sweeping the rift for six hours "
             "while a convoy slips through behind you. Your job is to be invisible: "
             "no radar, no transmissions, no track. Sit dark and let the watch pass."
         ),
@@ -418,15 +439,15 @@ def _empty_lane(s: int) -> CampaignSeed:
         # crew genuinely waits them out rather than never being threatened.
         ContactTemplate(
             x=-50, y=0, heading=270, speed=100, type="escort",
-            faction="enemy", hostile=True, emitting=True, shipClass="kamekh-escort",
+            faction="enemy", hostile=True, emitting=True, shipClass="enemy-escort",
         ),
         ContactTemplate(
             x=30, y=60, heading=0, speed=100, type="escort",
-            faction="enemy", hostile=True, emitting=True, shipClass="kamekh-escort",
+            faction="enemy", hostile=True, emitting=True, shipClass="enemy-escort",
         ),
         ContactTemplate(
             x=0, y=-95, heading=180, speed=100, type="fighter",
-            faction="enemy", hostile=True, emitting=True, shipClass="salthi-fighter",
+            faction="enemy", hostile=True, emitting=True, shipClass="enemy-fighter",
         ),
     ]
     return CampaignSeed(
@@ -456,19 +477,19 @@ def _full_sweep(s: int) -> CampaignSeed:
         # here is manoeuvring, so the job is sensor work, not evasion.
         ContactTemplate(
             x=32, y=0, heading=0, speed=0, type="escort",
-            faction="enemy", hostile=True, emitting=False, shipClass="kamekh-escort",
+            faction="enemy", hostile=True, emitting=False, shipClass="enemy-escort",
         ),
         ContactTemplate(
             x=-18, y=28, heading=0, speed=0, type="escort",
-            faction="enemy", hostile=True, emitting=False, shipClass="kamekh-escort",
+            faction="enemy", hostile=True, emitting=False, shipClass="enemy-escort",
         ),
         ContactTemplate(
             x=6, y=-34, heading=0, speed=0, type="fighter",
-            faction="enemy", hostile=True, emitting=False, shipClass="grikath-fighter",
+            faction="enemy", hostile=True, emitting=False, shipClass="enemy-heavy-fighter",
         ),
         ContactTemplate(
             x=-40, y=-20, heading=0, speed=0, type="freighter",
-            faction="neutral", hostile=False, emitting=False, shipClass="longhaul-freighter",
+            faction="neutral", hostile=False, emitting=False, shipClass="friendly-freighter",
         ),
     ]
     return CampaignSeed(
@@ -497,7 +518,7 @@ CAMPAIGNS: dict[str, Callable[[int], CampaignSeed]] = {
     "capship-sniff": _capship_sniff,
     "lima-drift": _lima_drift,
     "rubble-run": _rubble_run,
-    "sumn-tpka": _sumn_tpka,
+    "sector-9-anomaly": _sector_9_anomaly,
     "silent-vigil": _silent_vigil,
     "empty-lane": _empty_lane,
     "full-sweep": _full_sweep,

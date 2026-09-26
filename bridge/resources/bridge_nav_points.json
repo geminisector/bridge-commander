@@ -20,9 +20,9 @@
     {"id": "rubble-gap", "name": "The Gap", "kind": "nav", "x": 25, "y": 66, "z": 0, "radiusKlik": 7, "chartAgeHours": 10, "note": "narrow passable lane"},
     {"id": "jump-sluice", "name": "Sluice Jump Point", "kind": "jump", "x": -74, "y": 44, "z": 0, "radiusKlik": 5, "chartAgeHours": 24, "note": "moving pirate point", "jumpType": "pirate", "windowOpen": 120, "windowClose": 420, "alignmentRequired": 0.8, "interference": 0.25, "dest": {"x": 0, "y": 0, "z": 0}}
   ],
-  "sumn-tpka": [
-    {"id": "tpka-hold", "name": "Hold Point", "kind": "nav", "x": -50, "y": -46, "z": 0, "radiusKlik": 9, "chartAgeHours": 5, "note": "quiet station"},
-    {"id": "tpka-screen", "name": "Screen Line", "kind": "nav", "x": 58, "y": 52, "z": 0, "radiusKlik": 10, "chartAgeHours": 18, "note": "terrain cover"}
+  "sector-9-anomaly": [
+    {"id": "anomaly-hold", "name": "Hold Point", "kind": "nav", "x": -50, "y": -46, "z": 0, "radiusKlik": 9, "chartAgeHours": 5, "note": "quiet station"},
+    {"id": "anomaly-screen", "name": "Screen Line", "kind": "nav", "x": 58, "y": 52, "z": 0, "radiusKlik": 10, "chartAgeHours": 18, "note": "terrain cover"}
   ],
   "silent-vigil": [
     {"id": "vigil-post", "name": "Vigil Post", "kind": "nav", "x": 20, "y": 74, "z": 0, "radiusKlik": 14, "chartAgeHours": 3, "note": "cold hold"},

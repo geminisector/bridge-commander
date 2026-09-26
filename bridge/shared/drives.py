@@ -14,7 +14,7 @@ from ..paths import resource_path
 
 _FILE = "bridge_drives.json"
 _FALLBACK: dict[str, Any] = {
-    "name": "Standard D-Drive",
+    "name": "Standard Drive",
     "spoolRate": 1.0,
     "fuelMultiplier": 1.0,
     "misjumpFloor": 0.35,
@@ -51,7 +51,7 @@ def drive_spec(name: str | None) -> dict[str, Any]:
 
 
 def drive_name(name: str | None) -> str:
-    return str(drive_spec(name).get("name", "Standard D-Drive"))
+    return str(drive_spec(name).get("name", "Standard Drive"))
 
 
 __all__ = ["DEFAULT_DRIVE", "DRIVES", "drive_name", "drive_spec"]

@@ -1438,7 +1438,13 @@ def create_state(
 
     seats = _seat_defaults()
 
-    contacts = [instantiate_contact(t, i, campaign) for i, t in enumerate(campaign.contacts)]
+    contacts: list[Contact] = []
+    used_names: set[str] = set()
+    for i, t in enumerate(campaign.contacts):
+        contact = instantiate_contact(t, i, campaign, used_names=used_names)
+        if contact.trueName:
+            used_names.add(contact.trueName)
+        contacts.append(contact)
 
     state = GameState(
         schemaVersion=STATE_SCHEMA_VERSION,
@@ -1526,7 +1532,7 @@ NEBULA_NAMES = (
     "Kali's Breath",
 )
 DEBRIS_NAMES = (
-    "K'har Wreckline",
+    "Harrow Wreckline",
     "Boneyard Alpha",
     "Shatter Belt",
     "Graveyard Orbit",
@@ -1570,13 +1576,14 @@ def instantiate_contact(
     i: int,
     campaign: CampaignSeed,
     track_number: int | None = None,
+    used_names: set[str] | None = None,
 ) -> Contact:
     hostile = t.hostile
     terrain = t.type in ENVIRONMENTAL_TYPES
     if terrain:
         true_name = environmental_name(t.type, i)
     elif t.type in ("escort", "capship", "fighter"):
-        true_name = military_name(_military_pool(t.type), i + 1)
+        true_name = military_name(_military_pool(t.type), i + 1, used_names)
     else:
         true_name = vessel_name(i + 3)
     # The plot shows an anonymous designation until the track is CONFIRMED;
@@ -3874,7 +3881,11 @@ def _spawn_reaction(state: GameState, ctype: ContactType, count: int) -> None:
             faction="enemy",
             hostile=True,
             emitting=True,  # searching on active — findable if you are looking
-            name=military_name(_military_pool(ctype), len(state.contacts) + i + 1),
+            name=military_name(
+                _military_pool(ctype),
+                len(state.contacts) + i + 1,
+                {c.trueName for c in state.contacts},
+            ),
         )
         spawn_opposition(state, template)
 
@@ -5073,7 +5084,7 @@ def _spawn_civilian(state: GameState) -> Contact | None:
         faction="neutral",
         hostile=False,
         emitting=True,
-        shipClass="drayman-transport" if ctype == "freighter" else "tarsus-prospector",
+        shipClass="friendly-transport" if ctype == "freighter" else "friendly-prospector",
     )
     c = spawn_opposition(state, template)
     log(
@@ -5127,7 +5138,7 @@ def _false_surrender(state: GameState, contact_id: str | None = None) -> None:
         faction="enemy",
         hostile=True,
         emitting=True,
-        shipClass="salthi-fighter",
+        shipClass="enemy-fighter",
     )
     contact = spawn_opposition(state, trap)
     state.war.tension = clamp(state.war.tension + 6, 0, 100)
@@ -5155,6 +5166,7 @@ def _apply_effect(state: GameState, effect: EventEffect, ev: DecisionEvent) -> N
                     len(state.contacts),
                     state.campaign,
                     track_number=len(state.contacts) + 1,
+                    used_names={c.trueName for c in state.contacts},
                 )
             )
     if effect.loseTrack:
@@ -5560,6 +5572,7 @@ def spawn_opposition(state: GameState, t: ContactTemplate) -> Contact | None:
         len(state.contacts) + 1000,
         state.campaign,
         track_number=len(state.contacts) + 1,
+        used_names={x.trueName for x in state.contacts},
     )
     c.id = f"gm-{uuid.uuid4().hex[:12]}"
     if t.name:

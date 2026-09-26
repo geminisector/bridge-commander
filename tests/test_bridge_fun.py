@@ -51,7 +51,7 @@ def _hostile(x: float = 20, y: float = 0, *, speed: float = 0) -> ContactTemplat
         faction="enemy",
         hostile=True,
         emitting=True,
-        shipClass="kamekh-escort",
+        shipClass="enemy-escort",
     )
 
 
@@ -65,7 +65,7 @@ def _freighter(x: float = 20, y: float = 0) -> ContactTemplate:
         faction="neutral",
         hostile=False,
         emitting=False,
-        shipClass="longhaul-freighter",
+        shipClass="friendly-freighter",
     )
 
 

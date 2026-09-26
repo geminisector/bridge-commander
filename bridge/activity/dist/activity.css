@@ -1,7 +1,8 @@
-/* BRIDGE COMMANDER — Gemini Sector styling.
-   Palette, typography and card language follow the Gemini Sector Hub
-   (geminisector.github.io): deep-space background with the shared starfield,
-   cyan glow accents, Zen Dots headings over Share Tech Mono readouts. */
+/* BRIDGE COMMANDER — deep-space watch styling.
+   Palette, typography and card language follow the deep-space sector-hub design
+   language (credited in CREDITS.md): deep-space background with the shared
+   starfield, cyan glow accents, Zen Dots headings over Share Tech Mono
+   readouts. */
 
 @import url('https://fonts.googleapis.com/css2?family=Zen+Dots&family=Share+Tech+Mono&display=swap');
 
@@ -38,7 +39,7 @@ body{
   line-height:1.6;
   color:var(--text);
   background-color:var(--bg);
-  /* The Gemini Sector starfield, tiled and pinned. */
+  /* The shared starfield, tiled and pinned. */
   background-image:url('./starfield.svg');
   background-repeat:repeat;
   background-attachment:fixed;

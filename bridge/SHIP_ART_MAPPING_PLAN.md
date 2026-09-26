@@ -2,9 +2,10 @@
 
 ## Problem
 
-Some bridge contacts display the wrong ship art—for example, Fralthi contacts
-currently resolving to a Ralatha image. This makes the visual identification
-game unreliable and can spoil or contradict the sensor information.
+Some bridge contacts display the wrong ship art—for example, an `enemy-cruiser`
+contact currently resolving to an `enemy-destroyer` image. This makes the visual
+identification game unreliable and can spoil or contradict the sensor
+information.
 
 ## Goals
 
@@ -27,9 +28,15 @@ Create an inventory of the available assets under `img/action` and
 - Faction and role.
 - Source asset and any aliases.
 
-Normalize naming differences such as `fralthi`, `FRALTHI`, `fralthi.png`, and
-legacy hull names into one canonical ID. Do not infer a missing mapping by
-falling back to a neighboring ship class.
+Normalize naming differences such as `enemy-cruiser`, `ENEMY-CRUISER`,
+`enemy-cruiser.png`, and legacy hull names into one canonical ID. Do not infer a
+missing mapping by falling back to a neighboring ship class.
+
+The crew's `home` hull and the hostile `enemy-cruiser` are the same class flown
+by both sides, so they share one silhouette. They still own distinct art files
+(`friendly-cruiser.png` and `enemy-cruiser.png`) so the one-file-per-class rule
+holds; the duplication is **intentional** and recorded here rather than fixed by
+splitting the drawing.
 
 ## Data-driven mapping
 
@@ -41,13 +48,13 @@ Example shape:
 
 ```json
 {
-  "FRALTHI": {
-    "action": "/img/action/fralthi.png",
-    "vdu": "/img/vdu/fralthi.png"
+  "enemy-cruiser": {
+    "action": "/img/action/enemy-cruiser.png",
+    "vdu": "/img/vdu/enemy-cruiser-vdu.gif"
   },
-  "RALATHA": {
-    "action": "/img/action/ralatha.png",
-    "vdu": "/img/vdu/ralatha.png"
+  "enemy-destroyer": {
+    "action": "/img/action/enemy-destroyer.png",
+    "vdu": "/img/vdu/enemy-destroyer-vdu.gif"
   }
 }
 ```
@@ -80,8 +87,8 @@ Build a one-shot audit command that reports:
 - Aliases that resolve inconsistently.
 - Case-sensitive path failures on Linux.
 
-The audit should specifically assert that Fralthi and Ralatha resolve to
-different assets and that each points to the intended hull.
+The audit should specifically assert that `enemy-cruiser` and `enemy-destroyer`
+resolve to different assets and that each points to the intended hull.
 
 ## Visual verification
 
@@ -107,7 +114,7 @@ it to an unknown or provisional class until verified.
 
 - Every canonical class has a valid mapping.
 - Every mapped file exists.
-- Fralthi and Ralatha resolve to distinct expected paths.
+- `enemy-cruiser` and `enemy-destroyer` resolve to distinct expected paths.
 - Case and legacy aliases resolve to the same canonical class.
 - Unknown classes use the unknown silhouette.
 - Missing assets never fall back to a different known ship.
@@ -121,7 +128,7 @@ it to an unknown or provisional class until verified.
 2. Define canonical ship IDs and aliases.
 3. Add `bridge_ship_art.json` with verified mappings.
 4. Implement and adopt the central resolver.
-5. Correct Fralthi/Ralatha and all other discovered mismatches.
+5. Correct `enemy-cruiser`/`enemy-destroyer` and all other discovered mismatches.
 6. Add the audit command and contact-sheet generator.
 7. Add unit/integration tests and make the audit part of CI or startup checks.
 8. Remove legacy fallback mappings once all assets are verified.

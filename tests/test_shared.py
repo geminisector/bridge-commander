@@ -151,7 +151,7 @@ def test_vec_serialization_is_camel_case_and_aliases_class():
 
     ship = ShipState(
         name="Test",
-        className="Kamekh",
+        className="Enemy_Escort",
         registry="TEST-1",
         pos=Vec(x=1, y=2, z=3),
         heading=0,
@@ -172,7 +172,7 @@ def test_vec_serialization_is_camel_case_and_aliases_class():
         altTarget=0,
     )
     dumped = ship.model_dump()
-    assert dumped["class"] == "Kamekh"
+    assert dumped["class"] == "Enemy_Escort"
     assert "className" not in dumped
     assert dumped["pos"] == {"x": 1.0, "y": 2.0, "z": 3.0}
     # GameState.schemaVersion is aliased back to the wire key "schema".
@@ -220,7 +220,7 @@ def test_packaged_catalogs_are_complete():
     from bridge.shared.shipyard import HULLS, MODULES
 
     assert len(ALL_SKILLS) >= 40
-    assert set(DRIVES) == {"standard", "morvan", "akwende"}
+    assert set(DRIVES) == {"standard", "heavy", "rapid"}
     assert len(ENVIRONMENTS) == 9
     assert len(HULLS) == 15
     assert set(MODULES) == {
@@ -266,13 +266,13 @@ def test_ship_catalog_is_complete_and_briefs_match():
 def test_ship_lookup_falls_back_by_contact_type_and_to_default():
     from bridge.shared import DEFAULT_SHIP_CLASS, ship_class, ship_for_type, ship_name
 
-    assert ship_class("salthi-fighter").id == "salthi-fighter"
+    assert ship_class("enemy-fighter").id == "enemy-fighter"
     assert ship_class("nope").id == DEFAULT_SHIP_CLASS
-    assert ship_for_type("capship").id == "ralatha-destroyer"
-    assert ship_for_type("capship", "fralthi-carrier").id == "fralthi-carrier"
-    assert ship_name("fralthi-carrier") == "KIS Fury"
-    assert ship_name("bengal-carrier") == "CSV Bengal"
-    assert ship_name("broadsword-bomber") == "KIS Broadsword"
+    assert ship_for_type("capship").id == "enemy-destroyer"
+    assert ship_for_type("capship", "enemy-cruiser").id == "enemy-cruiser"
+    assert ship_name("enemy-cruiser") == "Enemy_Cruiser-01"
+    assert ship_name("friendly-carrier") == "CSV Vanguard"
+    assert ship_name("enemy-bomber") == "Enemy_Bomber-01"
 
 
 def test_obstacle_effects_cover_every_environmental_type():
@@ -303,19 +303,19 @@ def test_ship_catalog_speeds_and_barcodes():
         FREQ_BANDS,
     )
 
-    assert {"home", "grikath-fighter"} <= set(SHIP_CLASSES)
+    assert {"home", "enemy-heavy-fighter"} <= set(SHIP_CLASSES)
     for h in SHIP_CLASSES.values():
         assert h.cruiseSpeed == CRUISE_KPS
         assert h.maxSpeed == FLANK_KPS
         assert len(h.bands) == FREQ_BANDS
 
 
-def test_sumn_tpka_campaign_exists():
+def test_sector_9_anomaly_campaign_exists():
     from bridge.shared import CAMPAIGNS, campaign_for
 
-    assert "sumn-tpka" in CAMPAIGNS
-    c = campaign_for("sumn-tpka")
-    assert c.title == "Sumn Tp'ka"
+    assert "sector-9-anomaly" in CAMPAIGNS
+    c = campaign_for("sector-9-anomaly")
+    assert c.title == "Sector 9 Anomaly"
     assert c.shipClass == "home"
 
 
@@ -331,9 +331,9 @@ def test_ship_art_resolves_from_the_package_and_exists_on_disk():
         assert (root / image.removeprefix("/img/")).is_file(), f"missing file for {image}"
         if vdu:
             assert (root / vdu.removeprefix("/img/")).is_file(), f"missing file for {vdu}"
-    assert SHIP_ART["drayman-transport"][0].endswith("drayman.png")
-    assert SHIP_ART["drayman-transport"][1].endswith("drayman-vdu.gif")
-    assert SHIP_ART["longhaul-freighter"][1].endswith("longhaul-vdu.png")
+    assert SHIP_ART["friendly-transport"][0].endswith("friendly-transport.png")
+    assert SHIP_ART["friendly-transport"][1].endswith("friendly-transport-vdu.gif")
+    assert SHIP_ART["friendly-freighter"][1].endswith("friendly-freighter-vdu.gif")
 
 
 def test_placeholder_art_is_128_by_128():
@@ -362,14 +362,90 @@ def test_ship_art_audit_reports_no_errors():
     assert errors == [], errors
 
 
-def test_fralthi_and_ralatha_keep_their_own_art():
+def test_the_two_cruisers_keep_their_own_art():
     # The canonical data file must not let a cruiser borrow its neighbour's hull.
-    assert SHIP_ART["fralthi-carrier"][0] != SHIP_ART["ralatha-destroyer"][0]
-    assert SHIP_ART["ralatha-destroyer"][0].endswith("ralatha.png")
-    assert SHIP_ART["home"][0].endswith("fralthi.png")
+    assert SHIP_ART["enemy-cruiser"][0] != SHIP_ART["enemy-destroyer"][0]
+    assert SHIP_ART["enemy-destroyer"][0].endswith("enemy-destroyer.png")
+    assert SHIP_ART["home"][0].endswith("friendly-cruiser.png")
 
 
 def test_unknown_hull_returns_no_art():
     from bridge.shared import ship_art
 
     assert ship_art("does-not-exist") == ("", "")
+
+
+def test_hull_ids_are_unique_role_based_and_named():
+    assert len(SHIP_CLASSES) == 15
+    expected_names = {
+        "home": "Friendly_Cruiser",
+        "friendly-corvette": "Friendly_Corvette",
+        "friendly-transport": "Friendly_Transport",
+        "friendly-prospector": "Friendly_Prospector",
+        "friendly-freighter": "Friendly_Freighter",
+        "friendly-carrier": "Friendly_Carrier",
+        "friendly-light-cruiser": "Friendly_LightCruiser",
+        "enemy-escort": "Enemy_Escort",
+        "enemy-fighter": "Enemy_Fighter",
+        "enemy-medium-fighter": "Enemy_MediumFighter",
+        "enemy-heavy-fighter": "Enemy_HeavyFighter",
+        "enemy-bomber": "Enemy_Bomber",
+        "enemy-destroyer": "Enemy_Destroyer",
+        "enemy-cruiser": "Enemy_Cruiser",
+        "enemy-heavy-transport": "Enemy_HeavyTransport",
+    }
+    assert {hull_id: hull.name for hull_id, hull in SHIP_CLASSES.items()} == expected_names
+    for hull_id in SHIP_CLASSES:
+        assert hull_id == "home" or hull_id.startswith(("friendly-", "enemy-")), hull_id
+
+
+def test_home_and_enemy_cruiser_are_distinct_but_identical_hulls():
+    home = SHIP_CLASSES["home"]
+    enemy = SHIP_CLASSES["enemy-cruiser"]
+    assert home.id != enemy.id
+    assert home.name != enemy.name
+    for field in (
+        "shieldFore",
+        "shieldAft",
+        "shieldRefresh",
+        "armorFore",
+        "armorAft",
+        "body",
+        "fuelCapacity",
+    ):
+        assert getattr(home, field) == getattr(enemy, field), field
+
+
+def test_every_class_has_a_callsign_and_no_enemy_duplicates():
+    from bridge.shared import SHIP_NAMES
+
+    assert set(SHIP_NAMES) == set(SHIP_CLASSES)
+    enemy_names = [SHIP_NAMES[i] for i in SHIP_CLASSES if i.startswith("enemy-")]
+    assert len(set(enemy_names)) == len(enemy_names), enemy_names
+
+
+def test_the_model_ship_class_default_is_a_real_hull():
+    from bridge.shared.types import ShipState
+
+    default = ShipState.model_fields["shipClass"].default
+    assert default in SHIP_CLASSES, default
+
+
+def test_every_art_target_exists_and_the_fallback_agrees():
+    import json
+
+    from bridge.paths import asset_root, resource_path
+    from bridge.shared.ships import _FALLBACK_ACTION
+
+    root = asset_root()
+    data = json.loads(resource_path("bridge_ship_art.json").read_text(encoding="utf-8"))
+    assert set(data) == set(SHIP_CLASSES)
+    for hull_id, entry in data.items():
+        action = entry["action"].removeprefix("/img/")
+        vdu = entry["vdu"].removeprefix("/img/")
+        assert (root / action).is_file(), action
+        assert (root / vdu).is_file(), vdu
+        stem = _FALLBACK_ACTION[hull_id].removesuffix(".png")
+        assert action == f"action/{stem}.png", hull_id
+        assert vdu == f"vdu/{stem}-vdu.gif", hull_id
+

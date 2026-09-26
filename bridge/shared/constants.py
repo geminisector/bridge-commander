@@ -11,7 +11,9 @@ from .types import ContactState, ContactType, EmconnState, SeatId, SensorEffect
 
 # Persisted state schema version. Old runs (pre-3D) are wiped on load.
 # v3 removed the exclusive sensor mode in favour of an active-radar toggle.
-STATE_SCHEMA_VERSION: Final = 3
+# v4 renames every hull id and callsign, so an old blob would keep showing the
+# retired names; in-flight rooms are wiped rather than migrated.
+STATE_SCHEMA_VERSION: Final = 4
 
 CLIENT_VERSION: Final = 1
 

@@ -85,8 +85,8 @@ referenced at `/img/...` is served from `ASSET_DIR`, defaulting to packaged
 
 The player-facing bundle in `bridge/activity/dist` is hand-maintained (no build
 step): `index.html` is the shell, `activity.js` renders the stations, and
-`activity.css` carries the whole look. It follows the Gemini Sector Hub
-(`geminisector.github.io`) design language:
+`activity.css` carries the whole look. It follows the deep-space "sector hub"
+design language credited in `CREDITS.md`:
 
 - the shared `starfield.svg` tiled and fixed behind the whole app, with a
   translucent nebula/vignette wash layered over it;

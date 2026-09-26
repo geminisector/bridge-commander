@@ -1,6 +1,8 @@
 # BRIDGE COMMANDER
 
-A standalone, browser-based tabletop bridge simulator set in the Wing Commander universe. Players share a ship, detect and classify contacts, manage the watch, and pause for tabletop handoffs while a server-authoritative hostile force reacts.
+A standalone, browser-based tabletop bridge simulator. Players share a ship, detect and classify contacts, manage the watch, and pause for tabletop handoffs while a server-authoritative hostile force reacts.
+
+The setting and hull catalogue are original to this project and use role-bearing, faction-neutral class names (`Friendly_Cruiser`, `Enemy_Destroyer`, …), so the same mechanics can be re-flavoured. The simulation rules are ported from WCRPG; see [Credits and licensing](bridge/CREDITS.md).
 
 This repository is an unofficial, non-commercial fan project. It is not affiliated with or endorsed by the rights holders. See [Credits and licensing](bridge/CREDITS.md).
 

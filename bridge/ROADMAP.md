@@ -299,7 +299,7 @@ clamped) and **loud** (`selfNoise` up). `jump:commit` is a clean jump at or abov
 the requirement (transit to `dest`, or extraction ends the watch), a **misjump**
 between the floor and the requirement (off-axis arrival, +45 min, core damage),
 or a **refusal** below the floor; `jump:abort` loses the charge. **P5b** adds
-the **drive table** (`resources/bridge_drives.json`: Standard / Morvan / Akwende
+the **drive table** (`resources/bridge_drives.json`: Standard / Heavy / Rapid
 vary spool rate, fuel cost and misjump floor; GM via `admin.setDrive`), **nav
 uncertainty** (dead-reckoning error accrues under way, stretches plotted ETAs and
 degrades jump alignment; `nav:fix` star/landmark/ping works it off, the ping
@@ -315,7 +315,7 @@ and defers to the P6 submarine work.
   loud**.
 - **P5.3** Commit/abort; **misjump** below threshold (wrong arrival, time/fuel
   loss, damage); interference raises the required quality.
-- **P5.4** Drives (D/Morvan/Akwende) and engine-class efficiency table.
+- **P5.4** Drives (Standard/Heavy/Rapid) and engine-class efficiency table.
 - **P5.5** **Nav uncertainty**: DR error accrues; a fix (star sighting,
   landmark, risky surfacing) resets it; unfixed error perturbs plotted ETA and
   jump alignment.
@@ -460,7 +460,7 @@ can be lost to wear and contamination rather than to enemy fire.
 **Objective:** the crew flies a ship they chose and fitted.
 
 **Status: done (P9.1–P9.6).** `resources/bridge_hulls.json` curates **15 hulls**
-(the 11 the bridge flew plus Bengal, Bristol, Raptor and Broadsword), each
+(the 11 the bridge originally flew plus four later additions), each
 carrying **arc-coded hardpoints** derived from the DB turret list and a weapon
 kind per mount; `resources/bridge_modules.json` adds five accessories fitted
 against **power, mass and cargo budgets**. `prep_weapons` now refuses a shot when
@@ -470,10 +470,11 @@ so component damage and identity travel with it. The GM's live hull change
 re-equips the mounts. UI: a Command **SHIPYARD** card listing hardpoints, arcs
 and fitted weapons with FIT/STRIP controls.
 
-- **P9.1** **Hull catalog** (`resources/bridge_hulls.json`) curated from
-  `ship_types` — Bengal, Bristol, Venture, Fralthi, Ralatha, Kamekh, variants
-  and the rest — carrying craft type, size class, agility, per-arc armour, body,
-  shields/refresh, component map, hardpoints, gunners, cargo, fuel, role, art.
+- **P9.1** **Hull catalog** (`resources/bridge_hulls.json`) curated from the
+  source `ship_types` table into the neutral role/faction hulls now in the
+  catalog — variants and the rest — carrying craft type, size class, agility,
+  per-arc armour, body, shields/refresh, component map, hardpoints, gunners,
+  cargo, fuel, role, art.
 - **P9.2** **Hardpoint loadout**: assign weapon tags from `ship_weapons_link` /
   `weapons` to the hull's arc-coded hardpoints; honour arc coverage, magazine,
   `MaxGunners`, `ShieldByPass`, `LockTime`, `Spoofability`.
