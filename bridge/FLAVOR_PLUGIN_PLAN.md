@@ -451,8 +451,15 @@ Landed with these decisions, which supersede the text above where they differ.
   core, namespaces its hulls (`wc.*`), supplies its own `defaults`, and
   demonstrates every seam (units, theme, ships, art fallback, callsigns,
   missions). It is allowlisted in `tests/test_no_wing_commander_names.py` and
-  excluded from the built package (see `flavors/README.md`). Step 10's
-  `stk`/`sw`/`bsg`/`farscape` reference flavors are left to contributors; the
-  test suite builds an `stk`-shaped units package in a temp tree to cover the
-  AU ladder.
+  excluded from the built package (see `flavors/README.md`).
+- **Step 10 partly shipped as examples.** `stk/` (Star Trek) and `sw/` (Star
+  Wars) are full reference flavors alongside `wc/`: each re-skins all 15 core
+  roles with namespaced hulls and its own `defaults`, theme, units and two
+  missions. `stk` exercises the AU/Mm auto-scaling ladder and `sw` a km/Mm
+  ladder with `MGLT`; both use the `registry` callsign style (`USS Enterprise`,
+  `ISD Devastator`). Like `wc` they are local examples, excluded from the built
+  package. `bsg`/`farscape` are left to contributors.
+- **Callsign styles are now four**: `corporate`, `surname`, `callsign` and
+  `registry` (prefix + proper name), so a setting with a registry convention
+  does not need to fake it with the merchant generators.
 

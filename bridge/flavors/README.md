@@ -2,7 +2,20 @@
 
 A **flavor** is a setting: a folder of data that re-skins, re-scales and
 re-narrates the bridge without shipping a line of Python. The shipped default is
-`core/`; `wc/` is the worked example and the acceptance test for the seam.
+`core/`.
+
+## Shipped examples
+
+Three worked examples live in this tree. They are demonstration re-skins, not
+published content (`core/` is the only flavor bundled into the built package):
+
+| Flavor | Setting | Shows off |
+|---|---|---|
+| `wc/` | space combat (the acceptance test) | namespaced hulls, overridden `defaults`, surname callsigns, an Mm distance ladder |
+| `stk/` | Star Trek | an AU/Mm auto-scaling ladder, a standalone LCARS theme, registry callsigns (`USS Enterprise`) |
+| `sw/` | Star Wars | a km/Mm ladder with `MGLT` speed, a crawl-yellow theme, registry callsigns (`ISD Devastator`) |
+
+Copy whichever is closest to what you want and edit it.
 
 ## The 30-second version
 
@@ -56,7 +69,7 @@ listed with the reason, and valid ones report hull and mission counts.
 | `units.json` | distance ladder, speed factor, dial labels | `factor` is canonical units per display unit, so the formatter divides. The ladder auto-scales: pick the largest rung whose `min` the value reaches. |
 | `theme.css` | the `:root` custom properties | Served after `activity.css`, so all existing markup resolves. Set `--font-display` and `--font-mono` to change type. |
 | `ships.json` | hulls, art, `defaults`, terrain images | Merge is per hull id and per field: an override may change just a name, a stat or an art file. Art resolves through the flavor chain, so a hull with no `assets/` falls back to core art. Add a `defaults` entry for every contact type you rename the catalog for. |
-| `callsigns.json` | name adjectives, nouns, naming style, hostile pools | Lists replace; hostile pools merge per role. |
+| `callsigns.json` | name adjectives, nouns, naming style, hostile pools | Lists replace; hostile pools merge per role. `vesselName` is one of `corporate` (`MV GREY FALCON`), `surname` (`Grey Falcon`), `callsign` (`Vanguard 612`) or `registry` (`USS Enterprise`). |
 | `missions/*.json` | scenarios | Mirrors `CampaignSeed` field-for-field. Explicit positions keep placement deterministic. |
 
 JSON Schemas for every file live in [`schema/`](schema/) for editor completion
@@ -102,6 +115,6 @@ the reason. `python -m bridge --list-flavors` shows what is installed;
 A flavor that names a third-party universe carries the same exposure as any
 other fan work. **A contributed flavor is the contributor's responsibility.**
 Do not add a third-party setting to this repository unless you are comfortable
-with that; `wc/` is included as a local example of the mechanism and is
-deliberately not shipped in the built package (see `pyproject.toml`
-`package-data`).
+with that; `wc/`, `stk/` and `sw/` are included as local examples of the
+mechanism and are deliberately not shipped in the built package (see
+`pyproject.toml` `package-data`).

@@ -118,10 +118,11 @@ def test_core_mission_matches_the_legacy_factory_coordinates():
     assert seed.contacts[0].speed == 30
 
 
-def test_available_lists_core_first_with_the_example_flavor():
+def test_available_lists_core_first_with_the_example_flavors():
     ids = flavors.available()
     assert ids[0] == "core"
-    assert "wc" in ids
+    # The shipped examples: core plus one re-skin per documented setting.
+    assert {"wc", "stk", "sw"} <= set(ids)
 
 
 # ---------------------------------------------------------------------------
@@ -199,10 +200,30 @@ def test_flavor_never_enters_the_simulation(flavor_home):
     assert core_dump == stk_dump
 
 
+def test_callsign_styles_cover_the_documented_generators():
+    from bridge.shared.flavors import Callsigns
+
+    corporate = Callsigns(adjectives=["GRAY"], nouns=["VEGA"], vessel_name="corporate")
+    assert corporate.vessel(3) == "MV GRAY VEGA"
+    surname = Callsigns(adjectives=["Grey"], nouns=["Falcon"], vessel_name="surname")
+    assert surname.vessel(3) == "Grey Falcon"
+    callsign = Callsigns(adjectives=["A"], nouns=["Vanguard"], vessel_name="callsign")
+    assert callsign.vessel(3).startswith("Vanguard ")
+    registry = Callsigns(adjectives=["USS"], nouns=["Enterprise"], vessel_name="registry")
+    assert registry.vessel(3) == "USS Enterprise"
+
+
+def test_registry_flavors_generate_registry_names():
+    # stk and sw name their contacts with a registry prefix plus a proper name.
+    for flavor_id, prefixes in (("stk", ("USS ", "NCC ", "SS ", "IKS ", "IRW ")), ("sw", ("CR90 ", "GR-75 ", "MC80 ", "ISD ", "SSD "))):
+        callsigns = flavors.get(flavor_id).callsigns
+        assert callsigns.vessel_name == "registry"
+        assert callsigns.vessel(5).startswith(prefixes)
+
+
 # ---------------------------------------------------------------------------
 # Validator: fail closed
 # ---------------------------------------------------------------------------
-
 
 def test_validator_rejects_a_dangling_default(flavor_home):
     _flavor(
@@ -760,6 +781,35 @@ def test_shipped_schemas_are_valid_json():
 def test_every_shipped_flavor_loads():
     rows = {row["id"]: row for row in flavors.summaries()}
     assert rows["core"]["valid"]
-    assert rows["wc"]["valid"]
-    assert rows["wc"]["hulls"] >= 15
-    assert rows["wc"]["missions"] >= 2
+    for flavor_id in ("wc", "stk", "sw"):
+        assert rows[flavor_id]["valid"], rows[flavor_id].get("error")
+        # Each example re-skins core's roles and adds its own scenarios.
+        assert rows[flavor_id]["hulls"] >= 15
+        assert rows[flavor_id]["missions"] >= 2
+
+
+@pytest.mark.parametrize(
+    "flavor_id,default_hull,mission_id",
+    [
+        ("wc", "wc.tigers-claw", "wc.vega-run"),
+        ("stk", "stk.miranda", "stk.babel"),
+        ("sw", "sw.cr90", "sw.kessel-run"),
+    ],
+)
+def test_example_mods_are_namespaced_and_playable(flavor_id, default_hull, mission_id):
+    flavor = flavors.get(flavor_id)
+    # Every hull the example defines is namespaced under the flavor id.
+    added = {h for h in flavor.ship_classes if h.startswith(f"{flavor_id}.")}
+    assert added, flavor_id
+    assert all(h.startswith(f"{flavor_id}.") for h in added)
+    # Its own missions and defaults resolve inside the merged catalog.
+    assert mission_id in flavor.missions
+    assert flavor.defaults["unknown"] == default_hull
+    assert default_hull in flavor.ship_classes
+    # A room can actually be built and advanced on the setting.
+    state = engine.create_state(
+        f"{flavor_id}-room", "inst", campaign_for(mission_id, flavor_id), flavor_id=flavor_id
+    )
+    assert state.flavorId == flavor_id
+    assert state.ship.shipClass.startswith(f"{flavor_id}.")
+    engine.advance(state, 30)

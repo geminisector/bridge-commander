@@ -1,0 +1,14 @@
+{
+  "distance": {
+    "base": "km",
+    "ladder": [
+      { "min": 1000000, "unit": "Mm", "factor": 1000.0, "precision": 1 },
+      { "min": 0, "unit": "km", "factor": 1.0, "precision": 0 }
+    ]
+  },
+  "speed": {
+    "base": "MGLT",
+    "factor": 1.0,
+    "dial": { "0": "Station", "15": "Slow", "60": "Cruise", "100": "Attack speed" }
+  }
+}

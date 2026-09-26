@@ -87,7 +87,8 @@ referenced at `/img/...` is served from `ASSET_DIR`, defaulting to packaged
 
 A **flavor** is a setting — a mod — as data: a directory under
 `bridge/flavors/<id>/` with a `flavor.json` manifest plus the JSON, CSS and
-images it overrides. `core` is the shipped default; `wc` is the worked example.
+images it overrides. `core` is the shipped default; `wc`, `stk` (Star Trek) and
+`sw` (Star Wars) are worked examples of the seam.
 A flavor inherits from `core` by default, ships no code, and provides only what
 it changes (see `FLAVOR_PLUGIN_PLAN.md` for the design and `flavors/README.md`
 for the authoring guide).

@@ -1,0 +1,11 @@
+{
+  "id": "stk",
+  "title": "Star Trek",
+  "extends": "core",
+  "units": "units.json",
+  "theme": "theme.css",
+  "ships": "ships.json",
+  "callsigns": "callsigns.json",
+  "missions": "missions/",
+  "defaultMission": "stk.babel"
+}

@@ -1,0 +1,46 @@
+{
+  "id": "sw.blockade",
+  "title": "Blockade",
+  "theater": "Outer Rim",
+  "brief": "A rebel convoy is trying to break an Imperial blockade and the frigate you command is the only escort it has. The picket line knows the convoy is coming; the Star Destroyer on the far side is waiting for it to commit.",
+  "target": "Bring the convoy through the picket. Classify the blockade line. Hold the escorts off long enough to clear the jump.",
+  "startHour": 20,
+  "patrol": { "center": { "x": 0, "y": 0, "z": 0 }, "radiusKlik": 100 },
+  "clutter": 0.35,
+  "escalation": 55,
+  "zBand": { "min": 2, "max": 12 },
+  "shipClass": "sw.nebulon",
+  "contacts": [
+    { "x": -30, "y": 34, "z": 5, "heading": 220, "speed": 40, "type": "freighter", "faction": "neutral", "hostile": false, "emitting": false, "name": "GR-75 Bright Hope", "shipClass": "sw.grt75", "radiusKlik": null },
+    { "x": 22, "y": 48, "z": 7, "heading": 190, "speed": 46, "type": "escort", "faction": "friendly", "hostile": false, "emitting": true, "name": "CR90 Tantive", "shipClass": "sw.cr90", "radiusKlik": null },
+    { "x": 12, "y": -26, "z": 5, "heading": 10, "speed": 72, "type": "fighter", "faction": "enemy", "hostile": true, "emitting": true, "name": "TIE Interceptor", "shipClass": "sw.tieinterceptor", "radiusKlik": null },
+    { "x": -38, "y": -14, "z": 8, "heading": 330, "speed": 58, "type": "fighter", "faction": "enemy", "hostile": true, "emitting": true, "name": "TIE Bomber", "shipClass": "sw.tiebomber", "radiusKlik": null },
+    { "x": 44, "y": 6, "z": 4, "heading": 90, "speed": 48, "type": "escort", "faction": "enemy", "hostile": true, "emitting": true, "name": "Raider Corvette", "shipClass": "sw.raider", "radiusKlik": null },
+    { "x": -70, "y": -54, "z": 0, "heading": 45, "speed": 28, "type": "capship", "faction": "enemy", "hostile": true, "emitting": false, "name": "ISD Avenger", "shipClass": "sw.isd", "radiusKlik": null },
+    { "x": 70, "y": 40, "z": 0, "heading": 270, "speed": 24, "type": "capship", "faction": "enemy", "hostile": true, "emitting": false, "name": "SSD Executor", "shipClass": "sw.ssd", "radiusKlik": null },
+    { "x": -6, "y": 2, "z": 0, "heading": 0, "speed": 0, "type": "ice", "faction": "neutral", "hostile": false, "emitting": false, "name": null, "shipClass": null, "radiusKlik": 10 }
+  ],
+  "events": [
+    { "atMinute": 50, "template": "orders" },
+    { "atMinute": 140, "template": "relay" },
+    { "atMinute": 230, "template": "civilian" },
+    { "atMinute": 320, "template": "contactclose" }
+  ],
+  "hazards": [
+    { "id": "sw.blockade.dust", "type": "dust-front", "title": "Outer Rim dust front", "startMinute": 90, "endMinute": 280, "intensity": 0.9, "noise": 0.03, "exposure": 0.2, "concealment": 0.25 }
+  ],
+  "navPoints": [
+    { "id": "sw.blockade.line", "name": "Picket Line", "kind": "nav", "pos": { "x": 0, "y": -60, "z": 0 }, "radiusKlik": 9, "chartAgeHours": 6, "note": "where the blockade sits" },
+    { "id": "sw.blockade.jump", "name": "Rim Jump Point", "kind": "jump", "pos": { "x": 88, "y": 72, "z": 0 }, "radiusKlik": 10, "chartAgeHours": 20, "note": "convoy egress" }
+  ],
+  "layers": [
+    { "id": "surface", "name": "Surface duct", "zMin": 0, "zMax": 10, "note": "Loud and exposed: everyone above and below hears you." },
+    { "id": "gradient", "name": "Gradient layer", "zMin": 10, "zMax": 22, "note": "The boundary itself: crossing it hides you and blinds you." },
+    { "id": "deep", "name": "Deep channel", "zMin": 22, "zMax": 40, "note": "Quiet and hard to reach; your array rides well down here." }
+  ],
+  "environment": "clear-space",
+  "barriers": [
+    { "id": "sw.blockade.line-a", "name": "Blockade Line North", "a": { "x": -80, "y": -60, "z": 0 }, "b": { "x": 20, "y": -80, "z": 0 }, "sensitivity": 0.75, "faction": "enemy", "note": "Mines and sensor buoys strung across the lane." },
+    { "id": "sw.blockade.line-b", "name": "Blockade Line South", "a": { "x": 20, "y": -80, "z": 0 }, "b": { "x": 90, "y": -40, "z": 0 }, "sensitivity": 0.7, "faction": "enemy", "note": "The second half of the picket." }
+  ]
+}

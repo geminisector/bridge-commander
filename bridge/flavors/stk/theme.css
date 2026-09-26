@@ -1,0 +1,28 @@
+/* stk — a Star Trek-flavoured re-skin of the core watch.
+   LCARS-inspired: black panels, warm orange controls, a violet secondary.
+   Straight :root override, served after activity.css. */
+
+@import url('https://fonts.googleapis.com/css2?family=Antonio&display=swap');
+
+:root{
+  --bg:#050507;
+  --bg-deep:#000;
+  --panel:#141118;
+  --panel-2:#1d1822;
+  --line:#3a2f42;
+  --text:#f2e9de;
+  --text-dim:#a89bb0;
+  --accent:#ff9c3f;
+  --accent-hover:#ffb964;
+  --glow:0 0 8px rgba(255,156,63,.35);
+  --glow-hover:0 0 15px rgba(255,185,100,.75),0 0 25px rgba(255,185,100,.35);
+  --radius:8px;
+  --cyan:#8f7bd6;
+  --dim:#8f7bd6;
+  --amber:#ffcc66;
+  --red:#ff6b73;
+  --green:#5fd39a;
+  --active:#3a2109;
+  --font-display:'Antonio','Zen Dots',system-ui,sans-serif;
+  --font-mono:'Share Tech Mono',ui-monospace,monospace;
+}

@@ -1,0 +1,29 @@
+{
+  "vesselName": "registry",
+  "adjectives": ["CR90", "GR-75", "MC80", "ISD", "SSD"],
+  "nouns": [
+    "Tantive",
+    "Outrider",
+    "Bright Hope",
+    "Home One",
+    "Devastator",
+    "Avenger",
+    "Liberty",
+    "Coruscant",
+    "Hammerhead",
+    "Ghost"
+  ],
+  "hostile": {
+    "escort": ["ISD Raider-01", "ISD Raider-02", "Raider Corvette-03", "Raider Corvette-04"],
+    "capship": ["ISD Devastator-01", "ISD Avenger-01", "SSD Executor-01", "ISD Tyrant-02"],
+    "fighter": [
+      "TIE-01",
+      "TIE-02",
+      "TIE-03",
+      "TIE Interceptor-04",
+      "TIE Interceptor-05",
+      "TIE Bomber-06",
+      "TIE Advanced-07"
+    ]
+  }
+}

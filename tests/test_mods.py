@@ -245,6 +245,9 @@ def test_admin_activates_a_mod_for_a_room():
             state = ws.receive_json()
             assert state["type"] == "admin.state"
             assert state["state"]["flavorId"] == "wc"
+            # Activating a mod for a room loads that setting's own default
+            # mission, not the inherited core scenario the room was on.
+            assert state["state"]["campaign"]["id"] == "wc.vega-run"
     assert rooms.rooms["chan-mod-room"].state.flavorId == "wc"
 
 

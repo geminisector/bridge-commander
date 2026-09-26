@@ -1,0 +1,44 @@
+{
+  "id": "stk.babel",
+  "title": "Babel",
+  "theater": "Babel Sector",
+  "brief": "Six civilian hulls have gone dark inside the corridor and the relay that should be watching it has stopped answering. A Romulan warbird is believed to be running silent somewhere in the dust, and a Klingon escort is already inside your patrol box asking the same questions you are.",
+  "target": "Trace the relay source, classify the traffic, and recover the convoy manifest without being fixed by the warbird.",
+  "startHour": 0,
+  "patrol": { "center": { "x": 0, "y": 0, "z": 0 }, "radiusKlik": 70 },
+  "clutter": 0.4,
+  "escalation": 18,
+  "zBand": { "min": 3, "max": 12 },
+  "shipClass": "stk.enterprise",
+  "contacts": [
+    { "x": -18, "y": 22, "z": 6, "heading": 200, "speed": 48, "type": "freighter", "faction": "neutral", "hostile": false, "emitting": false, "name": "SS Deneva", "shipClass": "stk.deneva", "radiusKlik": null },
+    { "x": 24, "y": 36, "z": 8, "heading": 150, "speed": 40, "type": "freighter", "faction": "neutral", "hostile": false, "emitting": false, "name": "SS Kobayashi", "shipClass": "stk.jclass", "radiusKlik": null },
+    { "x": 8, "y": -30, "z": 4, "heading": 20, "speed": 62, "type": "escort", "faction": "enemy", "hostile": true, "emitting": true, "name": "IKS Rotarran", "shipClass": "stk.birdofprey", "radiusKlik": null },
+    { "x": -42, "y": -12, "z": 5, "heading": 310, "speed": 55, "type": "fighter", "faction": "enemy", "hostile": true, "emitting": true, "name": "Jem'Hadar Strike", "shipClass": "stk.jemhadar", "radiusKlik": null },
+    { "x": 48, "y": -46, "z": 3, "heading": 90, "speed": 30, "type": "capship", "faction": "enemy", "hostile": true, "emitting": false, "name": "IRW D'deridex", "shipClass": "stk.warbird", "radiusKlik": null },
+    { "x": -4, "y": 8, "z": 0, "heading": 0, "speed": 0, "type": "debris", "faction": "neutral", "hostile": false, "emitting": false, "name": null, "shipClass": null, "radiusKlik": 9 },
+    { "x": 30, "y": 12, "z": 0, "heading": 0, "speed": 0, "type": "ice", "faction": "neutral", "hostile": false, "emitting": false, "name": null, "shipClass": null, "radiusKlik": 10 }
+  ],
+  "events": [
+    { "atMinute": 60, "template": "fleetnet" },
+    { "atMinute": 140, "template": "distress" },
+    { "atMinute": 220, "template": "probe" },
+    { "atMinute": 300, "template": "orders" }
+  ],
+  "hazards": [
+    { "id": "stk.babel.ion", "type": "ion-storm", "title": "Ion storm", "startMinute": 0, "endMinute": 240, "intensity": 1.4, "noise": 0.05, "exposure": 0.5, "concealment": 0.4 }
+  ],
+  "navPoints": [
+    { "id": "stk.babel.relay", "name": "Babel Relay", "kind": "nav", "pos": { "x": 40, "y": 12, "z": 0 }, "radiusKlik": 8, "chartAgeHours": 96, "note": "silent for six days" },
+    { "id": "stk.babel.jump", "name": "Babel Jump Point", "kind": "jump", "pos": { "x": -55, "y": 60, "z": 0 }, "radiusKlik": 10, "chartAgeHours": 18, "note": "civilian egress" }
+  ],
+  "layers": [
+    { "id": "surface", "name": "Surface duct", "zMin": 0, "zMax": 10, "note": "Loud and exposed: everyone above and below hears you." },
+    { "id": "gradient", "name": "Gradient layer", "zMin": 10, "zMax": 22, "note": "The boundary itself: crossing it hides you and blinds you." },
+    { "id": "deep", "name": "Deep channel", "zMin": 22, "zMax": 40, "note": "Quiet and hard to reach; your array rides well down here." }
+  ],
+  "environment": "clear-space",
+  "barriers": [
+    { "id": "stk.babel.picket", "name": "Babel Picket", "a": { "x": -30, "y": -80, "z": 0 }, "b": { "x": 70, "y": -40, "z": 0 }, "sensitivity": 0.6, "faction": "enemy", "note": "A listening line across the corridor mouth." }
+  ]
+}

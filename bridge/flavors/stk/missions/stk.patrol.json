@@ -1,0 +1,40 @@
+{
+  "id": "stk.patrol",
+  "title": "Neutral Zone Patrol",
+  "theater": "Romulan Neutral Zone",
+  "brief": "A survey hull has crossed the line and both sides know it. Hold the corridor, keep the surveyor alive long enough to be turned around, and do not be the officer who starts a war over a navigation error.",
+  "target": "Escort the surveyor back across the line. Classify every warship that comes to look. Weapons stay safe.",
+  "startHour": 14,
+  "patrol": { "center": { "x": 0, "y": 0, "z": 0 }, "radiusKlik": 85 },
+  "clutter": 0.15,
+  "escalation": 34,
+  "zBand": { "min": 0, "max": 9 },
+  "shipClass": "stk.excelsior",
+  "contacts": [
+    { "x": -26, "y": 30, "z": 0, "heading": 240, "speed": 36, "type": "prospector", "faction": "neutral", "hostile": false, "emitting": false, "name": "SS Antares", "shipClass": "stk.antares", "radiusKlik": null },
+    { "x": 40, "y": 14, "z": 0, "heading": 180, "speed": 44, "type": "escort", "faction": "enemy", "hostile": true, "emitting": true, "name": "IKS Pagh", "shipClass": "stk.birdofprey", "radiusKlik": null },
+    { "x": -64, "y": -20, "z": 0, "heading": 60, "speed": 52, "type": "escort", "faction": "enemy", "hostile": true, "emitting": false, "name": "IKS B'Moth", "shipClass": "stk.birdofprey", "radiusKlik": null },
+    { "x": 12, "y": -58, "z": 0, "heading": 0, "speed": 70, "type": "fighter", "faction": "enemy", "hostile": true, "emitting": true, "name": "CDS Hideki", "shipClass": "stk.jemhadar", "radiusKlik": null },
+    { "x": 76, "y": 44, "z": 0, "heading": 270, "speed": 26, "type": "capship", "faction": "enemy", "hostile": true, "emitting": false, "name": "IKS Negh'Var", "shipClass": "stk.neghvar", "radiusKlik": null },
+    { "x": 18, "y": 66, "z": 0, "heading": 0, "speed": 0, "type": "dust", "faction": "neutral", "hostile": false, "emitting": false, "name": null, "shipClass": null, "radiusKlik": 14 }
+  ],
+  "events": [
+    { "atMinute": 70, "template": "challenge" },
+    { "atMinute": 160, "template": "fleetnet" },
+    { "atMinute": 250, "template": "weapons-warning" }
+  ],
+  "hazards": [
+    { "id": "stk.patrol.radiation", "type": "radiation-storm", "title": "Subspace radiation front", "startMinute": 120, "endMinute": 300, "intensity": 1.1, "noise": 0.045, "exposure": 0.3, "concealment": 0.2 }
+  ],
+  "navPoints": [
+    { "id": "stk.patrol.line", "name": "The Line", "kind": "nav", "pos": { "x": 0, "y": 50, "z": 0 }, "radiusKlik": 9, "chartAgeHours": 4, "note": "charted border marker" },
+    { "id": "stk.patrol.station", "name": "Listening Post", "kind": "nav", "pos": { "x": -70, "y": 20, "z": 0 }, "radiusKlik": 7, "chartAgeHours": 30, "note": "friendly sensor outpost" }
+  ],
+  "layers": [
+    { "id": "surface", "name": "Surface duct", "zMin": 0, "zMax": 10, "note": "Loud and exposed: everyone above and below hears you." },
+    { "id": "gradient", "name": "Gradient layer", "zMin": 10, "zMax": 22, "note": "The boundary itself: crossing it hides you and blinds you." },
+    { "id": "deep", "name": "Deep channel", "zMin": 22, "zMax": 40, "note": "Quiet and hard to reach; your array rides well down here." }
+  ],
+  "environment": "clear-space",
+  "barriers": []
+}

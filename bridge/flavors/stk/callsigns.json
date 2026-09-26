@@ -1,0 +1,31 @@
+{
+  "vesselName": "registry",
+  "adjectives": ["USS", "NCC", "SS", "IKS", "IRW"],
+  "nouns": [
+    "Enterprise",
+    "Voyager",
+    "Defiant",
+    "Intrepid",
+    "Akira",
+    "Nova",
+    "Saber",
+    "Constellation",
+    "Excelsior",
+    "Miranda",
+    "Reliant",
+    "Grissom"
+  ],
+  "hostile": {
+    "escort": ["IKS Rotarran-01", "IKS Rotarran-02", "IKS Pagh-03", "IKS B'Moth-04"],
+    "capship": ["IRW D'deridex-01", "IKS Negh'Var-01", "CDS Bok'Nor-01", "IRW D'deridex-02"],
+    "fighter": [
+      "Jem'Hadar-01",
+      "Jem'Hadar-02",
+      "Jem'Hadar-03",
+      "IKS B'rel-04",
+      "IKS B'rel-05",
+      "CDS Hideki-06",
+      "CDS Hideki-07"
+    ]
+  }
+}

@@ -7,8 +7,8 @@
   "additionalProperties": false,
   "properties": {
     "vesselName": {
-      "enum": ["corporate", "surname", "callsign"],
-      "description": "corporate -> 'MV GREY FALCON'; surname -> 'Grey Falcon'; callsign -> 'Vanguard 612'."
+      "enum": ["corporate", "surname", "callsign", "registry"],
+      "description": "corporate -> 'MV GREY FALCON'; surname -> 'Grey Falcon'; callsign -> 'Vanguard 612'; registry -> 'USS Enterprise' / 'ISD Devastator'."
     },
     "adjectives": { "type": "array", "items": { "type": "string" } },
     "nouns": { "type": "array", "items": { "type": "string" } },

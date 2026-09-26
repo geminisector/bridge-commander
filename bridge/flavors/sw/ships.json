@@ -1,0 +1,694 @@
+{
+  "hulls": {
+    "sw.cr90": {
+      "name": "CR90 corvette",
+      "role": "Corvette",
+      "contactType": "carrier",
+      "massKt": 28.8,
+      "profile": 0.45,
+      "stealth": 0.55,
+      "emission": 0.3,
+      "sensorQuality": 0.92,
+      "crew": 280,
+      "blurb": "A fast, under-armed courier hull that survives on speed and nerve.",
+      "art": {
+        "action": "friendly-cruiser.png",
+        "vdu": "friendly-cruiser-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 300,
+        "shieldAft": 200,
+        "shieldRefresh": 150,
+        "armorFore": 35,
+        "armorAft": 25,
+        "armorPort": 5,
+        "armorStarboard": 5,
+        "body": 330,
+        "fuelCapacity": 6
+      },
+      "hardpoints": [
+        {
+          "id": "HL1-FB",
+          "arc": "fore",
+          "kind": "gun"
+        },
+        {
+          "id": "HL1-SB",
+          "arc": "port",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Friendly_Cruiser",
+      "gunners": 2,
+      "cargoHold": 1000.0,
+      "names": [
+        "CR90 Tantive"
+      ]
+    },
+    "sw.yt1300": {
+      "name": "YT-1300 light freighter",
+      "role": "Escort",
+      "contactType": "escort",
+      "massKt": 6.5,
+      "profile": 0.6,
+      "stealth": 0.3,
+      "emission": 0.5,
+      "sensorQuality": 0.8,
+      "crew": 60,
+      "blurb": "A freighter that has been modified until nobody can say what it was.",
+      "art": {
+        "action": "friendly-corvette.png",
+        "vdu": "friendly-corvette-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 25,
+        "shieldAft": 25,
+        "shieldRefresh": 15,
+        "armorFore": 15,
+        "armorAft": 15,
+        "armorPort": 5,
+        "armorStarboard": 5,
+        "body": 175,
+        "fuelCapacity": 5
+      },
+      "hardpoints": [
+        {
+          "id": "V-LT",
+          "arc": "port",
+          "kind": "gun"
+        },
+        {
+          "id": "V-RT",
+          "arc": "starboard",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Friendly_Corvette",
+      "gunners": 2,
+      "cargoHold": 300.0,
+      "names": [
+        "YT-1300 Outrider"
+      ]
+    },
+    "sw.grt75": {
+      "name": "GR-75 medium transport",
+      "role": "Transport",
+      "contactType": "freighter",
+      "massKt": 18.0,
+      "profile": 0.8,
+      "stealth": 0.1,
+      "emission": 0.55,
+      "sensorQuality": 0.5,
+      "crew": 24,
+      "blurb": "A slab of a transport: thin shields, vast hold, easy to find.",
+      "art": {
+        "action": "friendly-transport.png",
+        "vdu": "friendly-transport-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 17,
+        "shieldAft": 15,
+        "shieldRefresh": 9.6,
+        "armorFore": 10,
+        "armorAft": 10,
+        "armorPort": 5,
+        "armorStarboard": 5,
+        "body": 110,
+        "fuelCapacity": 6
+      },
+      "hardpoints": [
+        {
+          "id": "Fk-L",
+          "arc": "fore",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Friendly_Transport",
+      "gunners": 1,
+      "cargoHold": 1000.0,
+      "names": [
+        "GR-75 Bright Hope"
+      ]
+    },
+    "sw.miner": {
+      "name": "mining ship",
+      "role": "Prospector",
+      "contactType": "prospector",
+      "massKt": 2.5,
+      "profile": 0.5,
+      "stealth": 0.2,
+      "emission": 0.6,
+      "sensorQuality": 0.6,
+      "crew": 4,
+      "blurb": "Ore processors and a reactor that shouts on every band.",
+      "art": {
+        "action": "friendly-prospector.png",
+        "vdu": "friendly-prospector-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 6,
+        "shieldAft": 6,
+        "shieldRefresh": 3.6,
+        "armorFore": 8,
+        "armorAft": 8,
+        "armorPort": 6.5,
+        "armorStarboard": 6.5,
+        "body": 30,
+        "fuelCapacity": 3
+      },
+      "hardpoints": [
+        {
+          "id": "fore-gun",
+          "arc": "fore",
+          "kind": "gun"
+        },
+        {
+          "id": "fore-missile",
+          "arc": "fore",
+          "kind": "missile"
+        }
+      ],
+      "shipType": "Friendly_Prospector",
+      "gunners": 0,
+      "cargoHold": 125.0,
+      "names": [
+        "Mining Ship Spice"
+      ]
+    },
+    "sw.freighter": {
+      "name": "bulk freighter",
+      "role": "Freighter",
+      "contactType": "freighter",
+      "massKt": 2.0,
+      "profile": 0.85,
+      "stealth": 0.05,
+      "emission": 0.7,
+      "sensorQuality": 0.45,
+      "crew": 18,
+      "blurb": "Slow, ugly and absolutely essential to somebody.",
+      "art": {
+        "action": "friendly-freighter.png",
+        "vdu": "friendly-freighter-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 5,
+        "shieldAft": 5,
+        "shieldRefresh": 4.8,
+        "armorFore": 6,
+        "armorAft": 8,
+        "armorPort": 8,
+        "armorStarboard": 8,
+        "body": 22,
+        "fuelCapacity": 1
+      },
+      "hardpoints": [
+        {
+          "id": "fore-gun",
+          "arc": "fore",
+          "kind": "gun"
+        },
+        {
+          "id": "fore-missile",
+          "arc": "fore",
+          "kind": "missile"
+        }
+      ],
+      "shipType": "Friendly_Freighter",
+      "gunners": 1,
+      "cargoHold": 54.0,
+      "names": [
+        "Bulk Freighter"
+      ]
+    },
+    "sw.mc80": {
+      "name": "MC80 star cruiser",
+      "role": "Star cruiser",
+      "contactType": "capship",
+      "massKt": 19000.0,
+      "profile": 0.92,
+      "stealth": 0.1,
+      "emission": 0.85,
+      "sensorQuality": 0.8,
+      "crew": 2400,
+      "blurb": "A mon calamari line cruiser: fighter decks and a heavy shield envelope.",
+      "art": {
+        "action": "friendly-carrier.png",
+        "vdu": "friendly-carrier-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 500,
+        "shieldAft": 500,
+        "shieldRefresh": 300,
+        "armorFore": 60,
+        "armorAft": 60,
+        "armorPort": 5,
+        "armorStarboard": 5,
+        "body": 400,
+        "fuelCapacity": 6
+      },
+      "hardpoints": [
+        {
+          "id": "HL1-LB",
+          "arc": "port",
+          "kind": "gun"
+        },
+        {
+          "id": "HL1-RB",
+          "arc": "port",
+          "kind": "gun"
+        },
+        {
+          "id": "HL2-FB",
+          "arc": "fore",
+          "kind": "gun"
+        },
+        {
+          "id": "HL2-CB",
+          "arc": "port",
+          "kind": "gun"
+        },
+        {
+          "id": "HL2-AB",
+          "arc": "aft",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Friendly_Carrier",
+      "gunners": 5,
+      "cargoHold": 2200.0,
+      "names": [
+        "MC80 Home One"
+      ]
+    },
+    "sw.nebulon": {
+      "name": "Nebulon-B frigate",
+      "role": "Light cruiser",
+      "contactType": "capship",
+      "massKt": 7600.0,
+      "profile": 0.78,
+      "stealth": 0.2,
+      "emission": 0.7,
+      "sensorQuality": 0.75,
+      "crew": 680,
+      "blurb": "A frigate built around its fighter bay and its sensor mast.",
+      "art": {
+        "action": "friendly-light-cruiser.png",
+        "vdu": "friendly-light-cruiser-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 200,
+        "shieldAft": 200,
+        "shieldRefresh": 135,
+        "armorFore": 18,
+        "armorAft": 18,
+        "armorPort": 5,
+        "armorStarboard": 5,
+        "body": 220,
+        "fuelCapacity": 5
+      },
+      "hardpoints": [
+        {
+          "id": "HL2-FB",
+          "arc": "fore",
+          "kind": "gun"
+        },
+        {
+          "id": "HL2-CB",
+          "arc": "port",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Friendly_LightCruiser",
+      "gunners": 2,
+      "cargoHold": 900.0,
+      "names": [
+        "Nebulon-B Redemption"
+      ]
+    },
+    "sw.raider": {
+      "name": "Raider-class corvette",
+      "role": "Escort",
+      "contactType": "escort",
+      "massKt": 12.0,
+      "profile": 0.5,
+      "stealth": 0.35,
+      "emission": 0.45,
+      "sensorQuality": 0.8,
+      "crew": 120,
+      "blurb": "A picket corvette that hunts in pairs and calls in the big hull.",
+      "art": {
+        "action": "enemy-escort.png",
+        "vdu": "enemy-escort-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 30,
+        "shieldAft": 30,
+        "shieldRefresh": 18,
+        "armorFore": 20,
+        "armorAft": 20,
+        "armorPort": 5,
+        "armorStarboard": 5,
+        "body": 175,
+        "fuelCapacity": 6
+      },
+      "hardpoints": [
+        {
+          "id": "Fk-M",
+          "arc": "fore",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Enemy_Escort",
+      "gunners": 1,
+      "cargoHold": 420.0,
+      "names": [
+        "ISD Raider"
+      ]
+    },
+    "sw.tie": {
+      "name": "TIE fighter",
+      "role": "Fighter",
+      "contactType": "fighter",
+      "massKt": 0.9,
+      "profile": 0.22,
+      "stealth": 0.65,
+      "emission": 0.75,
+      "sensorQuality": 0.7,
+      "crew": 1,
+      "blurb": "Cheap, fast and flown in numbers; its pilot is the expensive part.",
+      "art": {
+        "action": "enemy-fighter.png",
+        "vdu": "enemy-fighter-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 3.5,
+        "shieldAft": 3.5,
+        "shieldRefresh": 2.1,
+        "armorFore": 3,
+        "armorAft": 2,
+        "armorPort": 1.5,
+        "armorStarboard": 1.5,
+        "body": 15,
+        "fuelCapacity": 2
+      },
+      "hardpoints": [
+        {
+          "id": "fore-gun",
+          "arc": "fore",
+          "kind": "gun"
+        },
+        {
+          "id": "fore-missile",
+          "arc": "fore",
+          "kind": "missile"
+        }
+      ],
+      "shipType": "Enemy_Fighter",
+      "gunners": 0,
+      "cargoHold": 2.0,
+      "names": [
+        "TIE Fighter"
+      ]
+    },
+    "sw.tieinterceptor": {
+      "name": "TIE interceptor",
+      "role": "Medium fighter",
+      "contactType": "fighter",
+      "massKt": 14.0,
+      "profile": 0.35,
+      "stealth": 0.6,
+      "emission": 0.5,
+      "sensorQuality": 0.6,
+      "crew": 1,
+      "blurb": "A dagger-winged interceptor built to run down anything that turns away.",
+      "art": {
+        "action": "enemy-medium-fighter.png",
+        "vdu": "enemy-medium-fighter-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 9,
+        "shieldAft": 9,
+        "shieldRefresh": 5.4,
+        "armorFore": 10,
+        "armorAft": 10,
+        "armorPort": 8,
+        "armorStarboard": 8,
+        "body": 40,
+        "fuelCapacity": 1
+      },
+      "hardpoints": [
+        {
+          "id": "fore-gun",
+          "arc": "fore",
+          "kind": "gun"
+        },
+        {
+          "id": "fore-missile",
+          "arc": "fore",
+          "kind": "missile"
+        }
+      ],
+      "shipType": "Enemy_MediumFighter",
+      "gunners": 0,
+      "cargoHold": 5.0,
+      "names": [
+        "TIE Interceptor"
+      ]
+    },
+    "sw.tieadvanced": {
+      "name": "TIE advanced",
+      "role": "Heavy fighter",
+      "contactType": "fighter",
+      "massKt": 2.4,
+      "profile": 0.38,
+      "stealth": 0.45,
+      "emission": 0.65,
+      "sensorQuality": 0.75,
+      "crew": 2,
+      "blurb": "A shielded TIE with a real hyperdrive: the one that comes back.",
+      "art": {
+        "action": "enemy-heavy-fighter.png",
+        "vdu": "enemy-heavy-fighter-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 11,
+        "shieldAft": 11,
+        "shieldRefresh": 6.6,
+        "armorFore": 16,
+        "armorAft": 16,
+        "armorPort": 15,
+        "armorStarboard": 15,
+        "body": 40,
+        "fuelCapacity": 1
+      },
+      "hardpoints": [
+        {
+          "id": "A",
+          "arc": "all",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Enemy_HeavyFighter",
+      "gunners": 1,
+      "cargoHold": 15.0,
+      "names": [
+        "TIE Advanced"
+      ]
+    },
+    "sw.tiebomber": {
+      "name": "TIE bomber",
+      "role": "Bomber",
+      "contactType": "fighter",
+      "massKt": 22.0,
+      "profile": 0.55,
+      "stealth": 0.4,
+      "emission": 0.6,
+      "sensorQuality": 0.55,
+      "crew": 3,
+      "blurb": "Slow, plated and carrying torpedoes meant for hulls like yours.",
+      "art": {
+        "action": "enemy-bomber.png",
+        "vdu": "enemy-bomber-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 30,
+        "shieldAft": 30,
+        "shieldRefresh": 18,
+        "armorFore": 25,
+        "armorAft": 25,
+        "armorPort": 23,
+        "armorStarboard": 23,
+        "body": 50,
+        "fuelCapacity": 1
+      },
+      "hardpoints": [
+        {
+          "id": "A",
+          "arc": "all",
+          "kind": "gun"
+        },
+        {
+          "id": "L",
+          "arc": "port",
+          "kind": "gun"
+        },
+        {
+          "id": "R",
+          "arc": "starboard",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Enemy_Bomber",
+      "gunners": 3,
+      "cargoHold": 6.0,
+      "names": [
+        "TIE Bomber"
+      ]
+    },
+    "sw.isd": {
+      "name": "Imperial Star Destroyer",
+      "role": "Destroyer",
+      "contactType": "capship",
+      "massKt": 200.0,
+      "profile": 0.7,
+      "stealth": 0.3,
+      "emission": 0.55,
+      "sensorQuality": 0.85,
+      "crew": 600,
+      "blurb": "A wedge of armour, turbolasers and hangar bays. It does not hurry.",
+      "art": {
+        "action": "enemy-destroyer.png",
+        "vdu": "enemy-destroyer-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 400,
+        "shieldAft": 400,
+        "shieldRefresh": 240,
+        "armorFore": 50,
+        "armorAft": 50,
+        "armorPort": 5,
+        "armorStarboard": 5,
+        "body": 240,
+        "fuelCapacity": 6
+      },
+      "hardpoints": [
+        {
+          "id": "Fk-L",
+          "arc": "fore",
+          "kind": "gun"
+        },
+        {
+          "id": "Fk-Lb",
+          "arc": "fore",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Enemy_Destroyer",
+      "gunners": 2,
+      "cargoHold": 750.0,
+      "names": [
+        "ISD Devastator"
+      ]
+    },
+    "sw.ssd": {
+      "name": "Star Dreadnought",
+      "role": "Carrier",
+      "contactType": "carrier",
+      "massKt": 320.0,
+      "profile": 0.95,
+      "stealth": 0.25,
+      "emission": 0.4,
+      "sensorQuality": 0.9,
+      "crew": 1400,
+      "blurb": "A command hull the size of a city, and just as hard to miss.",
+      "art": {
+        "action": "enemy-cruiser.png",
+        "vdu": "enemy-cruiser-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 300,
+        "shieldAft": 200,
+        "shieldRefresh": 150,
+        "armorFore": 35,
+        "armorAft": 25,
+        "armorPort": 5,
+        "armorStarboard": 5,
+        "body": 330,
+        "fuelCapacity": 6
+      },
+      "hardpoints": [
+        {
+          "id": "HL1-FB",
+          "arc": "fore",
+          "kind": "gun"
+        },
+        {
+          "id": "HL1-SB",
+          "arc": "port",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Enemy_Cruiser",
+      "gunners": 2,
+      "cargoHold": 1000.0,
+      "names": [
+        "SSD Executor"
+      ]
+    },
+    "sw.transport": {
+      "name": "Imperial transport",
+      "role": "Transport",
+      "contactType": "freighter",
+      "massKt": 120.0,
+      "profile": 0.8,
+      "stealth": 0.2,
+      "emission": 0.5,
+      "sensorQuality": 0.55,
+      "crew": 300,
+      "blurb": "A resupply hull: broad gravidar arc, ordinary emissions, no escort worth naming.",
+      "art": {
+        "action": "enemy-heavy-transport.png",
+        "vdu": "enemy-heavy-transport-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 19,
+        "shieldAft": 19,
+        "shieldRefresh": 11.4,
+        "armorFore": 17,
+        "armorAft": 17,
+        "armorPort": 5,
+        "armorStarboard": 5,
+        "body": 130,
+        "fuelCapacity": 5
+      },
+      "hardpoints": [
+        {
+          "id": "Fk-M",
+          "arc": "fore",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Enemy_HeavyTransport",
+      "gunners": 1,
+      "cargoHold": 3000.0,
+      "names": [
+        "Imperial Transport"
+      ]
+    }
+  },
+  "defaults": {
+    "unknown": "sw.cr90",
+    "prospector": "sw.miner",
+    "freighter": "sw.grt75",
+    "liner": "sw.grt75",
+    "escort": "sw.raider",
+    "capship": "sw.isd",
+    "fighter": "sw.tie",
+    "carrier": "sw.ssd",
+    "asteroid": "",
+    "nebula": "",
+    "debris": "",
+    "dust": "",
+    "ice": ""
+  }
+}

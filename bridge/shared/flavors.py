@@ -273,8 +273,10 @@ class Callsigns:
     """Per-flavor name pools.
 
     ``vesselName`` selects the generator: ``corporate`` gives ``MV GREY FALCON``
-    (the shipped style), ``surname`` gives ``Grey Falcon``-style merchant names
-    and ``callsign`` gives ``Vanguard 612``-style designations.
+    (the shipped style), ``surname`` gives ``Grey Falcon``-style merchant names,
+    ``callsign`` gives ``Vanguard 612``-style designations, and ``registry``
+    gives prefix-plus-name registries such as ``USS Enterprise`` or
+    ``ISD Devastator`` (the pool entries carry their own case).
     """
 
     adjectives: list[str] = field(default_factory=list)
@@ -302,6 +304,10 @@ class Callsigns:
         if self.vessel_name == "callsign":
             number = 100 + int(math.floor(hash_random(seed, 13) * 900))
             return f"{noun.title()} {number}"
+        if self.vessel_name == "registry":
+            # A registry prefix plus a proper name: "USS Enterprise",
+            # "ISD Devastator".  The pool entry carries its own case.
+            return f"{adjective} {noun}"
         return f"MV {adjective} {noun}"
 
     def pool_for(self, contact_type: str) -> list[str]:

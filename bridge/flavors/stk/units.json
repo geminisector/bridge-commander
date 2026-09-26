@@ -1,0 +1,15 @@
+{
+  "distance": {
+    "base": "klik",
+    "ladder": [
+      { "min": 100000000, "unit": "AU", "factor": 149597870.7, "precision": 4 },
+      { "min": 1000, "unit": "Mm", "factor": 1000.0, "precision": 1 },
+      { "min": 0, "unit": "klik", "factor": 1.0, "precision": 1 }
+    ]
+  },
+  "speed": {
+    "base": "kps",
+    "factor": 1.0,
+    "dial": { "0": "Station keeping", "15": "Maneuvering", "60": "Cruise", "100": "Full impulse" }
+  }
+}

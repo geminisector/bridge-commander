@@ -201,9 +201,15 @@ class Room:
         Per-room selection (FLAVOR_PLUGIN_PLAN.md §"Selection and loader"): a
         table picks its setting, and the fresh state carries the same claimed
         seats and host authority so nobody is dropped.
+
+        With no explicit mission, the setting's own ``defaultMission`` is used —
+        activating a mod for a room should show that mod's content, not the
+        inherited core scenario that happened to be running.
         """
         resolved = mods.guard_room(flavor_id or self.state.flavorId)
-        mission = campaign_id or self.state.campaign.id
+        mission = campaign_id or get_flavor(resolved).first_mission_or(
+            self.state.campaign.id
+        )
         instance_id = self.state.room.instanceId or "bridge"
         fresh = create_state(
             self.channel_id,
