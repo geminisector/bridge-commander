@@ -1,0 +1,235 @@
+{
+  "id": "rubble-run",
+  "title": "Rubble Run",
+  "theater": "Vega Belt",
+  "brief": "An asteroid belt lanes a thousand traders and hides everyone else. Hold the belt mouth, sort the freighters from the wolves, and mind the rocks \u2014 among the rubble every gravidar read lies.",
+  "target": "Hold the belt mouth. Classify the traffic. Trust the waveform board, not the masses.",
+  "startHour": 3.0,
+  "patrol": {
+    "center": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "radiusKlik": 80.0
+  },
+  "clutter": 0.8,
+  "noiseRate": null,
+  "noiseFilter": null,
+  "zBand": null,
+  "escalation": 38.0,
+  "contacts": [
+    {
+      "x": -18.0,
+      "y": 45.0,
+      "z": null,
+      "heading": 341.0,
+      "speed": 43.0,
+      "type": "prospector",
+      "faction": "neutral",
+      "hostile": false,
+      "emitting": false,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    },
+    {
+      "x": -36.0,
+      "y": -43.0,
+      "z": null,
+      "heading": 35.0,
+      "speed": 39.0,
+      "type": "prospector",
+      "faction": "neutral",
+      "hostile": false,
+      "emitting": false,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    },
+    {
+      "x": -9.0,
+      "y": 63.0,
+      "z": null,
+      "heading": 213.0,
+      "speed": 93.0,
+      "type": "freighter",
+      "faction": "neutral",
+      "hostile": false,
+      "emitting": false,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    },
+    {
+      "x": -19.0,
+      "y": -61.0,
+      "z": null,
+      "heading": 349.0,
+      "speed": 90.0,
+      "type": "freighter",
+      "faction": "neutral",
+      "hostile": false,
+      "emitting": false,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    },
+    {
+      "x": -30.0,
+      "y": -28.0,
+      "z": null,
+      "heading": 126.0,
+      "speed": 62.0,
+      "type": "liner",
+      "faction": "neutral",
+      "hostile": false,
+      "emitting": false,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    },
+    {
+      "x": 28.0,
+      "y": 29.0,
+      "z": null,
+      "heading": 195.0,
+      "speed": 100.0,
+      "type": "escort",
+      "faction": "enemy",
+      "hostile": true,
+      "emitting": true,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    },
+    {
+      "x": 75.0,
+      "y": -26.0,
+      "z": null,
+      "heading": 121.0,
+      "speed": 49.0,
+      "type": "capship",
+      "faction": "enemy",
+      "hostile": true,
+      "emitting": false,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    }
+  ],
+  "events": [
+    {
+      "atMinute": 72.0,
+      "template": "fleetnet"
+    },
+    {
+      "atMinute": 132.0,
+      "template": "unmarked"
+    },
+    {
+      "atMinute": 205.0,
+      "template": "probe"
+    },
+    {
+      "atMinute": 274.0,
+      "template": "orders"
+    },
+    {
+      "atMinute": 358.0,
+      "template": "fleetnet"
+    }
+  ],
+  "hazards": [
+    {
+      "id": "rubble-mouth",
+      "type": "debris-field",
+      "title": "Rubble field mouth",
+      "startMinute": 0.0,
+      "endMinute": null,
+      "intensity": 0.8,
+      "noise": 0.02,
+      "exposure": 0.1,
+      "concealment": 0.3
+    }
+  ],
+  "shipClass": null,
+  "sun": null,
+  "sunRadiusKlik": 0.0,
+  "navPoints": [
+    {
+      "id": "rubble-gap",
+      "name": "The Gap",
+      "kind": "nav",
+      "pos": {
+        "x": 25.0,
+        "y": 66.0,
+        "z": 0.0
+      },
+      "radiusKlik": 7.0,
+      "chartAgeHours": 10.0,
+      "note": "narrow passable lane",
+      "jumpType": "stable",
+      "windowOpen": 0.0,
+      "windowClose": null,
+      "alignmentRequired": 0.6,
+      "interference": 0.0,
+      "dest": null
+    },
+    {
+      "id": "jump-sluice",
+      "name": "Sluice Jump Point",
+      "kind": "jump",
+      "pos": {
+        "x": -74.0,
+        "y": 44.0,
+        "z": 0.0
+      },
+      "radiusKlik": 5.0,
+      "chartAgeHours": 24.0,
+      "note": "moving pirate point",
+      "jumpType": "pirate",
+      "windowOpen": 120.0,
+      "windowClose": 420.0,
+      "alignmentRequired": 0.8,
+      "interference": 0.25,
+      "dest": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      }
+    }
+  ],
+  "layers": [
+    {
+      "id": "surface",
+      "name": "Surface duct",
+      "zMin": 0.0,
+      "zMax": 10.0,
+      "note": "Loud and exposed: everyone above and below hears you."
+    },
+    {
+      "id": "gradient",
+      "name": "Gradient layer",
+      "zMin": 10.0,
+      "zMax": 22.0,
+      "note": "The boundary itself: crossing it hides you and blinds you."
+    },
+    {
+      "id": "deep",
+      "name": "Deep channel",
+      "zMin": 22.0,
+      "zMax": 40.0,
+      "note": "Quiet and hard to reach; your own sensors reach less far."
+    },
+    {
+      "id": "shadow",
+      "name": "Shadow zone",
+      "zMin": 40.0,
+      "zMax": 50.0,
+      "note": "The deepest band: nearly invisible from above, nearly blind yourself."
+    }
+  ],
+  "environment": "clear-space",
+  "barriers": []
+}

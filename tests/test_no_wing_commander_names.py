@@ -76,6 +76,15 @@ ALLOWLIST = {
     "tests/test_no_wing_commander_names.py",
 }
 
+#: Directories that legitimately name the retired material.  ``flavors/wc`` is
+#: the plugin plan's acceptance-test setting: it exists *because* the vocabulary
+#: is now data, so it is the one place the retired names are supposed to appear.
+#: It is a local/community example and is not shipped in the wheel (see
+#: ``pyproject.toml`` package-data).
+ALLOWLIST_PREFIXES = (
+    "bridge/flavors/wc/",
+)
+
 SKIP_DIRS = {
     ".git",
     ".mypy_cache",
@@ -106,7 +115,7 @@ def _text_files() -> list[Path]:
         if parts[0] in SKIP_TOP_LEVEL or any(part in SKIP_DIRS for part in parts):
             continue
         rel = path.relative_to(REPO_ROOT).as_posix()
-        if rel in ALLOWLIST:
+        if rel in ALLOWLIST or rel.startswith(ALLOWLIST_PREFIXES):
             continue
         files.append(path)
     return files

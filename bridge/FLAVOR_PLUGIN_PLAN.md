@@ -398,3 +398,61 @@ where the plan either works or does not.
    `flavors/README.md` stating that a contributed flavor is the contributor's
    responsibility, with `wc` shipped as a local-only example not published with
    the app.
+
+## Implementation notes
+
+Landed with these decisions, which supersede the text above where they differ.
+
+- **Core is fully data.** `bridge/flavors/core/` carries `flavor.json`,
+  `units.json`, `theme.css`, `ships.json` (all 15 hulls with stats, hardpoints,
+  art and registry names), `callsigns.json` and `missions/*.json` (all 9
+  campaigns, each with its hazards, nav points, layers, barriers and events).
+  The in-code `_HULL_STATS`, `_FALLBACK_ACTION`, `DEFAULT_BY_TYPE`, `SHIP_NAMES`
+  and the campaign factories are gone; `shared/ships.py` and
+  `shared/campaigns.py` are compatibility/behavior layers over the loader.
+  `tools/export_core_flavor.py` records how the data was migrated.
+- **`min` is in canonical klik.** The plan's sample ladder gives the Mm rung
+  `"min": 1.0`; that would render a 40-klik knife fight as `0.0 Mm`. It is a
+  typo for `1.0e3` (1 Mm). The schema and `flavors/README.md` state the
+  canonical-units rule, and the validator only enforces ordering, positivity and
+  a zero last rung.
+- **The legacy fallback maps are obsolete.** `art` is explicit per hull in
+  `ships.json`, so `_FALLBACK_ACTION` is not re-created; the per-flavor art
+  resolver keeps the extension-swap behavior and searches the flavor chain, so a
+  hull that overrides a core hull without art inherits the core art.
+- **Server-side display strings route through `Units`; the bundled client does
+  not.** `engine.py` and `events.py` format every human-readable distance and
+  speed through the room's flavor, but the prebuilt `activity/dist` bundle still
+  carries a handful of hardcoded `KLIK` labels. Those are a UI follow-up, not a
+  simulation concern; the canonical wire values are unchanged.
+- **`flavorId` has a default**, so older saved rooms stay valid and
+  `STATE_SCHEMA_VERSION` did not need a bump. A room whose flavor is no longer
+  installed falls back to `core` on load with a logged reason.
+- **Selection surfaces:** `DEFAULT_FLAVOR` / `--flavor`, `MsgStart.flavorId`,
+  `admin.reset { flavorId }`, and a SETTING picker in the GM console. Open
+  question 3's previews remain out of scope.
+- **A mod manager gates what rooms may play.** Landed after the first pass:
+  installed flavors are *inert* until activated (`bridge/server/mods.py`; the
+  enabled set and server default persist in the rooms DB). The GM console's
+  *Mods / settings* panel activates/deactivates server-wide, applies an
+  activated mod to a room (`admin.activateModForRoom`, which rebuilds the room
+  and keeps seats), and sets/clears the default for new rooms. `core` is always
+  active and cannot be deactivated; `DEFAULT_FLAVOR`/`--flavor` counts as an
+  explicit activation. Disabled mods are refused by `admin.reset` and guarded at
+  room load, which also covers a deactivated saved room.
+- **Validator hardened after audit.** The loader now type-checks numeric hull
+  fields, stats, hardpoint shape/arc/kind and terrain overrides; requires a
+  non-empty hull catalog and at least one mission; and wraps validate+compile so
+  no `ValueError`/`TypeError` can escape `get()`/`summaries()`/`--check-flavor`
+  (one malformed flavor can no longer block startup). `defaults` keys are
+  checked against `ContactType`, and `terrain` filenames resolve through the
+  flavor art chain instead of being passed through raw.
+- **Step 9 shipped as `wc/`**, the acceptance test: it loads against a WC-free
+  core, namespaces its hulls (`wc.*`), supplies its own `defaults`, and
+  demonstrates every seam (units, theme, ships, art fallback, callsigns,
+  missions). It is allowlisted in `tests/test_no_wing_commander_names.py` and
+  excluded from the built package (see `flavors/README.md`). Step 10's
+  `stk`/`sw`/`bsg`/`farscape` reference flavors are left to contributors; the
+  test suite builds an `stk`-shaped units package in a temp tree to cover the
+  AU ladder.
+

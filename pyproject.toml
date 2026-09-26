@@ -45,6 +45,13 @@ bridge = [
     "img/*/*.png",
     "resources/*.json",
     "server/admin-ui/*",
+    # The shipped setting.  Contributed flavors (e.g. the local `wc` example)
+    # are deliberately not published with the app; see bridge/flavors/README.md.
+    "flavors/core/*.json",
+    "flavors/core/*.css",
+    "flavors/core/missions/*.json",
+    "flavors/README.md",
+    "flavors/schema/*.json",
 ]
 
 [tool.pytest.ini_options]

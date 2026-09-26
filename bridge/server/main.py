@@ -11,8 +11,10 @@ its own port in a background thread.
 
 from __future__ import annotations
 
+import argparse
 import asyncio
 import contextlib
+import os
 import threading
 import time
 from contextlib import asynccontextmanager
@@ -21,12 +23,13 @@ from pathlib import Path
 from typing import Any, AsyncIterator
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse, Response
 
-from ..paths import asset_root, package_path
+from ..paths import asset_root, asset_roots, package_path
+from ..shared.flavors import format_summary, get as get_flavor
 from .admin import create_admin_app
 from .config import (
     ACTIVITY_DIST,
@@ -36,6 +39,7 @@ from .config import (
     ASSET_DIR,
     CORS_ORIGINS,
     DATA_DIR,
+    DEFAULT_FLAVOR,
     HOST,
     PORT,
 )
@@ -66,6 +70,7 @@ def _now_iso() -> str:
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     init_db()
+    _report_flavors()
     tick_task = asyncio.create_task(_auto_tick())
     _start_admin_thread()
     try:
@@ -74,6 +79,34 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         tick_task.cancel()
         with contextlib.suppress(asyncio.CancelledError):
             await tick_task
+
+
+def _report_flavors() -> None:
+    """Validate and advertise the installed settings at startup.
+
+    A flavor that fails validation is already failing closed (``get`` falls back
+    to core); this makes the whole catalog inspectable in one log line.
+    """
+    from . import mods
+
+    print(format_summary())
+    if DEFAULT_FLAVOR:
+        print(f"[bridge] DEFAULT_FLAVOR={DEFAULT_FLAVOR}")
+    activated = [row["id"] for row in mods.list_mods() if row["enabled"]]
+    print(
+        "[bridge] activated mods: "
+        + (", ".join(activated) if activated else "core only")
+        + f"; default for new rooms: {mods.default_flavor()}"
+    )
+    # Force-load the boot default so a broken default is reported now, not at
+    # the first websocket hello.
+    resolved = get_flavor(mods.default_flavor())
+    print(f"[bridge] serving new rooms on flavor: {resolved.id} ({resolved.title})")
+    from ..shared.ships import audit_ship_art
+
+    for finding in audit_ship_art(resolved.id):
+        if finding.startswith("ERROR:"):
+            print(f"[bridge] {resolved.id}: {finding}")
 
 
 app = FastAPI(title="BRIDGE COMMANDER", lifespan=lifespan)
@@ -134,6 +167,71 @@ def _asset_dir() -> Path | None:
 # Register the websocket route before any catch-all static mount, otherwise a
 # mount at "/" would swallow websocket upgrades for "/ws".
 attach_ws(app)
+
+
+# ---------------------------------------------------------------------------
+# Flavor serving
+#
+# A flavor's art and theme are served per flavor id, so two rooms on different
+# settings in one process never see each other's files.  Core art keeps its
+# historical /img/... URLs; flavor art lives under /img/f/<flavor>/....
+# ---------------------------------------------------------------------------
+
+
+def _room_flavor(request: Request) -> str:
+    """The flavor the page's room is playing, or the activated default."""
+    from . import mods
+
+    channel_id = request.query_params.get("channelId") or ""
+    room = rooms.rooms.get(channel_id) if channel_id else None
+    if room is not None:
+        return room.state.flavorId
+    return mods.default_flavor()
+
+
+def _render_index(dist: Path, flavor_id: str) -> str:
+    """Inject the flavor theme after activity.css, so it overrides cleanly."""
+    html = (dist / "index.html").read_text(encoding="utf-8")
+    link = f'<link rel="stylesheet" href="/flavor/{flavor_id}/theme.css">'
+    if link in html:
+        return html
+    marker = '<link rel="stylesheet" href="/activity.css">'
+    if marker in html:
+        return html.replace(marker, marker + "\n  " + link, 1)
+    return html.replace("</head>", "  " + link + "\n</head>", 1)
+
+
+@app.get("/", include_in_schema=False)
+@app.get("/index.html", include_in_schema=False)
+async def flavored_index(request: Request) -> Response:
+    dist = _activity_dist()
+    if dist is None:
+        return HTMLResponse(
+            "<h1>BRIDGE COMMANDER</h1><p>Activity bundle not found; "
+            "set ACTIVITY_DIST to serve the UI.</p>",
+            status_code=200,
+        )
+    return HTMLResponse(_render_index(dist, _room_flavor(request)))
+
+
+@app.get("/flavor/{flavor_id}/theme.css", include_in_schema=False)
+async def flavor_theme(flavor_id: str) -> Response:
+    css = get_flavor(flavor_id).theme_css or get_flavor("core").theme_css
+    return Response(content=css, media_type="text/css")
+
+
+@app.get("/img/f/{flavor_id}/{kind}/{filename}", include_in_schema=False)
+async def flavor_asset(flavor_id: str, kind: str, filename: str) -> Response:
+    from ..shared.flavors import available
+
+    if flavor_id not in set(available()):
+        return Response(status_code=404)
+    for root in asset_roots(flavor_id):
+        candidate = root / kind / filename
+        if candidate.is_file():
+            return FileResponse(candidate)
+    return Response(status_code=404)
+
 
 # Mount the image tree before "/" so it wins over the activity catch-all.
 _assets = _asset_dir()
@@ -203,6 +301,60 @@ def _start_admin_thread() -> None:
 
 
 def main() -> None:
+    """Run the server, or inspect the installed flavors from the CLI.
+
+    ``--flavor`` picks the setting new rooms start on (equivalent to the
+    ``DEFAULT_FLAVOR`` environment variable); ``--list-flavors`` prints the
+    catalog and exits, which is what flavor authors and CI use to check a new
+    package without booting the game.
+    """
+    parser = argparse.ArgumentParser(
+        prog="bridge", description="BRIDGE COMMANDER server"
+    )
+    parser.add_argument(
+        "--flavor",
+        default="",
+        help="default setting for new rooms (overrides DEFAULT_FLAVOR)",
+    )
+    parser.add_argument(
+        "--list-flavors",
+        action="store_true",
+        help="list installed flavors and exit",
+    )
+    parser.add_argument(
+        "--check-flavor",
+        action="append",
+        default=[],
+        metavar="ID",
+        help="load and validate one flavor, then exit (repeatable)",
+    )
+    args, _unknown = parser.parse_known_args()
+    if args.list_flavors:
+        print(format_summary())
+        return
+    if args.check_flavor:
+        from ..shared import flavors as _flavors
+
+        status = 0
+        for flavor_id in args.check_flavor:
+            try:
+                checked = _flavors.load_flavor(flavor_id)
+            except _flavors.FlavorError as exc:
+                print(f"FAIL {flavor_id}: {exc}")
+                status = 1
+                continue
+            print(
+                f"OK   {checked.id}: {checked.title} — "
+                f"{len(checked.hull_defs)} hulls, {len(checked.missions)} missions"
+            )
+            for finding in checked.findings:
+                print(f"     {finding}")
+        raise SystemExit(status)
+    if args.flavor:
+        os.environ["DEFAULT_FLAVOR"] = args.flavor
+        from ..shared import flavors as _flavors
+
+        _flavors.reset_cache()
     init_db(DATA_DIR)
     uvicorn.run(app, host=HOST, port=PORT)
 

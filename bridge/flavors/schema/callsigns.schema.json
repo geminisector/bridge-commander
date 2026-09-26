@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bridge-commander.local/flavors/schema/callsigns.schema.json",
+  "title": "Flavor callsigns (callsigns.json)",
+  "description": "Name pools for generated contacts. Lists replace the inherited list wholesale; the hostile pools merge per role.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "vesselName": {
+      "enum": ["corporate", "surname", "callsign"],
+      "description": "corporate -> 'MV GREY FALCON'; surname -> 'Grey Falcon'; callsign -> 'Vanguard 612'."
+    },
+    "adjectives": { "type": "array", "items": { "type": "string" } },
+    "nouns": { "type": "array", "items": { "type": "string" } },
+    "hostile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "escort": { "type": "array", "items": { "type": "string" } },
+        "capship": { "type": "array", "items": { "type": "string" } },
+        "fighter": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

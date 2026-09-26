@@ -9,8 +9,15 @@ import math
 from collections.abc import Callable
 
 from .constants import DEFAULT_ADVANCE_MINUTES, ENGAGEMENT_RANGE_KLIK
+from .flavors import get as _get_flavor
 from .math_utils import hash_random
 from .types import DecisionEvent, DecisionOption, EventEffect, GameState
+
+
+def _fd(state: GameState, klik: float, places: int | None = None) -> str:
+    """Format a canonical distance in the room's flavor units."""
+    flavor_id = getattr(state, "flavorId", None)
+    return _get_flavor(flavor_id).units.format_distance(klik, places)
 
 
 def _round(x: float) -> int:
@@ -44,7 +51,7 @@ def engagement_prompt(state: GameState, contact_id: str) -> DecisionEvent:
         deadline=state.clock + 60,
         source="command",
         text=(
-            f"{name} is {rng} klik out and closing. This is where the app handsover: "
+            f"{name} is {_fd(state, rng, 0)} out and closing. This is where the app handsover: "
             "your crew resolves the fight however you like (tabletop, another sim, "
             "improv). Generate the handoff pack, resolve the engagement on your terms, "
             "then resume the patrol."
@@ -187,7 +194,7 @@ def _orders(s: GameState) -> DecisionEvent:
         deadline=s.clock + DEFAULT_ADVANCE_MINUTES * 6,
         source="flag-command",
         text=(
-            f"Flag command wants a new hold point {distance} klik to your "
+            f"Flag command wants a new hold point {_fd(s, distance, 0)} to your "
             f"{north_south}{east}, and a second pass over your current lane before you "
             "go. This moves you out of position for whatever is coming in on the far "
             "bearing."

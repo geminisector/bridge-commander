@@ -9,11 +9,12 @@ WebSocket protocol defined in `bridge/shared/protocol.py`.
 ```
 bridge/
   activity/dist/  player UI
+  flavors/        settings (mods) as data: core plus the wc example
   img/            128x128 placeholder hull, terrain, and contact art
-  resources/      campaigns, events, hazards, environments, hulls, and modules
+  resources/      events, hazards, environments, hulls, and modules
   server/         FastAPI, WebSocket, persistence, engine, and GM console
-  shared/         types, constants, math, campaigns, events, and protocol
-tests/            shared, engine, protocol, and server integration tests
+  shared/         types, constants, math, flavors, campaigns, events, and protocol
+tests/            shared, engine, flavor, protocol, and server integration tests
 pyproject.toml    install, test, lint, type-check, and package metadata
 ```
 
@@ -69,8 +70,9 @@ bridge
 ```
 
 Environment (see `server/config.py`): `HOST`, `PORT`, `CORS_ORIGINS`, `DATA_DIR`,
-`ADMIN_HOST`, `ADMIN_PORT`, `ADMIN_TOKEN`, `ADMIN_ORIGINS`, `ACTIVITY_DIST`, and
-`ASSET_DIR`. The server binds to `127.0.0.1` by default; set `HOST=0.0.0.0` only
+`ADMIN_HOST`, `ADMIN_PORT`, `ADMIN_TOKEN`, `ADMIN_ORIGINS`, `ACTIVITY_DIST`,
+`ASSET_DIR`, `FLAVORS_DIR`, and `DEFAULT_FLAVOR`. The server binds to
+`127.0.0.1` by default; set `HOST=0.0.0.0` only
 behind an appropriate access-control layer.
 When the built activity dist is present it is served from `/`; the client
 WebSocket is `/ws`. The GM builder is a second FastAPI app on `ADMIN_PORT`
@@ -80,6 +82,35 @@ The activity bundle is auto-discovered from `ACTIVITY_DIST` (a directory
 containing `index.html`) or the packaged `bridge/activity/dist`. Contact art
 referenced at `/img/...` is served from `ASSET_DIR`, defaulting to packaged
 `bridge/img`.
+
+### Settings (flavors)
+
+A **flavor** is a setting — a mod — as data: a directory under
+`bridge/flavors/<id>/` with a `flavor.json` manifest plus the JSON, CSS and
+images it overrides. `core` is the shipped default; `wc` is the worked example.
+A flavor inherits from `core` by default, ships no code, and provides only what
+it changes (see `FLAVOR_PLUGIN_PLAN.md` for the design and `flavors/README.md`
+for the authoring guide).
+
+```bash
+python -m bridge --list-flavors         # installed settings, hull/mission counts
+python -m bridge --check-flavor wc      # load + validate one flavor, exit 1 on error
+python -m bridge --flavor wc            # new rooms start on wc
+```
+
+Installed settings are **inert until activated**. The GM console's *Mods /
+settings* panel switches a mod on or off server-wide, applies it to a room
+(rebuilding that room on the setting), or makes it the default for new rooms;
+the choice persists in the rooms database. `DEFAULT_FLAVOR` / `--flavor` counts
+as an explicit activation at boot. A room whose mod is deactivated or removed
+falls back to the default and stays playable.
+
+Units, theme, hulls, art, callsigns and missions are independently flavorable.
+Distances and speeds stay canonical (`klik`, `kps`) everywhere on the wire and in
+the simulation; `units.json` only changes how a value is *displayed*. A flavor
+that fails validation does not half-load: the server logs the reason and plays
+that room on `core`. Rooms record their `flavorId` in state, so a reconnecting
+client renders the same units and art.
 
 ### Activity UI styling
 

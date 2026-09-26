@@ -1,0 +1,14 @@
+{
+  "distance": {
+    "base": "klik",
+    "ladder": [
+      { "min": 1000, "unit": "Mm", "factor": 1000.0, "precision": 1 },
+      { "min": 0, "unit": "klik", "factor": 1.0, "precision": 1 }
+    ]
+  },
+  "speed": {
+    "base": "kps",
+    "factor": 1.0,
+    "dial": { "0": "Stopped", "15": "Silent Running", "60": "Cruise", "100": "Afterburner" }
+  }
+}

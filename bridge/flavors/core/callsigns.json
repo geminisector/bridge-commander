@@ -1,0 +1,55 @@
+{
+  "vesselName": "corporate",
+  "adjectives": [
+    "GRAY",
+    "BLUE",
+    "LONG",
+    "RED",
+    "RUST",
+    "STILL",
+    "SLOW",
+    "BROKEN",
+    "COLD",
+    "HARD",
+    "SOFT",
+    "FAT"
+  ],
+  "nouns": [
+    "VEGA",
+    "TRITON",
+    "APOLLO",
+    "MERIDIAN",
+    "PERSEUS",
+    "SOLACE",
+    "JANUS",
+    "CYGNUS",
+    "AURORA",
+    "HARVEST",
+    "TITAN",
+    "VULCAN",
+    "LYRA"
+  ],
+  "hostile": {
+    "escort": [
+      "Enemy_Escort-01",
+      "Enemy_Escort-02",
+      "Enemy_Escort-03",
+      "Enemy_Escort-04"
+    ],
+    "capship": [
+      "Enemy_Cruiser-01",
+      "Enemy_Destroyer-01",
+      "Enemy_HeavyTransport-01",
+      "Enemy_Cruiser-02"
+    ],
+    "fighter": [
+      "Enemy_Fighter-01",
+      "Enemy_Fighter-02",
+      "Enemy_Fighter-03",
+      "Enemy_Fighter-04",
+      "Enemy_Fighter-05",
+      "Enemy_Fighter-06",
+      "Enemy_Fighter-07"
+    ]
+  }
+}

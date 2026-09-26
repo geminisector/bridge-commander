@@ -1,0 +1,235 @@
+{
+  "id": "whale-road",
+  "title": "Whale Road Run",
+  "theater": "Hastings Reach",
+  "brief": "A freighter convoy is transiting under escort. Your orders: shadow it, break down its screen, call the report line, and stay off their scopes.",
+  "target": "Track the convoy. ID its escort. Send a traffic report. Do not be detected.",
+  "startHour": 6.0,
+  "patrol": {
+    "center": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "radiusKlik": 75.0
+  },
+  "clutter": 0.05,
+  "noiseRate": null,
+  "noiseFilter": null,
+  "zBand": null,
+  "escalation": 46.0,
+  "contacts": [
+    {
+      "x": 67.0,
+      "y": -55.0,
+      "z": null,
+      "heading": 42.0,
+      "speed": 72.0,
+      "type": "freighter",
+      "faction": "neutral",
+      "hostile": false,
+      "emitting": false,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    },
+    {
+      "x": 47.0,
+      "y": 45.0,
+      "z": null,
+      "heading": 168.0,
+      "speed": 76.0,
+      "type": "freighter",
+      "faction": "neutral",
+      "hostile": false,
+      "emitting": false,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    },
+    {
+      "x": -58.0,
+      "y": 23.0,
+      "z": null,
+      "heading": 162.0,
+      "speed": 82.0,
+      "type": "freighter",
+      "faction": "neutral",
+      "hostile": false,
+      "emitting": false,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    },
+    {
+      "x": 0.0,
+      "y": 82.0,
+      "z": null,
+      "heading": 38.0,
+      "speed": 64.0,
+      "type": "liner",
+      "faction": "neutral",
+      "hostile": false,
+      "emitting": false,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    },
+    {
+      "x": 69.0,
+      "y": 40.0,
+      "z": null,
+      "heading": 132.0,
+      "speed": 100.0,
+      "type": "escort",
+      "faction": "enemy",
+      "hostile": true,
+      "emitting": true,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    },
+    {
+      "x": -61.0,
+      "y": -26.0,
+      "z": null,
+      "heading": 264.0,
+      "speed": 100.0,
+      "type": "escort",
+      "faction": "enemy",
+      "hostile": true,
+      "emitting": true,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    },
+    {
+      "x": 40.0,
+      "y": 35.0,
+      "z": null,
+      "heading": 22.0,
+      "speed": 61.0,
+      "type": "capship",
+      "faction": "enemy",
+      "hostile": true,
+      "emitting": false,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    }
+  ],
+  "events": [
+    {
+      "atMinute": 66.0,
+      "template": "orders"
+    },
+    {
+      "atMinute": 130.0,
+      "template": "unmarked"
+    },
+    {
+      "atMinute": 209.0,
+      "template": "fleetnet"
+    },
+    {
+      "atMinute": 270.0,
+      "template": "probe"
+    },
+    {
+      "atMinute": 357.0,
+      "template": "distress"
+    },
+    {
+      "atMinute": 384.0,
+      "template": "orders"
+    }
+  ],
+  "hazards": [
+    {
+      "id": "dust-lane",
+      "type": "dust-front",
+      "title": "Thermal dust front",
+      "startMinute": 120.0,
+      "endMinute": 230.0,
+      "intensity": 0.8,
+      "noise": 0.025,
+      "exposure": 0.2,
+      "concealment": 0.25
+    }
+  ],
+  "shipClass": null,
+  "sun": null,
+  "sunRadiusKlik": 0.0,
+  "navPoints": [
+    {
+      "id": "whale-watch",
+      "name": "Whale Watch",
+      "kind": "nav",
+      "pos": {
+        "x": 30.0,
+        "y": 62.0,
+        "z": 0.0
+      },
+      "radiusKlik": 10.0,
+      "chartAgeHours": 6.0,
+      "note": "migration lane",
+      "jumpType": "stable",
+      "windowOpen": 0.0,
+      "windowClose": null,
+      "alignmentRequired": 0.6,
+      "interference": 0.0,
+      "dest": null
+    },
+    {
+      "id": "refuelling-depot",
+      "name": "Depot Anchorage",
+      "kind": "body",
+      "pos": {
+        "x": -60.0,
+        "y": -20.0,
+        "z": 0.0
+      },
+      "radiusKlik": 9.0,
+      "chartAgeHours": 2.0,
+      "note": "tanker rendezvous",
+      "jumpType": "stable",
+      "windowOpen": 0.0,
+      "windowClose": null,
+      "alignmentRequired": 0.6,
+      "interference": 0.0,
+      "dest": null
+    }
+  ],
+  "layers": [
+    {
+      "id": "surface",
+      "name": "Surface duct",
+      "zMin": 0.0,
+      "zMax": 10.0,
+      "note": "Loud and exposed: everyone above and below hears you."
+    },
+    {
+      "id": "gradient",
+      "name": "Gradient layer",
+      "zMin": 10.0,
+      "zMax": 22.0,
+      "note": "The boundary itself: crossing it hides you and blinds you."
+    },
+    {
+      "id": "deep",
+      "name": "Deep channel",
+      "zMin": 22.0,
+      "zMax": 40.0,
+      "note": "Quiet and hard to reach; your own sensors reach less far."
+    },
+    {
+      "id": "shadow",
+      "name": "Shadow zone",
+      "zMin": 40.0,
+      "zMax": 50.0,
+      "note": "The deepest band: nearly invisible from above, nearly blind yourself."
+    }
+  ],
+  "environment": "clear-space",
+  "barriers": []
+}

@@ -36,13 +36,7 @@ from ..shared.checks import (
     roll_d20,
     skill_modifier,
 )
-from ..shared.campaigns import (
-    CAPSHIP_CLASSES,
-    ESCORT_CLASSES,
-    FIGHTER_CLASSES,
-    military_name,
-    vessel_name,
-)
+from ..shared.campaigns import military_name, military_pool, vessel_name
 from ..shared.constants import (
     ACTIVE_SWEEP_RANGE_KLIK,
     ALTITUDE_RATE_KLIK_PER_HOUR,
@@ -293,13 +287,14 @@ from ..shared.math_utils import (
     wrap_bearing,
 )
 from ..shared.ships import (
-    SHIP_CLASSES,
-    TERRAIN_IMAGES,
     ship_briefs,
     ship_class,
+    ship_classes,
     ship_for_type,
     ship_name,
+    terrain_image,
 )
+from ..shared.flavors import Units, default_flavor_id, get as get_flavor
 from ..shared.weapons import solution_grade, weapon_spec
 from ..shared.types import (
     BearingSample,
@@ -376,6 +371,30 @@ def _round_to(x: float, places: int = 1) -> float:
     return math.floor(x * factor + 0.5) / factor
 
 
+# ---------------------------------------------------------------------------
+# Flavor-aware presentation
+#
+# The simulation works in canonical klik and kps everywhere.  These helpers are
+# the only place a value is converted for a human to read, and they always read
+# the *room's* flavor, so two tables on different settings render their own
+# units from the same numbers (FLAVOR_PLUGIN_PLAN.md invariant 10).
+# ---------------------------------------------------------------------------
+
+
+def _units(state: GameState) -> Units:
+    return get_flavor(state.flavorId).units
+
+
+def _fd(state: GameState, klik: float, places: int | None = None) -> str:
+    """Format a canonical distance for the room's flavor."""
+    return _units(state).format_distance(klik, places)
+
+
+def _fs(state: GameState, kps: float, places: int | None = None) -> str:
+    """Format a canonical speed for the room's flavor."""
+    return _units(state).format_speed(kps, places)
+
+
 def _as(model: type[BaseModel], value: Any) -> Any:
     """Accept an already-built model or the raw dict the wire layer may pass."""
     if isinstance(value, model):
@@ -413,7 +432,7 @@ def _patrol_route(center: Vec, radius_klik: float) -> list[Vec]:
     ]
 
 
-def _init_defences(ship: ShipState, klass: ShipClass) -> None:
+def _init_defences(ship: ShipState, klass: ShipClass, flavor_id: str | None = None) -> None:
     """Fit a fresh ship's shields, armour, systems and fuel."""
     mid = (klass.shieldFore + klass.shieldAft) / 2
     ship.shields = {
@@ -438,7 +457,7 @@ def _init_defences(ship: ShipState, klass: ShipClass) -> None:
     ship.spares = SPARES_LOADOUT
     ship.provisions = PROVISIONS_HOURS
     ship.ordnanceLoadout = {"torpedo": 2, "heat-seeker": 4}
-    _init_loadout(ship, klass)
+    _init_loadout(ship, klass, flavor_id)
     ship.fuelCapacity = klass.fuelCapacity or ALERT_FUEL_CAPACITY
     ship.fuel = ship.fuelCapacity
     ship.shieldRegenAt = 0.0
@@ -585,8 +604,8 @@ def refocus_shields(state: GameState, from_arc: str, to_arc: str) -> None:
     state.seq += 1
 
 
-def _size_class(ship: ShipState) -> int:
-    klass = ship_class(ship.shipClass)
+def _size_class(ship: ShipState, flavor_id: str | None = None) -> int:
+    klass = ship_class(ship.shipClass, flavor_id)
     return max(MIN_SIZE_CLASS, _round(klass.body / 25.0)) if klass.body else 6
 
 
@@ -624,7 +643,7 @@ def apply_damage(
 
     if remaining > 0:
         ship.core = clamp(
-            ship.core + remaining * CORE_DAMAGE_PER_POINT / _size_class(ship), 0, 100
+            ship.core + remaining * CORE_DAMAGE_PER_POINT / _size_class(ship, state.flavorId), 0, 100
         )
         if ship.core >= SHOCK_CORE_DAMAGE:
             shock_crew(state, "the hull is badly hit")
@@ -1005,7 +1024,7 @@ def commit_course(state: GameState, nav_id: str = "") -> None:
         # A gravity-well incident is structural, not a weapon hit: it bites the
         # core directly, bypassing shields and armour.
         state.ship.core = clamp(
-            state.ship.core + NAV_INCIDENT_DAMAGE / _size_class(state.ship), 0, 100
+            state.ship.core + NAV_INCIDENT_DAMAGE / _size_class(state.ship, state.flavorId), 0, 100
         )
         log(
             state,
@@ -1019,7 +1038,7 @@ def commit_course(state: GameState, nav_id: str = "") -> None:
         "OPS",
         f"Leg committed to {nav.name}: Astrogation {result.outcome.replace('-', ' ')}"
         + (
-            f", arrival {_round_to(offset, 1)} klik off-axis."
+            f", arrival {_fd(state, offset, 1)} off-axis."
             if offset
             else ", on-axis arrival."
         ),
@@ -1076,7 +1095,7 @@ def _check_nav_arrival(state: GameState) -> None:
         log(
             state,
             "OPS",
-            f"Arrival at {commit.name}: {commit.offsetKlik} klik off-axis "
+            f"Arrival at {commit.name}: {_fd(state, commit.offsetKlik)} off-axis "
             "(navigation error).",
             "warn",
         )
@@ -1136,7 +1155,7 @@ def fix_nav(state: GameState, method: str = "star") -> None:
         log(
             state,
             "OPS",
-            f"{label.capitalize()} — position error down to {NAV_FIX_BASE_KLIK:.0f} klik.",
+            f"{label.capitalize()} — position error down to {_fd(state, NAV_FIX_BASE_KLIK, 0)}.",
             "ok",
         )
     else:
@@ -1144,7 +1163,7 @@ def fix_nav(state: GameState, method: str = "star") -> None:
         log(
             state,
             "OPS",
-            f"{label.capitalize()} failed — the error only trims to {ship.navErrorKlik} klik.",
+            f"{label.capitalize()} failed — the error only trims to {_fd(state, ship.navErrorKlik)}.",
             "warn",
         )
     refresh_plot(state)
@@ -1243,7 +1262,7 @@ def spool_jump(state: GameState, nav_id: str) -> None:
         log(
             state,
             "OPS",
-            f"Too far to spool — close to within {int(JUMP_RANGE_KLIK)} klik of {nav.name}.",
+            f"Too far to spool — close to within {_fd(state, JUMP_RANGE_KLIK, 0)} of {nav.name}.",
             "warn",
         )
         state.seq += 1
@@ -1352,7 +1371,7 @@ def commit_jump(state: GameState) -> None:
     ship.waypoints = []
     if js.alignment < required:
         offset = (required - js.alignment) * 40.0
-        ship.core = clamp(ship.core + JUMP_MISJUMP_DAMAGE / _size_class(ship), 0, 100)
+        ship.core = clamp(ship.core + JUMP_MISJUMP_DAMAGE / _size_class(ship, state.flavorId), 0, 100)
         state.clock += JUMP_MISJUMP_DELAY_MIN
         if nav.dest is not None:
             ship.pos = Vec(x=nav.dest.x + offset, y=nav.dest.y + offset, z=nav.dest.z)
@@ -1398,11 +1417,13 @@ def create_state(
     instance_id: str,
     campaign: CampaignSeed,
     ship_id: str | None = None,
+    flavor_id: str | None = None,
 ) -> GameState:
+    resolved_flavor = flavor_id or default_flavor_id()
     center = campaign.patrol.center
-    klass = ship_class(ship_id or campaign.shipClass)
+    klass = ship_class(ship_id or campaign.shipClass, resolved_flavor)
     ship = ShipState(
-        name=ship_name(klass.id),
+        name=ship_name(klass.id, resolved_flavor),
         registry="CC-112",
         pos=Vec(x=center.x, y=center.y, z=0),
         heading=45,
@@ -1434,14 +1455,16 @@ def create_state(
         className=klass.name,
     )
     _apply_emission(ship)
-    _init_defences(ship, klass)
+    _init_defences(ship, klass, resolved_flavor)
 
     seats = _seat_defaults()
 
     contacts: list[Contact] = []
     used_names: set[str] = set()
     for i, t in enumerate(campaign.contacts):
-        contact = instantiate_contact(t, i, campaign, used_names=used_names)
+        contact = instantiate_contact(
+            t, i, campaign, used_names=used_names, flavor_id=resolved_flavor
+        )
         if contact.trueName:
             used_names.add(contact.trueName)
         contacts.append(contact)
@@ -1449,6 +1472,7 @@ def create_state(
     state = GameState(
         schemaVersion=STATE_SCHEMA_VERSION,
         room=RoomRef(channelId=channel_id, instanceId=instance_id),
+        flavorId=get_flavor(resolved_flavor).id,
         campaign=campaign,
         ship=ship,
         seats=seats,
@@ -1507,12 +1531,9 @@ def _seat_defaults() -> dict[SeatId, Seat]:
     }
 
 
-def _military_pool(type: ContactType) -> list[str]:
-    if type == "capship":
-        return CAPSHIP_CLASSES
-    if type == "fighter":
-        return FIGHTER_CLASSES
-    return ESCORT_CLASSES
+def _military_pool(type: ContactType, flavor_id: str | None = None) -> list[str]:
+    """The flavor's hostile callsign pool for a contact type."""
+    return military_pool(type, flavor_id)
 
 
 # Terrain names — fields and clouds are charted places, not vessels, so they
@@ -1577,15 +1598,20 @@ def instantiate_contact(
     campaign: CampaignSeed,
     track_number: int | None = None,
     used_names: set[str] | None = None,
+    flavor_id: str | None = None,
 ) -> Contact:
     hostile = t.hostile
     terrain = t.type in ENVIRONMENTAL_TYPES
     if terrain:
         true_name = environmental_name(t.type, i)
+    elif t.name:
+        true_name = t.name
     elif t.type in ("escort", "capship", "fighter"):
-        true_name = military_name(_military_pool(t.type), i + 1, used_names)
+        true_name = military_name(
+            _military_pool(t.type, flavor_id), i + 1, used_names
+        )
     else:
-        true_name = vessel_name(i + 3)
+        true_name = vessel_name(i + 3, flavor_id)
     # The plot shows an anonymous designation until the track is CONFIRMED;
     # ``trueName`` is released by ``_reveal_contact`` at that point.
     name = f"TRACK-{(track_number if track_number is not None else i + 1):02d}"
@@ -1611,11 +1637,11 @@ def instantiate_contact(
             else OBSTACLE_RADIUS.get(t.type, 8.0)
         )
         frequency = _terrain_bands(t.type)
-        image = TERRAIN_IMAGES.get(t.type, "")
+        image = terrain_image(t.type, flavor_id)
         vdu = ""
         sensor_quality = 0.0
     else:
-        klass = ship_for_type(t.type, t.shipClass)
+        klass = ship_for_type(t.type, t.shipClass, flavor_id)
         ship_id = klass.id
         profile = klass.profile
         stealth = klass.stealth
@@ -1924,10 +1950,10 @@ def replenish(state: GameState) -> None:
     state.seq += 1
 
 
-def _init_loadout(ship: ShipState, klass: ShipClass) -> None:
+def _init_loadout(ship: ShipState, klass: ShipClass, flavor_id: str | None = None) -> None:
     """Fit the hull's mounts and set the module budgets it can spend."""
-    entry = hull_entry(klass.id)
-    ship.hardpoints = default_loadout(klass.id)
+    entry = hull_entry(klass.id, flavor_id)
+    ship.hardpoints = default_loadout(klass.id, flavor_id)
     ship.powerBudget = 6.0 + klass.body / 40.0
     ship.massBudgetKt = max(4.0, klass.massKt * 0.5)
     ship.cargoCapacity = float(entry.get("cargoHold") or 0.0)
@@ -1938,7 +1964,7 @@ def _init_loadout(ship: ShipState, klass: ShipClass) -> None:
 def _apply_module_fit(state: GameState) -> None:
     """Recompute hull stats from the fitted modules."""
     ship = state.ship
-    klass = ship_class(ship.shipClass)
+    klass = ship_class(ship.shipClass, state.flavorId)
     shield_mult = module_multiplier(ship.modules, "shieldMultiplier")
     mid = (klass.shieldFore + klass.shieldAft) / 2
     base_shields = {
@@ -2828,7 +2854,7 @@ def _visual_detect(state: GameState, c: Contact, dt: float) -> None:
     log(
         state,
         "VISUAL",
-        f"Optics: {c.name} in the lens at {_round(d)} klik, bearing "
+        f"Optics: {c.name} in the lens at {_fd(state, d, 0)}, bearing "
         f"{_round(true_b):03d}, {'+' if elev >= 0 else ''}{_round(elev)}° elevation.",
         "intel",
     )
@@ -2995,7 +3021,7 @@ def _update_tma(state: GameState, dt: float) -> None:
         log(
             state,
             "SENSORS",
-            f"TMA SOLUTION on {c.name} — {_round_to(rng, 1) if rng else '—'} klik "
+            f"TMA SOLUTION on {c.name} — {_fd(state, rng, 1) if rng else '—'} "
             f"(quality {_round(tma.quality * 100)}%) from the manoeuvre.",
             "ok",
         )
@@ -3349,7 +3375,7 @@ def _triangulate(state: GameState, c: Contact) -> bool:
         state,
         "SENSORS",
         f"Cross-fix: {b.name} and our own array intersect one return at "
-        f"{_round(rng)} klik, bearing {_round(own[-1].bearing):03d}. Track ranged.",
+        f"{_fd(state, rng, 0)}, bearing {_round(own[-1].bearing):03d}. Track ranged.",
         "intel",
     )
     return True
@@ -3688,7 +3714,7 @@ def _engagement_candidates(state: GameState) -> DecisionEvent | None:
                 state,
                 "TAC",
                 f"{hostile.name} CONFIRMED and inside the engagement window "
-                f"({_round(d)} klik). Handoff readiness advised.",
+                f"({_fd(state, d, 0)}). Handoff readiness advised.",
                 "danger",
             )
             return engagement_prompt(state, hostile.id)
@@ -3741,7 +3767,7 @@ def _check_patrol_win(state: GameState) -> None:
             state,
             "won",
             f"PATROL WON — the lane is clear. Every hostile has broken off beyond "
-            f"{DISENGAGE_RANGE_KLIK} klik and we made it through.",
+            f"{_fd(state, DISENGAGE_RANGE_KLIK, 0)} and we made it through.",
         )
         return
     if state.ship.roe != "safe":
@@ -3882,7 +3908,7 @@ def _spawn_reaction(state: GameState, ctype: ContactType, count: int) -> None:
             hostile=True,
             emitting=True,  # searching on active — findable if you are looking
             name=military_name(
-                _military_pool(ctype),
+                _military_pool(ctype, state.flavorId),
                 len(state.contacts) + i + 1,
                 {c.trueName for c in state.contacts},
             ),
@@ -3965,8 +3991,8 @@ def build_handoff_pack(state: GameState, contact: Contact) -> HandoffPack:
         ),
         orders=_handoff_orders(state),
         summary=(
-            f"{pic.name} ({pic.type}), {int(pic.range)} klik, bearing "
-            f"{int(pic.bearing):03d}, course {int(pic.course)} at {int(pic.speed)} kps. "
+            f"{pic.name} ({pic.type}), {_fd(state, pic.range, 0)}, bearing "
+            f"{int(pic.bearing):03d}, course {int(pic.course)} at {_fs(state, pic.speed, 0)}. "
             f"Crew readiness {_round(state.ship.readiness)}%. "
             + (
                 f"{spec.name} {shot_type} shot at "
@@ -3980,6 +4006,8 @@ def build_handoff_pack(state: GameState, contact: Contact) -> HandoffPack:
                 else "Weapons discipline active."
             )
         ),
+        flavorId=get_flavor(state.flavorId).id,
+        flavorTitle=get_flavor(state.flavorId).title,
     )
 
 
@@ -4218,7 +4246,7 @@ def build_spectrum(c: Contact) -> Spectrum:
     return spectrum
 
 
-def _update_catalogue_matches(c: Contact) -> None:
+def _update_catalogue_matches(c: Contact, flavor_id: str | None = None) -> None:
     """Rank the ship catalogue by what the listen pass has pulled in.
 
     Candidates are actual **ship types** (``SHIP_CLASSES`` hulls), not broad
@@ -4235,7 +4263,7 @@ def _update_catalogue_matches(c: Contact) -> None:
     observed = c.sensor.bands
     emission = c.spectrum.emission if c.spectrum else []
     matches: list[CatalogueMatch] = []
-    for hull in SHIP_CLASSES.values():
+    for hull in ship_classes(flavor_id).values():
         score: float | None = None
         if observed and len(observed) == len(hull.bands):
             error = sum((a - b) ** 2 for a, b in zip(observed, hull.bands)) / len(observed)
@@ -4272,7 +4300,7 @@ def listen_waveform(state: GameState, contact_id: str) -> None:
     listens = math.floor(c.waveform.progress / WAVEFORM_LISTEN_PROGRESS) + 1
     c.waveform.progress = clamp(c.waveform.progress + WAVEFORM_LISTEN_PROGRESS, 0, 1)
     build_spectrum(c)
-    _update_catalogue_matches(c)
+    _update_catalogue_matches(c, state.flavorId)
     if c.waveform.progress >= 1:
         c.waveform.resolved = True
         bump_confidence(state, c, 0.16)
@@ -4491,7 +4519,7 @@ def _active_pass(state: GameState, *, strong: bool) -> tuple[int, int]:
             log(
                 state,
                 "SENSORS",
-                f"Radar return: {c.name} at {_round(measured)} klik"
+                f"Radar return: {c.name} at {_fd(state, measured, 0)}"
                 + (f" (scattered ±{_round(scatter * 20)}%)" if scatter > 0.3 else "")
                 + f", bearing {_round(meas_b):03d}, {'+' if elev >= 0 else ''}{_round(elev)}°.",
                 "info",
@@ -4909,8 +4937,8 @@ def prep_weapons(
                 state,
                 c,
                 spec,
-                f"range {_round(rng)} klik is outside its "
-                f"{_round(spec.rangeKlik)}-klik envelope",
+                f"range {_fd(state, rng, 0)} is outside its "
+                f"{_fd(state, spec.rangeKlik, 0)} envelope",
             )
             return
         if grade < required:
@@ -4948,7 +4976,7 @@ def prep_weapons(
         state,
         "WEAPONS",
         f"Solution {weapons_state.upper()} — {spec.name}, {shot} shot, "
-        f"{_round(grade * 100)}% on {c.name} at {_round(rng)} klik. "
+        f"{_round(grade * 100)}% on {c.name} at {_fd(state, rng, 0)}. "
         + (
             "Contact flagged HOSTILE — RoE to HOLD."
             if c.hostile
@@ -5414,7 +5442,7 @@ def set_speed(state: GameState, kps: float) -> None:
             log(
                 state,
                 "OPS",
-                f"Speed held at {int(ceiling)} kps — the drive is spooling and the "
+                f"Speed held at {_fs(state, ceiling, 0)} — the drive is spooling and the "
                 "ship cannot manoeuvre hard.",
                 "warn",
             )
@@ -5445,10 +5473,10 @@ def set_condition(state: GameState, value: Condition) -> None:
 
 def set_ship_class(state: GameState, ship_id: str | None) -> bool:
     """The GM dictates which hull the crew flies for this scenario."""
-    klass = ship_class(ship_id)
+    klass = ship_class(ship_id, state.flavorId)
     s = state.ship
     s.shipClass = klass.id
-    s.name = ship_name(klass.id)
+    s.name = ship_name(klass.id, state.flavorId)
     s.className = klass.name
     s.cruiseSpeed = klass.cruiseSpeed
     s.maxSpeed = klass.maxSpeed
@@ -5459,7 +5487,7 @@ def set_ship_class(state: GameState, ship_id: str | None) -> bool:
     s.emission = klass.emission
     s.massKt = klass.massKt
     s.speed = clamp(s.speed, 0, s.maxSpeed)
-    _init_loadout(s, klass)
+    _init_loadout(s, klass, state.flavorId)
     _apply_module_fit(state)
     _apply_emission(s)
     state.seq += 1
@@ -5618,7 +5646,7 @@ def patch_opposition(state: GameState, contact_id: str, patch: ContactPatch) -> 
     if patch.guess:
         c.guess = patch.guess
     if patch.shipClass:
-        klass = ship_for_type(c.trueType, patch.shipClass)
+        klass = ship_for_type(c.trueType, patch.shipClass, state.flavorId)
         c.shipClass = klass.id
         c.profile = klass.profile
         c.stealth = klass.stealth

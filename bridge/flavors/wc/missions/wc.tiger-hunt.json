@@ -1,0 +1,44 @@
+{
+  "id": "wc.tiger-hunt",
+  "title": "Tiger Hunt",
+  "theater": "Enigma Sector",
+  "brief": "A Fralthi-class carrier has been running fighters through this system for a week. Intel has a rough box and nothing else. Sit dark, find the big hangar, and hold a track long enough to call the strike in.",
+  "target": "Locate the Fralthi carrier and hold a confirmed track. Avoid its Salthi screen.",
+  "startHour": 22,
+  "patrol": { "center": { "x": 0, "y": 0, "z": 0 }, "radiusKlik": 120 },
+  "clutter": 0.55,
+  "escalation": 62,
+  "contacts": [
+    { "x": -60, "y": 40, "z": 0, "heading": 90, "speed": 88, "type": "fighter", "faction": "enemy", "hostile": true, "emitting": true, "name": "KIS Salthi-02", "shipClass": "wc.salthi", "radiusKlik": null },
+    { "x": 44, "y": 62, "z": 0, "heading": 200, "speed": 92, "type": "fighter", "faction": "enemy", "hostile": true, "emitting": true, "name": "KIS Salthi-03", "shipClass": "wc.salthi", "radiusKlik": null },
+    { "x": 10, "y": -58, "z": 0, "heading": 0, "speed": 74, "type": "fighter", "faction": "enemy", "hostile": true, "emitting": false, "name": "KIS Grikath-06", "shipClass": "wc.grikath", "radiusKlik": null },
+    { "x": 82, "y": -20, "z": 0, "heading": 270, "speed": 46, "type": "capship", "faction": "enemy", "hostile": true, "emitting": false, "name": "KIS Ralatha-01", "shipClass": "wc.ralatha", "radiusKlik": null },
+    { "x": -96, "y": -70, "z": 0, "heading": 45, "speed": 34, "type": "capship", "faction": "enemy", "hostile": true, "emitting": false, "name": "KIS Fralthi-02", "shipClass": "wc.fralthi", "radiusKlik": null },
+    { "x": -30, "y": 18, "z": 0, "heading": 0, "speed": 0, "type": "debris", "faction": "neutral", "hostile": false, "emitting": false, "name": null, "shipClass": null, "radiusKlik": 9 },
+    { "x": 24, "y": -14, "z": 0, "heading": 0, "speed": 0, "type": "dust", "faction": "neutral", "hostile": false, "emitting": false, "name": null, "shipClass": null, "radiusKlik": 14 },
+    { "x": 62, "y": 54, "z": 0, "heading": 0, "speed": 0, "type": "ice", "faction": "neutral", "hostile": false, "emitting": false, "name": null, "shipClass": null, "radiusKlik": 10 }
+  ],
+  "events": [
+    { "atMinute": 70, "template": "unmarked" },
+    { "atMinute": 160, "template": "weapons-warning" },
+    { "atMinute": 260, "template": "fleetnet" },
+    { "atMinute": 330, "template": "false-surrender" }
+  ],
+  "hazards": [
+    { "id": "wc.enigma.ion", "type": "ionized-nebula", "title": "Enigma ion storm", "startMinute": 120, "endMinute": 300, "intensity": 1.2, "noise": 0.05, "exposure": 0.5, "concealment": 0.35 }
+  ],
+  "shipClass": "wc.tigers-claw",
+  "sun": { "x": 180, "y": -160, "z": 0 },
+  "sunRadiusKlik": 40.0,
+  "navPoints": [
+    { "id": "wc.enigma.datum", "name": "Damaged Relay", "kind": "nav", "pos": { "x": -18, "y": -44, "z": 0 }, "radiusKlik": 9, "chartAgeHours": 30, "note": "last known contact cut" },
+    { "id": "wc.enigma.jump", "name": "Enigma Jump Point", "kind": "jump", "pos": { "x": 96, "y": 84, "z": 0 }, "radiusKlik": 10, "chartAgeHours": 12, "note": "carrier's likely egress" }
+  ],
+  "layers": [
+    { "id": "surface", "name": "Surface duct", "zMin": 0, "zMax": 10, "note": "Loud and exposed: everyone above and below hears you." },
+    { "id": "gradient", "name": "Gradient layer", "zMin": 10, "zMax": 22, "note": "The boundary itself: crossing it hides you and blinds you." },
+    { "id": "deep", "name": "Deep channel", "zMin": 22, "zMax": 40, "note": "Quiet and hard to reach; your array rides well down here." }
+  ],
+  "environment": "clear-space",
+  "barriers": []
+}

@@ -1072,6 +1072,10 @@ class HandoffPack(WireModel):
     weapons: HandoffWeapons
     orders: str
     summary: str
+    # The setting the tabletop is playing, so the off-app resolution knows which
+    # flavor's hull names and units the pack is written in.
+    flavorId: str = "core"
+    flavorTitle: str = ""
 
 
 class LogbookDigest(WireModel):
@@ -1104,6 +1108,24 @@ class AdminChannel(WireModel):
     status: GameStatus
     players: int
     hostId: str | None = None
+    # The setting this room is playing, so the GM console can show and change it.
+    flavorId: str = "core"
+
+
+class AdminFlavorBrief(WireModel):
+    """An installed flavor, for the GM console and the ``--list-flavors`` CLI."""
+
+    id: str
+    title: str
+    extends: str | None = None
+    hulls: int = 0
+    missions: int = 0
+    valid: bool = True
+    error: str = ""
+    # Activation state: a mod is inert until an operator switches it on.
+    enabled: bool = False
+    default: bool = False
+    core: bool = False
 
 
 class AdminPlayer(WireModel):
@@ -1135,6 +1157,11 @@ class GameState(WireModel):
     # is named ``schemaVersion`` to avoid shadowing Pydantic's BaseModel.schema.
     schemaVersion: int = Field(alias="schema")
     room: RoomRef
+    # The setting (flavor) this room plays.  Recorded so a reconnecting client
+    # renders the same units and art as everyone else, and so the handoff pack
+    # can name the setting the tabletop is playing.  "core" is the shipped
+    # default; the loader falls back to it when a flavor disappears from disk.
+    flavorId: str = "core"
     campaign: CampaignSeed
     ship: ShipState
     seats: dict[SeatId, Seat]

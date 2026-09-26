@@ -1,0 +1,191 @@
+{
+  "id": "lima-drift",
+  "title": "Lima Drift",
+  "theater": "Hostile Approaches",
+  "brief": "Tight patrol lanes, a lot of traffic masking people who do not want to be seen. Get into your loiter box, monitor the resupply axis, then ease out.",
+  "target": "Loiter undetected. Fix the axis of traffic. Carry a clean egress.",
+  "startHour": 1.0,
+  "patrol": {
+    "center": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "radiusKlik": 70.0
+  },
+  "clutter": 0.2,
+  "noiseRate": null,
+  "noiseFilter": null,
+  "zBand": null,
+  "escalation": 42.0,
+  "contacts": [
+    {
+      "x": -61.0,
+      "y": -13.0,
+      "z": null,
+      "heading": 220.0,
+      "speed": 61.0,
+      "type": "prospector",
+      "faction": "neutral",
+      "hostile": false,
+      "emitting": false,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    },
+    {
+      "x": -32.0,
+      "y": -30.0,
+      "z": null,
+      "heading": 246.0,
+      "speed": 68.0,
+      "type": "liner",
+      "faction": "neutral",
+      "hostile": false,
+      "emitting": false,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    },
+    {
+      "x": 82.0,
+      "y": 24.0,
+      "z": null,
+      "heading": 226.0,
+      "speed": 92.0,
+      "type": "escort",
+      "faction": "enemy",
+      "hostile": true,
+      "emitting": true,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    },
+    {
+      "x": -29.0,
+      "y": 13.0,
+      "z": null,
+      "heading": 74.0,
+      "speed": 100.0,
+      "type": "escort",
+      "faction": "enemy",
+      "hostile": true,
+      "emitting": true,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    },
+    {
+      "x": -76.0,
+      "y": -14.0,
+      "z": null,
+      "heading": 33.0,
+      "speed": 75.0,
+      "type": "freighter",
+      "faction": "neutral",
+      "hostile": false,
+      "emitting": false,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    }
+  ],
+  "events": [
+    {
+      "atMinute": 39.0,
+      "template": "unmarked"
+    },
+    {
+      "atMinute": 144.0,
+      "template": "orders"
+    },
+    {
+      "atMinute": 230.0,
+      "template": "probe"
+    },
+    {
+      "atMinute": 289.0,
+      "template": "distress"
+    },
+    {
+      "atMinute": 332.0,
+      "template": "orders"
+    }
+  ],
+  "hazards": [],
+  "shipClass": null,
+  "sun": null,
+  "sunRadiusKlik": 0.0,
+  "navPoints": [
+    {
+      "id": "drift-mouth",
+      "name": "Drift Mouth",
+      "kind": "nav",
+      "pos": {
+        "x": 40.0,
+        "y": -70.0,
+        "z": 0.0
+      },
+      "radiusKlik": 9.0,
+      "chartAgeHours": 16.0,
+      "note": "current shear",
+      "jumpType": "stable",
+      "windowOpen": 0.0,
+      "windowClose": null,
+      "alignmentRequired": 0.6,
+      "interference": 0.0,
+      "dest": null
+    },
+    {
+      "id": "derelict",
+      "name": "Derelict Hulk",
+      "kind": "body",
+      "pos": {
+        "x": -35.0,
+        "y": -55.0,
+        "z": 0.0
+      },
+      "radiusKlik": 6.0,
+      "chartAgeHours": 40.0,
+      "note": "salvage; charts very stale",
+      "jumpType": "stable",
+      "windowOpen": 0.0,
+      "windowClose": null,
+      "alignmentRequired": 0.6,
+      "interference": 0.0,
+      "dest": null
+    }
+  ],
+  "layers": [
+    {
+      "id": "surface",
+      "name": "Surface duct",
+      "zMin": 0.0,
+      "zMax": 10.0,
+      "note": "Loud and exposed: everyone above and below hears you."
+    },
+    {
+      "id": "gradient",
+      "name": "Gradient layer",
+      "zMin": 10.0,
+      "zMax": 22.0,
+      "note": "The boundary itself: crossing it hides you and blinds you."
+    },
+    {
+      "id": "deep",
+      "name": "Deep channel",
+      "zMin": 22.0,
+      "zMax": 40.0,
+      "note": "Quiet and hard to reach; your own sensors reach less far."
+    },
+    {
+      "id": "shadow",
+      "name": "Shadow zone",
+      "zMin": 40.0,
+      "zMax": 50.0,
+      "note": "The deepest band: nearly invisible from above, nearly blind yourself."
+    }
+  ],
+  "environment": "clear-space",
+  "barriers": []
+}

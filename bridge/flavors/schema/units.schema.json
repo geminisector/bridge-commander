@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bridge-commander.local/flavors/schema/units.schema.json",
+  "title": "Flavor units (units.json)",
+  "description": "Display formatting only. Distances and speeds stay canonical (klik, kps) on the wire; a flavor converts when showing a value to a human.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "distance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "base": { "type": "string", "description": "Label for the canonical unit (core: klik)." },
+        "ladder": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Auto-scaling rungs, ordered by descending min. The formatter picks the largest rung whose min the value reaches.",
+          "items": {
+            "type": "object",
+            "required": ["min", "unit", "factor"],
+            "additionalProperties": false,
+            "properties": {
+              "min": { "type": "number", "minimum": 0, "description": "Smallest canonical value this rung covers." },
+              "unit": { "type": "string" },
+              "factor": { "type": "number", "exclusiveMinimum": 0, "description": "Canonical units per display unit (the formatter divides by it)." },
+              "precision": { "type": "integer", "minimum": 0, "default": 1 }
+            }
+          }
+        }
+      }
+    },
+    "speed": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "base": { "type": "string", "description": "Label for the canonical speed unit (core: kps)." },
+        "factor": { "type": "number", "exclusiveMinimum": 0, "default": 1.0, "description": "Canonical units per display unit." },
+        "dial": {
+          "type": "object",
+          "description": "Labels for the shared 0-100 speed dial. Keys are numbers in 0..100.",
+          "propertyNames": { "pattern": "^[0-9]+(\\.[0-9]+)?$" },
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    }
+  }
+}

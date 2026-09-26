@@ -31,12 +31,25 @@
           <button id="refresh" title="Re-list the active rooms and available campaigns">REFRESH</button>
           <button id="subscribe" title="Subscribe to live state broadcasts for the selected room">WATCH ROOM</button>
           <span class="toolbar-divider"></span>
+          <label>SETTING <select id="flavor"><option value="">Room default</option></select></label>
           <label>CAMPAIGN <select id="campaign"><option value="">Default</option></select></label>
           <label>CREW SHIP <select id="crew-ship"></select></label>
-          <button id="new-engagement" title="Reset the selected room to a fresh engagement using the chosen campaign and crew ship">START NEW ENGAGEMENT</button>
+          <button id="new-engagement" title="Reset the selected room to a fresh engagement using the chosen setting, campaign and crew ship">START NEW ENGAGEMENT</button>
           <button id="set-ship" title="Change the crew hull in the running engagement without resetting it">SET CREW SHIP (LIVE)</button>
           <button id="freeze" title="Hold the clock so you can move contacts and inject events; advance is blocked until you release it">FREEZE TIME</button>
         </div>
+
+        <section class="card">
+          <div class="section-head">
+            <h2>Mods / settings</h2>
+            <span class="mod-head">
+              <span id="mod-meta" class="muted">—</span>
+              <button id="mod-clear-default" title="Clear the default so new rooms fall back to core">CLEAR DEFAULT</button>
+            </span>
+          </div>
+          <p class="muted">Installed settings are inert until activated. Activate a mod, then use it in the selected room or make it the default for new rooms.</p>
+          <div id="mods" class="empty">No mods.</div>
+        </section>
 
         <section class="card map-card">
           <div class="section-head">

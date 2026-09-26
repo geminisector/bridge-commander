@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bridge-commander.local/flavors/schema/ships.schema.json",
+  "title": "Flavor ships (ships.json)",
+  "description": "Hulls, art and the contact-type -> hull default map, in one file. Merge is per hull id and per field, so a flavor that extends core may override just a name, a stat or an art file. A hull with no art of its own resolves through the flavor chain to core art.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "hulls": {
+      "description": "Either an id -> hull map (preferred) or a list of hull objects each carrying an id.",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/hull" }
+        },
+        {
+          "type": "array",
+          "items": { "$ref": "#/$defs/hullWithId" }
+        }
+      ]
+    },
+    "defaults": {
+      "type": "object",
+      "description": "Contact type -> hull id used when a scenario names no hull. Every non-empty value must be a hull id in the merged catalog.",
+      "propertyNames": {
+        "enum": ["unknown", "prospector", "freighter", "liner", "escort", "capship", "fighter", "carrier", "asteroid", "nebula", "debris", "dust", "ice"]
+      },
+      "additionalProperties": { "type": "string" }
+    },
+    "terrain": {
+      "type": "object",
+      "description": "Optional override of the terrain contact images (asteroid/debris/nebula/dust/ice).",
+      "propertyNames": { "enum": ["asteroid", "nebula", "debris", "dust", "ice"] },
+      "additionalProperties": { "type": "string" }
+    }
+  },
+  "$defs": {
+    "hullWithId": {
+      "allOf": [{ "$ref": "#/$defs/hull" }],
+      "required": ["id"],
+      "properties": { "id": { "type": "string" } }
+    },
+    "hull": {
+      "type": "object",
+      "required": ["name", "role", "contactType", "stats", "hardpoints", "art"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string", "description": "Class name. Required in practice, because namespaced ids title-case badly." },
+        "role": { "type": "string" },
+        "contactType": {
+          "enum": ["unknown", "prospector", "freighter", "liner", "escort", "capship", "fighter", "carrier", "asteroid", "nebula", "debris", "dust", "ice"]
+        },
+        "massKt": { "type": "number" },
+        "profile": { "type": "number" },
+        "stealth": { "type": "number" },
+        "emission": { "type": "number" },
+        "sensorQuality": { "type": "number" },
+        "crew": { "type": "integer", "minimum": 0 },
+        "blurb": { "type": "string" },
+        "shipType": { "type": "string" },
+        "gunners": { "type": "integer", "minimum": 0 },
+        "cargoHold": { "type": "number" },
+        "art": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "action": { "type": "string", "description": "Filename under assets/action/ (found in the flavor chain)." },
+            "vdu": { "type": "string", "description": "Filename under assets/vdu/." }
+          }
+        },
+        "stats": {
+          "type": "object",
+          "minProperties": 1,
+          "description": "Hull defences merged into the ShipClass model.",
+          "additionalProperties": { "type": "number" }
+        },
+        "hardpoints": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "arc", "kind"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string" },
+              "arc": { "enum": ["fore", "aft", "port", "starboard", "all"] },
+              "kind": { "enum": ["gun", "missile", "torpedo"] }
+            }
+          }
+        },
+        "names": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Registry/proper names when the crew flies this hull; the first is used."
+        }
+      }
+    }
+  }
+}

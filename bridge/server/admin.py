@@ -17,9 +17,18 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
-from ..shared import CAMPAIGNS, campaign_for, clamp, ship_briefs
+from ..shared import campaign_for, clamp, ship_briefs
+from ..shared.campaigns import campaign_briefs
 from ..shared.protocol import MsgAdminError, MsgAdminOk, MsgAdminState, parse_admin_c2s
-from ..shared.types import AdminChannel, AdminPlayer, CampaignBrief, GameState, Patrol, Vec
+from ..shared.types import (
+    AdminChannel,
+    AdminFlavorBrief,
+    AdminPlayer,
+    CampaignBrief,
+    GameState,
+    Patrol,
+    Vec,
+)
 from .admin_events import clean_event
 from .config import ADMIN_ORIGINS
 from .engine import (
@@ -36,6 +45,7 @@ from .engine import (
     spawn_opposition,
 )
 from ..shared.checks import ALL_SKILLS
+from . import mods
 from .rooms import rooms
 
 _ADMIN_UI_DIR = Path(__file__).resolve().parent / "admin-ui"
@@ -135,7 +145,7 @@ async def _handle(
         return
 
     if msg.type == "admin.list":
-        base = _admin_snapshot()
+        base = _admin_snapshot(msg.channelId)
         if msg.channelId:
             base.channels = [
                 c for c in base.channels if c.channelId == msg.channelId
@@ -266,6 +276,43 @@ async def _handle(
         await _send(websocket, MsgAdminState(channelId=room.channel_id, state=room.state))
         return
 
+    if msg.type == "admin.activateMod":
+        ok, reason = mods.activate(msg.flavorId)
+        if not ok:
+            await _send(websocket, MsgAdminError(message=reason))
+            return
+        await _send(websocket, _admin_snapshot())
+        return
+
+    if msg.type == "admin.deactivateMod":
+        ok, reason = mods.deactivate(msg.flavorId)
+        if not ok:
+            await _send(websocket, MsgAdminError(message=reason))
+            return
+        await _send(websocket, _admin_snapshot())
+        return
+
+    if msg.type == "admin.setDefaultMod":
+        ok, reason = mods.set_default(msg.flavorId)
+        if not ok:
+            await _send(websocket, MsgAdminError(message=reason))
+            return
+        await _send(websocket, _admin_snapshot())
+        return
+
+    if msg.type == "admin.activateModForRoom":
+        room = _room_for(msg.channelId)
+        if not mods.is_enabled(msg.flavorId):
+            await _send(
+                websocket,
+                MsgAdminError(message=f"mod {msg.flavorId!r} is not activated"),
+            )
+            return
+        await room.reconfigure(flavor_id=msg.flavorId)
+        await _send(websocket, MsgAdminState(channelId=room.channel_id, state=room.state))
+        await _send(websocket, _admin_snapshot(room.channel_id))
+        return
+
     if msg.type == "admin.kick":
         room = rooms.rooms.get(msg.channelId)
         if room is None or msg.sessionId not in room.clients:
@@ -281,11 +328,19 @@ async def _handle(
     if msg.type == "admin.reset":
         room = _room_for(msg.channelId)
         instance_id = room.state.room.instanceId or "gm-prep"
+        if msg.flavorId and not mods.is_enabled(msg.flavorId):
+            await _send(
+                websocket,
+                MsgAdminError(message=f"mod {msg.flavorId!r} is not activated"),
+            )
+            return
+        flavor_id = msg.flavorId or mods.guard_room(room.state.flavorId)
         fresh = create_state(
             room.channel_id,
             instance_id,
-            campaign_for(msg.campaignId),
+            campaign_for(msg.campaignId, flavor_id),
             ship_id=msg.shipId,
+            flavor_id=flavor_id,
         )
         fresh.room.instanceId = instance_id
         await room.reset(fresh)
@@ -293,7 +348,9 @@ async def _handle(
         return
 
 
-def _admin_snapshot() -> MsgAdminOk:
+def _admin_snapshot(channel_id: str | None = None) -> MsgAdminOk:
+    room = rooms.rooms.get(channel_id) if channel_id else None
+    flavor_id = room.state.flavorId if room is not None else mods.default_flavor()
     players = [
         AdminPlayer(
             sessionId=client.sessionId,
@@ -314,18 +371,30 @@ def _admin_snapshot() -> MsgAdminOk:
                 status=room.state.status,
                 players=len(room.clients),
                 hostId=room.state.hostId,
+                flavorId=room.state.flavorId,
             )
             for channel_id, room in rooms.rooms.items()
         ],
         campaigns=[
-            CampaignBrief(
-                id=campaign_id,
-                title=CAMPAIGNS[campaign_id](0).title,
-                theater=CAMPAIGNS[campaign_id](0).theater,
-            )
-            for campaign_id in CAMPAIGNS
+            CampaignBrief(id=mission_id, title=title, theater=theater)
+            for mission_id, title, theater in campaign_briefs(flavor_id)
         ],
-        ships=ship_briefs(),
+        ships=ship_briefs(flavor_id),
+        flavors=[
+            AdminFlavorBrief(
+                id=row["id"],
+                title=row["title"],
+                extends=row.get("extends"),
+                hulls=row.get("hulls", 0),
+                missions=row.get("missions", 0),
+                valid=bool(row.get("valid", True)),
+                error=row.get("error", ""),
+                enabled=bool(row.get("enabled", False)),
+                default=bool(row.get("default", False)),
+                core=bool(row.get("core", False)),
+            )
+            for row in mods.list_mods()
+        ],
         players=players,
         skills=list(ALL_SKILLS),
     )

@@ -1,0 +1,243 @@
+{
+  "id": "full-sweep",
+  "title": "Full Sweep",
+  "theater": "Bex Reach",
+  "brief": "A raider wolfpack is lying dark in the reach, and command will not commit the convoy until every hull is on the board. Find them all, hold a track on each, and do it without lighting up.",
+  "target": "Detect and track every hostile contact. Weapons stay safe.",
+  "startHour": 0.0,
+  "patrol": {
+    "center": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "radiusKlik": 90.0
+  },
+  "clutter": 0.2,
+  "noiseRate": null,
+  "noiseFilter": null,
+  "zBand": null,
+  "escalation": 6.0,
+  "contacts": [
+    {
+      "x": 32.0,
+      "y": 0.0,
+      "z": null,
+      "heading": 0.0,
+      "speed": 0.0,
+      "type": "escort",
+      "faction": "enemy",
+      "hostile": true,
+      "emitting": false,
+      "name": null,
+      "shipClass": "enemy-escort",
+      "radiusKlik": null
+    },
+    {
+      "x": -18.0,
+      "y": 28.0,
+      "z": null,
+      "heading": 0.0,
+      "speed": 0.0,
+      "type": "escort",
+      "faction": "enemy",
+      "hostile": true,
+      "emitting": false,
+      "name": null,
+      "shipClass": "enemy-escort",
+      "radiusKlik": null
+    },
+    {
+      "x": 6.0,
+      "y": -34.0,
+      "z": null,
+      "heading": 0.0,
+      "speed": 0.0,
+      "type": "fighter",
+      "faction": "enemy",
+      "hostile": true,
+      "emitting": false,
+      "name": null,
+      "shipClass": "enemy-heavy-fighter",
+      "radiusKlik": null
+    },
+    {
+      "x": -40.0,
+      "y": -20.0,
+      "z": null,
+      "heading": 0.0,
+      "speed": 0.0,
+      "type": "freighter",
+      "faction": "neutral",
+      "hostile": false,
+      "emitting": false,
+      "name": null,
+      "shipClass": "friendly-freighter",
+      "radiusKlik": null
+    }
+  ],
+  "events": [
+    {
+      "atMinute": 49.0,
+      "template": "fleetnet"
+    },
+    {
+      "atMinute": 125.0,
+      "template": "unmarked"
+    },
+    {
+      "atMinute": 212.0,
+      "template": "challenge"
+    },
+    {
+      "atMinute": 311.0,
+      "template": "probe"
+    }
+  ],
+  "hazards": [
+    {
+      "id": "bex-rubble",
+      "type": "debris-field",
+      "title": "Bex rubble field",
+      "startMinute": 0.0,
+      "endMinute": null,
+      "intensity": 0.7,
+      "noise": 0.015,
+      "exposure": 0.1,
+      "concealment": 0.3
+    }
+  ],
+  "shipClass": "home",
+  "sun": null,
+  "sunRadiusKlik": 0.0,
+  "navPoints": [
+    {
+      "id": "sweep-one",
+      "name": "Sweep One",
+      "kind": "nav",
+      "pos": {
+        "x": -76.0,
+        "y": -40.0,
+        "z": 0.0
+      },
+      "radiusKlik": 12.0,
+      "chartAgeHours": 9.0,
+      "note": "grid entry",
+      "jumpType": "stable",
+      "windowOpen": 0.0,
+      "windowClose": null,
+      "alignmentRequired": 0.6,
+      "interference": 0.0,
+      "dest": null
+    },
+    {
+      "id": "sweep-two",
+      "name": "Sweep Two",
+      "kind": "nav",
+      "pos": {
+        "x": 46.0,
+        "y": 70.0,
+        "z": 0.0
+      },
+      "radiusKlik": 12.0,
+      "chartAgeHours": 9.0,
+      "note": "grid exit",
+      "jumpType": "stable",
+      "windowOpen": 0.0,
+      "windowClose": null,
+      "alignmentRequired": 0.6,
+      "interference": 0.0,
+      "dest": null
+    },
+    {
+      "id": "sweep-jump",
+      "name": "Sweep Jump Point",
+      "kind": "jump",
+      "pos": {
+        "x": 80.0,
+        "y": -30.0,
+        "z": 0.0
+      },
+      "radiusKlik": 5.0,
+      "chartAgeHours": 28.0,
+      "note": "extraction",
+      "jumpType": "stable",
+      "windowOpen": 0.0,
+      "windowClose": null,
+      "alignmentRequired": 0.6,
+      "interference": 0.15,
+      "dest": {
+        "x": -40.0,
+        "y": -40.0,
+        "z": 0.0
+      }
+    }
+  ],
+  "layers": [
+    {
+      "id": "surface",
+      "name": "Surface duct",
+      "zMin": 0.0,
+      "zMax": 10.0,
+      "note": "Loud and exposed: everyone above and below hears you."
+    },
+    {
+      "id": "gradient",
+      "name": "Gradient layer",
+      "zMin": 10.0,
+      "zMax": 22.0,
+      "note": "The boundary itself: crossing it hides you and blinds you."
+    },
+    {
+      "id": "deep",
+      "name": "Deep channel",
+      "zMin": 22.0,
+      "zMax": 40.0,
+      "note": "Quiet and hard to reach; your own sensors reach less far."
+    },
+    {
+      "id": "shadow",
+      "name": "Shadow zone",
+      "zMin": 40.0,
+      "zMax": 50.0,
+      "note": "The deepest band: nearly invisible from above, nearly blind yourself."
+    }
+  ],
+  "environment": "clear-space",
+  "barriers": [
+    {
+      "id": "sweep-line-north",
+      "name": "North Picket",
+      "a": {
+        "x": -80.0,
+        "y": 60.0,
+        "z": 0.0
+      },
+      "b": {
+        "x": 40.0,
+        "y": 80.0,
+        "z": 0.0
+      },
+      "sensitivity": 0.7,
+      "faction": "enemy",
+      "note": "Mines and sensors along the grid's northern edge."
+    },
+    {
+      "id": "sweep-line-south",
+      "name": "South Picket",
+      "a": {
+        "x": -60.0,
+        "y": -70.0,
+        "z": 0.0
+      },
+      "b": {
+        "x": 80.0,
+        "y": -50.0,
+        "z": 0.0
+      },
+      "sensitivity": 0.55,
+      "faction": "enemy",
+      "note": "Thinner coverage; a gap the locals use."
+    }
+  ]
+}

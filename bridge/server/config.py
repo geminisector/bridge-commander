@@ -34,6 +34,11 @@ ACTIVITY_DIST: str = os.getenv("ACTIVITY_DIST", "")
 # contact art referenced by the activity UI, e.g. ``/img/action/enemy-fighter.png``).
 # When unset the server uses the packaged ``bridge/img`` tree.
 ASSET_DIR: str = os.getenv("ASSET_DIR", "")
+# Optional directory holding the flavor packages.  When unset the server uses
+# the packaged ``bridge/flavors`` tree.
+FLAVORS_DIR: str = os.getenv("FLAVORS_DIR", "")
+# The setting new rooms start on.  Unset / unknown ids fall back to ``core``.
+DEFAULT_FLAVOR: str = os.getenv("DEFAULT_FLAVOR", "")
 # ``Number(process.env.ADMIN_PORT) || 0`` — an unset/blank/invalid value is 0.
 try:
     ADMIN_PORT: int = int(os.getenv("ADMIN_PORT") or "0")
@@ -54,6 +59,8 @@ class Config:
     dataDir: str = DATA_DIR
     activityDist: str = ACTIVITY_DIST
     assetDir: str = ASSET_DIR
+    flavorsDir: str = FLAVORS_DIR
+    defaultFlavor: str = DEFAULT_FLAVOR
     adminPort: int = ADMIN_PORT
     adminToken: str = ADMIN_TOKEN
     adminHost: str = ADMIN_HOST
@@ -67,6 +74,8 @@ config = Config(
     dataDir=DATA_DIR,
     activityDist=ACTIVITY_DIST,
     assetDir=ASSET_DIR,
+    flavorsDir=FLAVORS_DIR,
+    defaultFlavor=DEFAULT_FLAVOR,
     adminPort=ADMIN_PORT,
     adminToken=ADMIN_TOKEN,
     adminHost=ADMIN_HOST,
@@ -84,6 +93,8 @@ __all__ = [
     "DATA_DIR",
     "ACTIVITY_DIST",
     "ASSET_DIR",
+    "FLAVORS_DIR",
+    "DEFAULT_FLAVOR",
     "ADMIN_PORT",
     "ADMIN_TOKEN",
     "ADMIN_HOST",

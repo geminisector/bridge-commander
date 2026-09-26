@@ -49,4 +49,9 @@ bridge = [
     "img/*/*.png",
     "resources/*.json",
     "server/admin-ui/*",
+    "flavors/core/*.json",
+    "flavors/core/*.css",
+    "flavors/core/missions/*.json",
+    "flavors/README.md",
+    "flavors/schema/*.json",
 ]

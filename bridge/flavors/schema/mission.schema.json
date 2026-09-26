@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bridge-commander.local/flavors/schema/mission.schema.json",
+  "title": "Flavor mission (missions/*.json)",
+  "description": "A CampaignSeed-shaped document. The loader is CampaignSeed.model_validate(mission); every distance is canonical klik and no flavor may introduce randomness. Every shipClass must be a hull id in the merged catalog.",
+  "type": "object",
+  "required": ["id", "title", "patrol"],
+  "additionalProperties": true,
+  "properties": {
+    "id": { "type": "string", "description": "Namespaced by convention: <flavor>.<name>." },
+    "title": { "type": "string" },
+    "theater": { "type": "string" },
+    "brief": { "type": "string" },
+    "target": { "type": "string" },
+    "startHour": { "type": "number" },
+    "patrol": {
+      "type": "object",
+      "required": ["center", "radiusKlik"],
+      "additionalProperties": false,
+      "properties": {
+        "center": { "$ref": "#/$defs/vec" },
+        "radiusKlik": { "type": "number" }
+      }
+    },
+    "clutter": { "type": "number" },
+    "noiseRate": { "type": ["number", "null"] },
+    "noiseFilter": { "type": ["boolean", "null"] },
+    "zBand": {
+      "type": ["object", "null"],
+      "required": ["min", "max"],
+      "additionalProperties": false,
+      "properties": { "min": { "type": "number" }, "max": { "type": "number" } }
+    },
+    "escalation": { "type": "number" },
+    "shipClass": { "type": ["string", "null"], "description": "Crew hull id, validated against the merged catalog." },
+    "sun": { "oneOf": [{ "$ref": "#/$defs/vec" }, { "type": "null" }] },
+    "sunRadiusKlik": { "type": "number" },
+    "environment": { "type": "string" },
+    "contacts": { "type": "array", "items": { "$ref": "#/$defs/contact" } },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["atMinute", "template"],
+        "additionalProperties": false,
+        "properties": {
+          "atMinute": { "type": "number" },
+          "template": { "type": "string", "description": "A core decision-event template name." }
+        }
+      }
+    },
+    "hazards": { "type": "array", "items": { "$ref": "#/$defs/hazard" } },
+    "navPoints": { "type": "array", "items": { "$ref": "#/$defs/navPoint" } },
+    "layers": { "type": "array", "items": { "$ref": "#/$defs/layer" } },
+    "barriers": { "type": "array", "items": { "$ref": "#/$defs/barrier" } }
+  },
+  "$defs": {
+    "vec": {
+      "type": "object",
+      "required": ["x", "y", "z"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "z": { "type": "number" }
+      }
+    },
+    "contact": {
+      "type": "object",
+      "required": ["x", "y", "heading", "speed", "type"],
+      "additionalProperties": true,
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "z": { "type": ["number", "null"] },
+        "heading": { "type": "number" },
+        "speed": { "type": "number" },
+        "type": { "enum": ["unknown", "prospector", "freighter", "liner", "escort", "capship", "fighter", "carrier", "asteroid", "nebula", "debris", "dust", "ice"] },
+        "faction": { "enum": ["friendly", "neutral", "enemy"] },
+        "hostile": { "type": "boolean" },
+        "emitting": { "type": "boolean" },
+        "name": { "type": ["string", "null"], "description": "Explicit proper name; must be unique within the mission." },
+        "shipClass": { "type": ["string", "null"], "description": "Hull id, validated against the merged catalog." },
+        "radiusKlik": { "type": ["number", "null"] }
+      }
+    },
+    "hazard": {
+      "type": "object",
+      "required": ["id", "type", "title"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string" },
+        "title": { "type": "string" },
+        "startMinute": { "type": "number" },
+        "endMinute": { "type": ["number", "null"] },
+        "intensity": { "type": "number" },
+        "noise": { "type": "number" },
+        "exposure": { "type": "number" },
+        "concealment": { "type": "number" }
+      }
+    },
+    "navPoint": {
+      "type": "object",
+      "required": ["id", "name", "pos"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "kind": { "enum": ["nav", "jump", "body", "hazard"] },
+        "pos": { "$ref": "#/$defs/vec" },
+        "radiusKlik": { "type": "number" },
+        "chartAgeHours": { "type": "number" },
+        "note": { "type": "string" },
+        "jumpType": { "type": "string" },
+        "windowOpen": { "type": "number" },
+        "windowClose": { "type": ["number", "null"] },
+        "alignmentRequired": { "type": "number" },
+        "interference": { "type": "number" },
+        "dest": { "oneOf": [{ "$ref": "#/$defs/vec" }, { "type": "null" }] }
+      }
+    },
+    "layer": {
+      "type": "object",
+      "required": ["id", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "zMin": { "type": "number" },
+        "zMax": { "type": "number" },
+        "note": { "type": "string" }
+      }
+    },
+    "barrier": {
+      "type": "object",
+      "required": ["id", "name", "a", "b"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "a": { "$ref": "#/$defs/vec" },
+        "b": { "$ref": "#/$defs/vec" },
+        "sensitivity": { "type": "number" },
+        "faction": { "type": "string" },
+        "note": { "type": "string" }
+      }
+    }
+  }
+}

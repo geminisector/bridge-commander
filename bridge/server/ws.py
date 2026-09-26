@@ -18,7 +18,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
 from ..shared.constants import DEFAULT_ADVANCE_MINUTES
 from ..shared.protocol import MsgError, MsgHelloS2C, parse_c2s
-from ..shared.ships import SHIP_CLASSES
+from ..shared.ships import ship_classes
 from ..shared.types import SeatId
 from .engine import (
     active_sweep,
@@ -178,7 +178,7 @@ async def handle(websocket: WebSocket, msg: Any) -> None:
         hello = MsgHelloS2C(
             clientId=session_id,
             state=room.state,
-            catalogue=list(SHIP_CLASSES.values()),
+            catalogue=list(ship_classes(room.state.flavorId).values()),
         ).model_dump(mode="json")
         hello["state"] = public_state(room.state)
         await websocket.send_text(json.dumps(hello, separators=(",", ":")))
@@ -213,6 +213,15 @@ async def handle(websocket: WebSocket, msg: Any) -> None:
         async def _start(room: Room, user_id: str) -> None:
             if host_or_command(room, user_id):
                 if room.state.status == "lobby":
+                    # A host may pick the setting / mission / hull as part of
+                    # starting the room; with none supplied the room plays what
+                    # it was created with (DEFAULT_FLAVOR or its saved state).
+                    if msg.flavorId or msg.campaignId or msg.shipId:
+                        await room.reconfigure(
+                            flavor_id=msg.flavorId,
+                            campaign_id=msg.campaignId,
+                            ship_id=msg.shipId,
+                        )
                     room.state.status = "running"
                     await room.broadcast()
 

@@ -1,0 +1,207 @@
+{
+  "id": "capship-sniff",
+  "title": "Capship Sniff",
+  "theater": "Deep Quartet Basin",
+  "brief": "A hostile fleet carrier is believed to be slipping dark through this basin. Do not sprint, do not scan. Find the big quiet one by patience and geometry alone.",
+  "target": "Locate and fix the capital ship. Build a confirmed firing solution. (Firing happens off-app.)",
+  "startHour": 0.0,
+  "patrol": {
+    "center": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "radiusKlik": 110.0
+  },
+  "clutter": 0.3,
+  "noiseRate": null,
+  "noiseFilter": null,
+  "zBand": null,
+  "escalation": 24.0,
+  "contacts": [
+    {
+      "x": 21.0,
+      "y": -48.0,
+      "z": null,
+      "heading": 339.0,
+      "speed": 32.0,
+      "type": "prospector",
+      "faction": "neutral",
+      "hostile": false,
+      "emitting": false,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    },
+    {
+      "x": -62.0,
+      "y": 16.0,
+      "z": null,
+      "heading": 269.0,
+      "speed": 97.0,
+      "type": "freighter",
+      "faction": "neutral",
+      "hostile": false,
+      "emitting": false,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    },
+    {
+      "x": 43.0,
+      "y": -34.0,
+      "z": null,
+      "heading": 297.0,
+      "speed": 74.0,
+      "type": "freighter",
+      "faction": "neutral",
+      "hostile": false,
+      "emitting": false,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    },
+    {
+      "x": -87.0,
+      "y": -15.0,
+      "z": null,
+      "heading": 74.0,
+      "speed": 38.0,
+      "type": "capship",
+      "faction": "enemy",
+      "hostile": true,
+      "emitting": false,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    },
+    {
+      "x": 26.0,
+      "y": 59.0,
+      "z": null,
+      "heading": 268.0,
+      "speed": 48.0,
+      "type": "capship",
+      "faction": "enemy",
+      "hostile": true,
+      "emitting": false,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    }
+  ],
+  "events": [
+    {
+      "atMinute": 73.0,
+      "template": "fleetnet"
+    },
+    {
+      "atMinute": 155.0,
+      "template": "probe"
+    },
+    {
+      "atMinute": 248.0,
+      "template": "unmarked"
+    },
+    {
+      "atMinute": 309.0,
+      "template": "orders"
+    },
+    {
+      "atMinute": 393.0,
+      "template": "fleetnet"
+    }
+  ],
+  "hazards": [
+    {
+      "id": "radiation-storm",
+      "type": "radiation-storm",
+      "title": "Radiation storm",
+      "startMinute": 180.0,
+      "endMinute": 260.0,
+      "intensity": 0.9,
+      "noise": 0.05,
+      "exposure": 0.5,
+      "concealment": 0.1
+    }
+  ],
+  "shipClass": null,
+  "sun": {
+    "x": -180.0,
+    "y": 90.0,
+    "z": 0.0
+  },
+  "sunRadiusKlik": 55.0,
+  "navPoints": [
+    {
+      "id": "sneak-line",
+      "name": "Sneak Line",
+      "kind": "nav",
+      "pos": {
+        "x": -70.0,
+        "y": 50.0,
+        "z": 0.0
+      },
+      "radiusKlik": 12.0,
+      "chartAgeHours": 8.0,
+      "note": "debris shadow",
+      "jumpType": "stable",
+      "windowOpen": 0.0,
+      "windowClose": null,
+      "alignmentRequired": 0.6,
+      "interference": 0.0,
+      "dest": null
+    },
+    {
+      "id": "capship-standoff",
+      "name": "Standoff Point",
+      "kind": "nav",
+      "pos": {
+        "x": 68.0,
+        "y": -34.0,
+        "z": 0.0
+      },
+      "radiusKlik": 7.0,
+      "chartAgeHours": 20.0,
+      "note": "passive watch position",
+      "jumpType": "stable",
+      "windowOpen": 0.0,
+      "windowClose": null,
+      "alignmentRequired": 0.6,
+      "interference": 0.0,
+      "dest": null
+    }
+  ],
+  "layers": [
+    {
+      "id": "surface",
+      "name": "Surface duct",
+      "zMin": 0.0,
+      "zMax": 10.0,
+      "note": "Loud and exposed: everyone above and below hears you."
+    },
+    {
+      "id": "gradient",
+      "name": "Gradient layer",
+      "zMin": 10.0,
+      "zMax": 22.0,
+      "note": "The boundary itself: crossing it hides you and blinds you."
+    },
+    {
+      "id": "deep",
+      "name": "Deep channel",
+      "zMin": 22.0,
+      "zMax": 40.0,
+      "note": "Quiet and hard to reach; your own sensors reach less far."
+    },
+    {
+      "id": "shadow",
+      "name": "Shadow zone",
+      "zMin": 40.0,
+      "zMax": 50.0,
+      "note": "The deepest band: nearly invisible from above, nearly blind yourself."
+    }
+  ],
+  "environment": "clear-space",
+  "barriers": []
+}

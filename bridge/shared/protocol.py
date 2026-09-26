@@ -13,7 +13,9 @@ from typing import Annotated, Any, Literal, Union
 from pydantic import Field, TypeAdapter
 
 from .types import (
-    AdminChannel, AdminPlayer,
+    AdminChannel,
+    AdminFlavorBrief,
+    AdminPlayer,
     AdminShipBrief,
     AlertLevel,
     CampaignBrief,
@@ -65,6 +67,11 @@ class MsgSetSeat(WireModel):
 
 class MsgStart(WireModel):
     type: Literal["start"]
+    # Optional per-room setup: when the host starts a lobby with any of these,
+    # the server rebuilds the room's state with that setting, mission and hull.
+    flavorId: str | None = None
+    campaignId: str | None = None
+    shipId: str | None = None
 
 
 class MsgAdvance(WireModel):
@@ -574,6 +581,8 @@ class MsgAdminReset(WireModel):
     campaignId: str | None = None
     # Optional crew hull for the new scenario; falls back to the campaign default.
     shipId: str | None = None
+    # Optional setting for the room; falls back to the room's current flavor.
+    flavorId: str | None = None
 
 
 class MsgAdminSetShip(WireModel):
@@ -620,6 +629,35 @@ class MsgAdminSkills(WireModel):
     specializations: dict[str, int] = Field(default_factory=dict)
 
 
+class MsgAdminActivateMod(WireModel):
+    """Activate an installed setting server-wide so rooms may use it."""
+
+    type: Literal["admin.activateMod"]
+    flavorId: str
+
+
+class MsgAdminDeactivateMod(WireModel):
+    """Deactivate a setting; rooms on it fall back to the current default."""
+
+    type: Literal["admin.deactivateMod"]
+    flavorId: str
+
+
+class MsgAdminActivateModForRoom(WireModel):
+    """Switch a room onto an activated setting (rebuilds it, keeping seats)."""
+
+    type: Literal["admin.activateModForRoom"]
+    channelId: str
+    flavorId: str
+
+
+class MsgAdminSetDefaultMod(WireModel):
+    """Set (or clear, with null) the setting new rooms start on."""
+
+    type: Literal["admin.setDefaultMod"]
+    flavorId: str | None = None
+
+
 AdminC2S = Annotated[
     Union[
         MsgAdminHello,
@@ -638,6 +676,10 @@ AdminC2S = Annotated[
         MsgAdminTorpedo,
         MsgAdminSetDrive,
         MsgAdminSkills,
+        MsgAdminActivateMod,
+        MsgAdminDeactivateMod,
+        MsgAdminActivateModForRoom,
+        MsgAdminSetDefaultMod,
     ],
     Field(discriminator="type"),
 ]
@@ -650,6 +692,8 @@ class MsgAdminOk(WireModel):
     campaigns: list[CampaignBrief]
     ships: list[AdminShipBrief] = Field(default_factory=list)
     players: list[AdminPlayer] = Field(default_factory=list)
+    # Installed settings, so the GM console can offer them per room.
+    flavors: list[AdminFlavorBrief] = Field(default_factory=list)
     # The station skill catalogue, so the GM console can offer valid skill names.
     skills: list[str] = Field(default_factory=list)
 

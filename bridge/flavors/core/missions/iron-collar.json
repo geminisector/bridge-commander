@@ -1,0 +1,286 @@
+{
+  "id": "iron-collar",
+  "title": "Iron Collar Patrol",
+  "theater": "North Foster Strait",
+  "brief": "A supply war has closed the strait. Your ship is the tripwire: keep the pattern on the traffic, build a picture of who is coming through, and do not get pinned.",
+  "target": "Classify every persistent contact. Report the enemy patrol pattern. Avoid being targeted.",
+  "startHour": 2.0,
+  "patrol": {
+    "center": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "radiusKlik": 90.0
+  },
+  "clutter": 0.1,
+  "noiseRate": null,
+  "noiseFilter": null,
+  "zBand": null,
+  "escalation": 32.0,
+  "contacts": [
+    {
+      "x": -15.0,
+      "y": -58.0,
+      "z": null,
+      "heading": 282.0,
+      "speed": 30.0,
+      "type": "prospector",
+      "faction": "neutral",
+      "hostile": false,
+      "emitting": false,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    },
+    {
+      "x": -39.0,
+      "y": 3.0,
+      "z": null,
+      "heading": 255.0,
+      "speed": 44.0,
+      "type": "prospector",
+      "faction": "neutral",
+      "hostile": false,
+      "emitting": false,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    },
+    {
+      "x": 64.0,
+      "y": 25.0,
+      "z": null,
+      "heading": 337.0,
+      "speed": 77.0,
+      "type": "freighter",
+      "faction": "neutral",
+      "hostile": false,
+      "emitting": false,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    },
+    {
+      "x": 67.0,
+      "y": -46.0,
+      "z": null,
+      "heading": 179.0,
+      "speed": 84.0,
+      "type": "freighter",
+      "faction": "neutral",
+      "hostile": false,
+      "emitting": false,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    },
+    {
+      "x": 27.0,
+      "y": -37.0,
+      "z": null,
+      "heading": 167.0,
+      "speed": 100.0,
+      "type": "liner",
+      "faction": "neutral",
+      "hostile": false,
+      "emitting": false,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    },
+    {
+      "x": 24.0,
+      "y": -38.0,
+      "z": null,
+      "heading": 281.0,
+      "speed": 99.0,
+      "type": "escort",
+      "faction": "enemy",
+      "hostile": true,
+      "emitting": true,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    },
+    {
+      "x": 18.0,
+      "y": -80.0,
+      "z": null,
+      "heading": 173.0,
+      "speed": 100.0,
+      "type": "escort",
+      "faction": "enemy",
+      "hostile": true,
+      "emitting": true,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    },
+    {
+      "x": -31.0,
+      "y": -48.0,
+      "z": null,
+      "heading": 88.0,
+      "speed": 63.0,
+      "type": "capship",
+      "faction": "enemy",
+      "hostile": true,
+      "emitting": false,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    }
+  ],
+  "events": [
+    {
+      "atMinute": 64.0,
+      "template": "fleetnet"
+    },
+    {
+      "atMinute": 133.0,
+      "template": "unmarked"
+    },
+    {
+      "atMinute": 156.0,
+      "template": "distress"
+    },
+    {
+      "atMinute": 214.0,
+      "template": "orders"
+    },
+    {
+      "atMinute": 299.0,
+      "template": "probe"
+    },
+    {
+      "atMinute": 360.0,
+      "template": "weapons-warning"
+    }
+  ],
+  "hazards": [
+    {
+      "id": "ion-front",
+      "type": "ionized-nebula",
+      "title": "Ionized nebula front",
+      "startMinute": 70.0,
+      "endMinute": 150.0,
+      "intensity": 0.7,
+      "noise": 0.035,
+      "exposure": 0.4,
+      "concealment": 0.15
+    }
+  ],
+  "shipClass": null,
+  "sun": null,
+  "sunRadiusKlik": 0.0,
+  "navPoints": [
+    {
+      "id": "nav-alpha",
+      "name": "Nav Alpha",
+      "kind": "nav",
+      "pos": {
+        "x": -42.0,
+        "y": 28.0,
+        "z": 0.0
+      },
+      "radiusKlik": 8.0,
+      "chartAgeHours": 4.0,
+      "note": "freight-lane junction",
+      "jumpType": "stable",
+      "windowOpen": 0.0,
+      "windowClose": null,
+      "alignmentRequired": 0.6,
+      "interference": 0.0,
+      "dest": null
+    },
+    {
+      "id": "nav-bravo",
+      "name": "Nav Bravo",
+      "kind": "nav",
+      "pos": {
+        "x": 55.0,
+        "y": 40.0,
+        "z": 0.0
+      },
+      "radiusKlik": 8.0,
+      "chartAgeHours": 12.0,
+      "note": "asteroid shadow",
+      "jumpType": "stable",
+      "windowOpen": 0.0,
+      "windowClose": null,
+      "alignmentRequired": 0.6,
+      "interference": 0.0,
+      "dest": null
+    },
+    {
+      "id": "jump-gate",
+      "name": "Collar Jump Point",
+      "kind": "jump",
+      "pos": {
+        "x": 78.0,
+        "y": -58.0,
+        "z": 0.0
+      },
+      "radiusKlik": 5.0,
+      "chartAgeHours": 30.0,
+      "note": "pirate point; charts stale",
+      "jumpType": "stable",
+      "windowOpen": 0.0,
+      "windowClose": 600.0,
+      "alignmentRequired": 0.6,
+      "interference": 0.0,
+      "dest": null
+    }
+  ],
+  "layers": [
+    {
+      "id": "surface",
+      "name": "Surface duct",
+      "zMin": 0.0,
+      "zMax": 10.0,
+      "note": "Loud and exposed: everyone above and below hears you."
+    },
+    {
+      "id": "gradient",
+      "name": "Gradient layer",
+      "zMin": 10.0,
+      "zMax": 22.0,
+      "note": "The boundary itself: crossing it hides you and blinds you."
+    },
+    {
+      "id": "deep",
+      "name": "Deep channel",
+      "zMin": 22.0,
+      "zMax": 40.0,
+      "note": "Quiet and hard to reach; your own sensors reach less far."
+    },
+    {
+      "id": "shadow",
+      "name": "Shadow zone",
+      "zMin": 40.0,
+      "zMax": 50.0,
+      "note": "The deepest band: nearly invisible from above, nearly blind yourself."
+    }
+  ],
+  "environment": "clear-space",
+  "barriers": [
+    {
+      "id": "collar-picket",
+      "name": "Collar Picket",
+      "a": {
+        "x": -30.0,
+        "y": -80.0,
+        "z": 0.0
+      },
+      "b": {
+        "x": 70.0,
+        "y": -40.0,
+        "z": 0.0
+      },
+      "sensitivity": 0.6,
+      "faction": "enemy",
+      "note": "A listening line across the southern approach."
+    }
+  ]
+}

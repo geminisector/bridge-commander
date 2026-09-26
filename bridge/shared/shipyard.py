@@ -42,13 +42,24 @@ MODULES: dict[str, ModuleSpec] = {
 }
 
 
-def hull_entry(hull_id: str) -> dict[str, Any]:
+def hull_entry(hull_id: str, flavor_id: str | None = None) -> dict[str, Any]:
+    """A hull's curated entry (hardpoints, gunners, cargo) for a flavor.
+
+    Flavor hulls are authoritative; the legacy ``bridge_hulls.json`` table is
+    consulted only when the flavor does not define the id (which keeps the
+    pre-flavor API and tests honest).
+    """
+    from .flavors import get as get_flavor
+
+    entry = get_flavor(flavor_id).hull_entry(hull_id)
+    if entry:
+        return entry
     return HULLS.get(hull_id, {})
 
 
-def hull_hardpoints(hull_id: str) -> list[Hardpoint]:
+def hull_hardpoints(hull_id: str, flavor_id: str | None = None) -> list[Hardpoint]:
     """The mounts a hull carries, unfitted."""
-    entry = hull_entry(hull_id)
+    entry = hull_entry(hull_id, flavor_id)
     points = entry.get("hardpoints") or []
     return [
         Hardpoint(
@@ -128,7 +139,7 @@ def within_budgets(
     )
 
 
-def default_loadout(hull_id: str) -> list[Hardpoint]:
+def default_loadout(hull_id: str, flavor_id: str | None = None) -> list[Hardpoint]:
     """A sensible starting fit: a gun on every gun mount, missiles elsewhere."""
     fitted: list[Hardpoint] = []
     by_kind = {
@@ -136,7 +147,7 @@ def default_loadout(hull_id: str) -> list[Hardpoint]:
         "missile": "heat-seeker",
         "torpedo": "torpedo",
     }
-    for point in hull_hardpoints(hull_id):
+    for point in hull_hardpoints(hull_id, flavor_id):
         point.fitted = by_kind.get(point.kind, "laser-cannon")
         fitted.append(point)
     return fitted

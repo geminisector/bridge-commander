@@ -1,0 +1,765 @@
+"""Tests for the flavor plugin system (``bridge/FLAVOR_PLUGIN_PLAN.md``).
+
+These cover the four design invariants and every validator case the plan names:
+
+* data only — the loader never executes flavor content;
+* canonical units on the wire — conversion happens on display only;
+* fail closed — a bad flavor does not half-load;
+* no implicit inheritance of ids — dangling ``defaults`` and mission hull
+  references are load errors (the ``lance-corvette`` regression).
+"""
+
+from __future__ import annotations
+
+import asyncio
+import json
+import shutil
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
+import pytest
+
+from bridge.paths import package_path
+from bridge.server import db, engine, mods, rooms as rooms_mod
+from bridge.shared import flavors
+from bridge.shared.campaigns import campaign_for
+from bridge.shared.ships import ship_art, ship_class, ship_classes
+
+CORE_DIR = package_path("flavors", "core")
+
+
+@pytest.fixture(autouse=True)
+def _isolated_mod_db(tmp_path):
+    """Give every test a private mod-activation store (never the repo's data/)."""
+    db._conn = None
+    db.init_db(str(tmp_path))
+    yield
+    if db._conn is not None:
+        db._conn.close()
+    db._conn = None
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+
+def _write(path: Path, doc: object) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(doc), encoding="utf-8")
+
+
+def _flavor(root: Path, fid: str, manifest: dict | None = None, **files: object) -> Path:
+    """Create a flavor directory with a manifest and inline JSON files."""
+    directory = root / fid
+    directory.mkdir(parents=True, exist_ok=True)
+    doc = {"id": fid, "title": fid.upper()}
+    for name in files:
+        doc.setdefault(name, f"{name}.json")
+    doc.update(manifest or {})
+    _write(directory / "flavor.json", doc)
+    for name, payload in files.items():
+        _write(directory / f"{name}.json", payload)
+    return directory
+
+
+def _hull(name: str, **overrides: object) -> dict:
+    hull = {
+        "name": name,
+        "role": "Test hull",
+        "contactType": "escort",
+        "massKt": 5.0,
+        "profile": 0.5,
+        "stealth": 0.4,
+        "emission": 0.5,
+        "sensorQuality": 0.6,
+        "crew": 10,
+        "blurb": "",
+        "art": {"action": "friendly-corvette.png", "vdu": "friendly-corvette-vdu.gif"},
+        "stats": {"shieldFore": 10, "shieldAft": 10, "body": 50},
+        "hardpoints": [{"id": "fore-gun", "arc": "fore", "kind": "gun"}],
+    }
+    hull.update(overrides)
+    return hull
+
+
+@pytest.fixture
+def flavor_home(tmp_path, monkeypatch):
+    """A throwaway flavor tree seeded with the real core package."""
+    root = tmp_path / "flavors"
+    shutil.copytree(CORE_DIR, root / "core")
+    monkeypatch.setenv("FLAVORS_DIR", str(root))
+    flavors.reset_cache()
+    yield root
+    flavors.reset_cache()
+
+
+# ---------------------------------------------------------------------------
+# Core is the shipped default and stays intact
+# ---------------------------------------------------------------------------
+
+
+def test_core_flavor_loads_with_the_historical_catalog():
+    core = flavors.get("core")
+    assert core.id == "core"
+    assert len(core.hull_defs) == 15
+    assert len(core.missions) == 9
+    assert core.defaults["unknown"] == "home"
+    # The merge layer's hull tables agree with the compatibility view.
+    assert set(core.ship_classes) == set(ship_classes("core"))
+    assert "iron-collar" in core.missions
+
+
+def test_core_mission_matches_the_legacy_factory_coordinates():
+    seed = flavors.get("core").mission_seed("iron-collar")
+    assert seed.contacts[0].x == -15
+    assert seed.contacts[0].y == -58
+    assert seed.contacts[0].heading == 282
+    assert seed.contacts[0].speed == 30
+
+
+def test_available_lists_core_first_with_the_example_flavor():
+    ids = flavors.available()
+    assert ids[0] == "core"
+    assert "wc" in ids
+
+
+# ---------------------------------------------------------------------------
+# Units: conversion on display only
+# ---------------------------------------------------------------------------
+
+AU = 1.495978707e8
+MM = 1.0e3
+
+
+def _star_trek_units() -> dict:
+    # ``min`` is in canonical klik: the AU rung opens at ~0.67 AU, the Mm rung
+    # at 1 Mm (1000 klik), so a knife fight stays in klik and an intercept in AU.
+    return {
+        "distance": {
+            "base": "klik",
+            "ladder": [
+                {"min": 1.0e8, "unit": "AU", "factor": AU, "precision": 4},
+                {"min": 1.0e3, "unit": "Mm", "factor": MM, "precision": 1},
+                {"min": 0, "unit": "klik", "factor": 1.0, "precision": 1},
+            ],
+        },
+        "speed": {
+            "base": "kps",
+            "factor": 1.0,
+            "dial": {"15": "Silent Running", "60": "Cruise", "100": "Full Ahead"},
+        },
+    }
+
+
+def test_units_scale_both_directions(flavor_home):
+    _flavor(flavor_home, "stk", {"title": "Star Trek"}, units=_star_trek_units())
+    stk = flavors.get("stk")
+    core = flavors.get("core")
+    # 40 AU of canonical distance renders as AU under stk...
+    assert stk.units.format_distance(40 * AU) == "40.0000 AU"
+    # ...and the same value is plain klik under core, which is the point.
+    assert core.units.format_distance(40 * AU) == "5983914828.0 klik"
+    # A 40-klik knife fight is still klik under both.
+    assert core.units.format_distance(40) == "40.0 klik"
+    assert stk.units.format_distance(40) == "40.0 klik"
+    assert stk.units.format_distance(2000) == "2.0 Mm"
+    assert stk.units.speed_dial_name(60) == "Cruise"
+    assert stk.units.unit_label("distance") == "klik"
+
+
+def test_display_sites_use_the_room_flavor(flavor_home):
+    _flavor(flavor_home, "stk", {"title": "Star Trek"}, units=_star_trek_units())
+    state = engine.create_state(
+        "units", "inst", campaign_for("iron-collar", "stk"), flavor_id="stk"
+    )
+    assert state.flavorId == "stk"
+    assert engine._fd(state, 40 * AU) == "40.0000 AU"
+    core_state = engine.create_state(
+        "units-core", "inst", campaign_for("iron-collar", "core"), flavor_id="core"
+    )
+    assert engine._fd(core_state, 40) == "40.0 klik"
+
+
+def test_flavor_never_enters_the_simulation(flavor_home):
+    """Invariant 1: identical simulated time is byte-identical across flavors."""
+    _flavor(flavor_home, "stk", {"title": "Star Trek"}, units=_star_trek_units())
+    core_state = engine.create_state(
+        "same-room", "inst", campaign_for("iron-collar", "core"), flavor_id="core"
+    )
+    stk_state = engine.create_state(
+        "same-room", "inst", campaign_for("iron-collar", "stk"), flavor_id="stk"
+    )
+    engine.advance(core_state, 120)
+    engine.advance(stk_state, 120)
+    core_dump = json.loads(core_state.model_dump_json())
+    stk_dump = json.loads(stk_state.model_dump_json())
+    core_dump.pop("flavorId")
+    stk_dump.pop("flavorId")
+    assert core_dump == stk_dump
+
+
+# ---------------------------------------------------------------------------
+# Validator: fail closed
+# ---------------------------------------------------------------------------
+
+
+def test_validator_rejects_a_dangling_default(flavor_home):
+    _flavor(
+        flavor_home,
+        "bad",
+        {"extends": None},
+        ships={"hulls": {"bad.one": _hull("One")}, "defaults": {"escort": "bad.missing"}},
+    )
+    with pytest.raises(flavors.FlavorError, match="defaults"):
+        flavors.load_flavor("bad")
+
+
+def test_core_defaults_regression_is_caught(flavor_home):
+    """The lance-corvette case: a catalog missing a hull core defaults to."""
+    core_defaults = json.loads((CORE_DIR / "ships.json").read_text())["defaults"]
+    _flavor(
+        flavor_home,
+        "broken",
+        {"extends": None},
+        ships={"hulls": {"broken.one": _hull("One")}, "defaults": core_defaults},
+    )
+    with pytest.raises(flavors.FlavorError):
+        flavors.load_flavor("broken")
+
+
+def test_validator_rejects_a_mission_naming_a_missing_hull(flavor_home):
+    mission = {
+        "id": "bad.mission",
+        "title": "Bad",
+        "theater": "Nowhere",
+        "brief": "",
+        "target": "",
+        "startHour": 0,
+        "patrol": {"center": {"x": 0, "y": 0, "z": 0}, "radiusKlik": 50},
+        "clutter": 0,
+        "escalation": 10,
+        "contacts": [
+            {
+                "x": 0,
+                "y": 0,
+                "heading": 0,
+                "speed": 0,
+                "type": "fighter",
+                "faction": "enemy",
+                "hostile": True,
+                "emitting": False,
+                "shipClass": "bad.ghost",
+            }
+        ],
+    }
+    directory = _flavor(
+        flavor_home,
+        "bad",
+        {"extends": None},
+        ships={"hulls": {"bad.one": _hull("One")}, "defaults": {"unknown": "bad.one"}},
+    )
+    _write(directory / "missions" / "bad.mission.json", mission)
+    _write(directory / "flavor.json", {"id": "bad", "extends": None, "ships": "ships.json", "missions": "missions/"})
+    with pytest.raises(flavors.FlavorError, match="unknown hull"):
+        flavors.load_flavor("bad")
+
+
+def test_validator_rejects_missing_art(flavor_home):
+    _flavor(
+        flavor_home,
+        "bad",
+        {"extends": None},
+        ships={
+            "hulls": {
+                "bad.one": _hull("One", art={"action": "not-there.png", "vdu": ""})
+            },
+            "defaults": {"unknown": "bad.one"},
+        },
+    )
+    with pytest.raises(flavors.FlavorError, match="art not on disk"):
+        flavors.load_flavor("bad")
+
+
+def test_validator_rejects_an_unsorted_ladder():
+    with pytest.raises(flavors.FlavorError, match="descending"):
+        flavors.parse_units(
+            {
+                "distance": {
+                    "ladder": [
+                        {"min": 0, "unit": "klik", "factor": 1.0},
+                        {"min": 100, "unit": "Mm", "factor": 1000.0},
+                    ]
+                }
+            }
+        )
+
+
+def test_validator_requires_the_last_rung_to_be_zero():
+    with pytest.raises(flavors.FlavorError, match="min 0"):
+        flavors.parse_units(
+            {"distance": {"ladder": [{"min": 5, "unit": "klik", "factor": 1.0}]}}
+        )
+
+
+def test_validator_rejects_a_non_positive_factor():
+    with pytest.raises(flavors.FlavorError, match="positive"):
+        flavors.parse_units(
+            {"distance": {"ladder": [{"min": 0, "unit": "klik", "factor": 0}]}}
+        )
+
+
+def test_validator_rejects_a_bad_dial_key():
+    with pytest.raises(flavors.FlavorError, match="0-100"):
+        flavors.parse_units({"speed": {"dial": {"150": "Too fast"}}})
+
+
+def test_validator_rejects_an_extends_cycle(flavor_home):
+    _flavor(flavor_home, "a", {"extends": "b"})
+    _flavor(flavor_home, "b", {"extends": "a"})
+    with pytest.raises(flavors.FlavorError, match="cycle"):
+        flavors.load_flavor("a")
+
+
+def test_get_fails_closed_to_core_with_a_logged_reason(flavor_home, caplog):
+    _flavor(
+        flavor_home,
+        "bad",
+        {"extends": None},
+        ships={"hulls": {}, "defaults": {"escort": "bad.missing"}},
+    )
+    with caplog.at_level("WARNING"):
+        resolved = flavors.get("bad")
+    assert resolved.id == "core"
+    assert "failed to load" in caplog.text
+
+
+def test_validator_rejects_duplicate_contact_names(flavor_home):
+    mission = {
+        "id": "bad.dup",
+        "title": "Dup",
+        "theater": "Nowhere",
+        "brief": "",
+        "target": "",
+        "startHour": 0,
+        "patrol": {"center": {"x": 0, "y": 0, "z": 0}, "radiusKlik": 50},
+        "clutter": 0,
+        "escalation": 10,
+        "contacts": [
+            {"x": 0, "y": 0, "heading": 0, "speed": 0, "type": "fighter", "faction": "enemy", "hostile": True, "emitting": False, "name": "Same"},
+            {"x": 1, "y": 1, "heading": 0, "speed": 0, "type": "fighter", "faction": "enemy", "hostile": True, "emitting": False, "name": "Same"},
+        ],
+    }
+    directory = _flavor(
+        flavor_home,
+        "bad",
+        {"extends": None},
+        ships={"hulls": {"bad.one": _hull("One")}, "defaults": {"unknown": "bad.one"}},
+    )
+    _write(directory / "missions" / "bad.dup.json", mission)
+    _write(directory / "flavor.json", {"id": "bad", "extends": None, "ships": "ships.json", "missions": "missions/"})
+    with pytest.raises(flavors.FlavorError, match="repeats a contact name"):
+        flavors.load_flavor("bad")
+
+
+def test_non_numeric_hull_fields_fail_closed(flavor_home):
+    _flavor(
+        flavor_home,
+        "bad",
+        {"extends": None},
+        ships={
+            "hulls": {"bad.one": _hull("One", massKt="abc")},
+            "defaults": {"unknown": "bad.one"},
+        },
+    )
+    with pytest.raises(flavors.FlavorError, match="massKt"):
+        flavors.load_flavor("bad")
+    # The fail-closed boundary itself: a ValueError must not escape get()/summaries().
+    assert flavors.get("bad").id == "core"
+    assert any(row["id"] == "core" for row in flavors.summaries())
+
+
+def test_a_stat_that_is_not_a_number_fails_closed(flavor_home):
+    _flavor(
+        flavor_home,
+        "bad",
+        {"extends": None},
+        ships={
+            "hulls": {"bad.one": _hull("One", stats={"shieldFore": "abc"})},
+            "defaults": {"unknown": "bad.one"},
+        },
+    )
+    with pytest.raises(flavors.FlavorError, match="shieldFore"):
+        flavors.load_flavor("bad")
+
+
+def test_validator_requires_a_hull_catalog(flavor_home):
+    _flavor(flavor_home, "empty", {"extends": None}, ships={"hulls": {}, "defaults": {}})
+    with pytest.raises(flavors.FlavorError, match="no hulls"):
+        flavors.load_flavor("empty")
+
+
+def test_validator_requires_a_mission(flavor_home):
+    _flavor(
+        flavor_home,
+        "nomissions",
+        {"extends": None},
+        ships={
+            "hulls": {"nomissions.one": _hull("One")},
+            "defaults": {"unknown": "nomissions.one"},
+        },
+    )
+    with pytest.raises(flavors.FlavorError, match="no missions"):
+        flavors.load_flavor("nomissions")
+
+
+def test_validator_rejects_an_unknown_defaults_key(flavor_home):
+    _flavor(
+        flavor_home,
+        "typo",
+        {"extends": None},
+        ships={
+            "hulls": {"typo.one": _hull("One")},
+            "defaults": {"unknown": "typo.one", "figher": "typo.one"},
+        },
+    )
+    with pytest.raises(flavors.FlavorError, match="unknown contact type"):
+        flavors.load_flavor("typo")
+
+
+def test_validator_rejects_bad_hardpoints(flavor_home):
+    _flavor(
+        flavor_home,
+        "bad",
+        {},
+        ships={"hulls": {"bad.one": _hull("One", hardpoints="fore-gun")}},
+    )
+    with pytest.raises(flavors.FlavorError, match="hardpoints must be a list"):
+        flavors.load_flavor("bad")
+
+
+def test_terrain_overrides_resolve_through_the_chain(flavor_home):
+    _flavor(flavor_home, "rock", {}, ships={"terrain": {"asteroid": "asteroid.png"}})
+    flavors.reset_cache()
+    assert flavors.get("rock").terrain_images["asteroid"] == "/img/action/asteroid.png"
+    from bridge.shared.ships import terrain_image
+
+    assert terrain_image("asteroid", "rock") == "/img/action/asteroid.png"
+
+
+def test_missing_terrain_art_fails(flavor_home):
+    _flavor(flavor_home, "bad", {}, ships={"terrain": {"asteroid": "nope.png"}})
+    with pytest.raises(flavors.FlavorError, match="terrain"):
+        flavors.load_flavor("bad")
+
+
+def test_wc_mm_rung_is_canonical():
+    wc_units = flavors.get("wc").units
+    # 1 Mm = 1000 klik, so a 200 Mm distance renders in Mm, not klik.
+    assert wc_units.format_distance(200_000) == "200.0 Mm"
+    assert wc_units.format_speed(60) == "60 kps"
+
+
+# ---------------------------------------------------------------------------
+# Ships, art and the merge layer
+# ---------------------------------------------------------------------------
+
+
+def test_flavor_hull_with_art_resolves_to_the_flavor_image(flavor_home):
+    directory = _flavor(
+        flavor_home,
+        "art",
+        {},
+        ships={
+            "hulls": {
+                "art.one": _hull("Art One", art={"action": "art-one.png", "vdu": ""})
+            }
+        },
+    )
+    (directory / "assets" / "action").mkdir(parents=True)
+    shutil.copy(package_path("img", "action", "enemy-fighter.png"), directory / "assets" / "action" / "art-one.png")
+    flavors.reset_cache()
+    resolved = flavors.get("art")
+    action, _vdu = resolved.ship_art["art.one"]
+    assert action == "/img/f/art/action/art-one.png"
+    assert resolved.url_exists(action)
+
+
+def test_flavor_hull_without_art_falls_back_to_core(flavor_home):
+    _flavor(flavor_home, "reskin", {}, ships={"hulls": {"home": {"name": "Reskinned"}}})
+    flavors.reset_cache()
+    resolved = flavors.get("reskin")
+    assert resolved.ship_classes["home"].name == "Reskinned"
+    # The inherited field is the core art, not a blank.
+    assert resolved.ship_art["home"][0] == "/img/action/friendly-cruiser.png"
+    assert resolved.url_exists(resolved.ship_art["home"][0])
+
+
+def test_defaults_are_validated_against_the_merged_catalog(flavor_home):
+    _flavor(
+        flavor_home,
+        "ext",
+        {},
+        ships={"hulls": {"ext.one": _hull("One")}, "defaults": {"fighter": "ext.one"}},
+    )
+    flavors.reset_cache()
+    resolved = flavors.get("ext")
+    # Inherited core hulls remain, and the new default resolves.
+    assert "home" in resolved.ship_classes
+    assert ship_class("ext.one", "ext").name == "One"
+    assert resolved.defaults["fighter"] == "ext.one"
+
+
+def test_a_flavor_can_replace_core_wholesale(flavor_home):
+    """``extends: null`` is a standalone setting: no core hulls or missions leak in."""
+    mission = {
+        "id": "solo.run",
+        "title": "Solo Run",
+        "theater": "Nowhere",
+        "brief": "",
+        "target": "",
+        "startHour": 0,
+        "patrol": {"center": {"x": 0, "y": 0, "z": 0}, "radiusKlik": 40},
+        "clutter": 0.1,
+        "escalation": 5,
+        "shipClass": "solo.one",
+        "contacts": [
+            {
+                "x": 10,
+                "y": 5,
+                "heading": 0,
+                "speed": 40,
+                "type": "fighter",
+                "faction": "enemy",
+                "hostile": True,
+                "emitting": True,
+                "shipClass": "solo.one",
+            }
+        ],
+    }
+    directory = _flavor(
+        flavor_home,
+        "solo",
+        {"extends": None},
+        ships={"hulls": {"solo.one": _hull("Solo One")}, "defaults": {"unknown": "solo.one"}},
+    )
+    _write(directory / "missions" / "solo.run.json", mission)
+    _write(
+        directory / "flavor.json",
+        {"id": "solo", "extends": None, "ships": "ships.json", "missions": "missions/"},
+    )
+    flavors.reset_cache()
+    solo = flavors.get("solo")
+    assert solo.extends is None
+    # The core catalog is genuinely absent, not merged in.
+    assert set(solo.ship_classes) == {"solo.one"}
+    assert "iron-collar" not in solo.missions
+    state = engine.create_state(
+        "solo-room", "inst", campaign_for("solo.run", "solo"), flavor_id="solo"
+    )
+    assert state.flavorId == "solo"
+    assert state.ship.shipClass == "solo.one"
+    assert state.contacts[0].shipClass == "solo.one"
+
+
+def test_art_urls_are_per_flavor_for_a_flavor_hull():
+    wc = flavors.get("wc")
+    action, vdu = ship_art("wc.tigers-claw", "wc")
+    # wc ships no assets of its own, so its hulls resolve through core art.
+    assert action == "/img/action/friendly-cruiser.png"
+    assert wc.url_exists(action)
+    # The registry name comes from the flavor's own ships.json (kept out of this
+    # test's source, because the retired-vocabulary gate scans test files).
+    expected_name = json.loads(
+        (package_path("flavors", "wc", "ships.json")).read_text(encoding="utf-8")
+    )["hulls"]["wc.tigers-claw"]["names"][0]
+    assert wc.ship_names["wc.tigers-claw"] == expected_name
+
+
+# ---------------------------------------------------------------------------
+# Theme
+# ---------------------------------------------------------------------------
+
+
+def test_core_theme_is_unchanged():
+    css = flavors.get("core").theme_css
+    assert "--bg:#0b0d17" in css
+    assert "--font-mono:'Share Tech Mono',monospace" in css
+
+
+def test_flavor_theme_overrides_core(flavor_home):
+    directory = _flavor(flavor_home, "dark", {})
+    (directory / "theme.css").write_text(":root{--bg:#000}", encoding="utf-8")
+    _write(directory / "flavor.json", {"id": "dark", "theme": "theme.css"})
+    flavors.reset_cache()
+    assert flavors.get("dark").theme_css == ":root{--bg:#000}"
+
+
+def test_missing_theme_falls_back_to_core(flavor_home):
+    _flavor(flavor_home, "notheme", {"theme": "missing.css"})
+    flavors.reset_cache()
+    resolved = flavors.get("notheme")
+    assert resolved.theme_css == flavors.get("core").theme_css
+
+
+def test_index_injection_places_the_theme_after_activity_css():
+    from bridge.server.main import _render_index
+
+    html = _render_index(package_path("activity", "dist"), "wc")
+    css_at = html.index('href="/activity.css"')
+    theme_at = html.index('href="/flavor/wc/theme.css"')
+    assert css_at < theme_at
+
+
+def test_theme_route_serves_css():
+    from bridge.server.main import flavor_theme
+
+    response = asyncio.run(flavor_theme("core"))
+    assert response.status_code == 200
+    assert b"--bg:#0b0d17" in response.body
+
+
+# ---------------------------------------------------------------------------
+# Per-flavor cache and rooms
+# ---------------------------------------------------------------------------
+
+
+def test_two_flavors_keep_their_own_catalogs_in_one_process():
+    core = flavors.get("core")
+    wc = flavors.get("wc")
+    assert core is not wc
+    assert core.ship_classes["home"] is not wc.ship_classes.get("home")
+    assert core.defaults["unknown"] == "home"
+    assert wc.defaults["unknown"] == "wc.tigers-claw"
+    assert core.units.format_distance(40) == "40.0 klik"
+    assert wc.units is not core.units
+
+
+def test_per_flavor_caches_are_safe_under_concurrent_first_use():
+    flavors.reset_cache()
+
+    def resolve(flavor_id: str) -> str:
+        return flavors.get(flavor_id).id
+
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        results = list(pool.map(resolve, ["core", "wc"] * 4))
+    assert results == ["core", "wc"] * 4
+    assert flavors.get("core").ship_art["home"][0].startswith("/img/action/")
+    assert flavors.get("wc").ship_art["wc.tigers-claw"][0].startswith("/img/action/")
+
+
+def test_a_room_remembers_its_flavor():
+    state = engine.create_state(
+        "wc-room", "inst", campaign_for("wc.vega-run", "wc"), flavor_id="wc"
+    )
+    assert state.flavorId == "wc"
+    assert state.ship.shipClass == "wc.tigers-claw"
+    assert state.contacts[0].shipClass.startswith("wc.")
+
+
+def test_handoff_pack_names_the_setting():
+    state = engine.create_state(
+        "handoff-wc", "inst", campaign_for("wc.vega-run", "wc"), flavor_id="wc"
+    )
+    state.contacts[0].everDetected = True
+    engine.force_handoff(state, "Captain")
+    assert state.handoffPack is not None
+    assert state.handoffPack.flavorId == "wc"
+    assert state.handoffPack.flavorTitle == flavors.get("wc").title
+
+
+def test_removed_flavor_falls_back_to_core_on_reload(monkeypatch):
+    state = engine.create_state(
+        "ghost-room", "inst", campaign_for("iron-collar", "core"), flavor_id="core"
+    )
+    state.flavorId = "ghost"
+    monkeypatch.setattr(rooms_mod, "load_room", lambda channel: state)
+    room = rooms_mod.Room.load_or_create("ghost-room", "inst")
+    assert room.state.flavorId == "core"
+    # Still playable: the sim advances without a missing-flavor crash.
+    engine.advance(room.state, 30)
+
+
+def test_room_reconfigure_preserves_seats():
+    flavor_home_state = engine.create_state(
+        "reconf", "inst", campaign_for("iron-collar", "core"), flavor_id="core"
+    )
+    room = rooms_mod.Room("reconf", "inst", flavor_home_state)
+    mods.activate("wc")
+    asyncio.run(room.reconfigure(flavor_id="wc", campaign_id="wc.vega-run"))
+    assert room.state.flavorId == "wc"
+    assert room.state.campaign.id == "wc.vega-run"
+
+
+def test_default_flavor_env_picks_the_room_setting(monkeypatch):
+    monkeypatch.setenv("DEFAULT_FLAVOR", "wc")
+    assert flavors.default_flavor_id() == "wc"
+    monkeypatch.setenv("DEFAULT_FLAVOR", "not-installed")
+    assert flavors.default_flavor_id() == "core"
+
+
+# ---------------------------------------------------------------------------
+# CLI / schemas
+# ---------------------------------------------------------------------------
+
+
+def test_list_flavors_cli(capsys):
+    from bridge.server.main import main
+
+    import sys
+
+    argv = sys.argv
+    sys.argv = ["bridge", "--list-flavors"]
+    try:
+        main()
+    finally:
+        sys.argv = argv
+    out = capsys.readouterr().out
+    assert "core" in out
+    assert "wc" in out
+    assert "INVALID" not in out
+
+
+def test_check_flavor_cli_reports_failure(flavor_home, capsys):
+    from bridge.server.main import main
+
+    import sys
+
+    _flavor(
+        flavor_home,
+        "bad",
+        {"extends": None},
+        ships={"hulls": {}, "defaults": {"escort": "bad.missing"}},
+    )
+    argv = sys.argv
+    sys.argv = ["bridge", "--check-flavor", "bad"]
+    try:
+        with pytest.raises(SystemExit) as excinfo:
+            main()
+    finally:
+        sys.argv = argv
+    assert excinfo.value.code == 1
+    assert "FAIL bad" in capsys.readouterr().out
+
+
+def test_shipped_schemas_are_valid_json():
+    schema_dir = package_path("flavors", "schema")
+    names = sorted(path.name for path in schema_dir.glob("*.json"))
+    assert names == [
+        "callsigns.schema.json",
+        "flavor.schema.json",
+        "mission.schema.json",
+        "ships.schema.json",
+        "units.schema.json",
+    ]
+    for path in schema_dir.glob("*.json"):
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        assert doc["$schema"].startswith("https://json-schema.org/")
+
+
+def test_every_shipped_flavor_loads():
+    rows = {row["id"]: row for row in flavors.summaries()}
+    assert rows["core"]["valid"]
+    assert rows["wc"]["valid"]
+    assert rows["wc"]["hulls"] >= 15
+    assert rows["wc"]["missions"] >= 2

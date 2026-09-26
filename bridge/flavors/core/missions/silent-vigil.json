@@ -1,0 +1,185 @@
+{
+  "id": "silent-vigil",
+  "title": "Silent Vigil",
+  "theater": "Ransom Rift",
+  "brief": "A hostile hunter-killer screen is sweeping the rift for six hours while a convoy slips through behind you. Your job is to be invisible: no radar, no transmissions, no track. Sit dark and let the watch pass.",
+  "target": "Survive six hours undetected. No hostile may build a track on you.",
+  "startHour": 0.0,
+  "patrol": {
+    "center": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "radiusKlik": 130.0
+  },
+  "clutter": 0.25,
+  "noiseRate": null,
+  "noiseFilter": null,
+  "zBand": null,
+  "escalation": 6.0,
+  "contacts": [
+    {
+      "x": -150.0,
+      "y": 90.0,
+      "z": null,
+      "heading": 90.0,
+      "speed": 70.0,
+      "type": "escort",
+      "faction": "enemy",
+      "hostile": true,
+      "emitting": true,
+      "name": null,
+      "shipClass": "enemy-escort",
+      "radiusKlik": null
+    },
+    {
+      "x": -120.0,
+      "y": -100.0,
+      "z": null,
+      "heading": 0.0,
+      "speed": 55.0,
+      "type": "escort",
+      "faction": "enemy",
+      "hostile": true,
+      "emitting": false,
+      "name": null,
+      "shipClass": "enemy-escort",
+      "radiusKlik": null
+    },
+    {
+      "x": -70.0,
+      "y": 80.0,
+      "z": null,
+      "heading": 90.0,
+      "speed": 90.0,
+      "type": "fighter",
+      "faction": "enemy",
+      "hostile": true,
+      "emitting": true,
+      "name": null,
+      "shipClass": "enemy-heavy-fighter",
+      "radiusKlik": null
+    },
+    {
+      "x": 40.0,
+      "y": -60.0,
+      "z": null,
+      "heading": 180.0,
+      "speed": 40.0,
+      "type": "prospector",
+      "faction": "neutral",
+      "hostile": false,
+      "emitting": false,
+      "name": null,
+      "shipClass": "friendly-prospector",
+      "radiusKlik": null
+    }
+  ],
+  "events": [
+    {
+      "atMinute": 84.0,
+      "template": "probe"
+    },
+    {
+      "atMinute": 174.0,
+      "template": "challenge"
+    },
+    {
+      "atMinute": 257.0,
+      "template": "relay"
+    },
+    {
+      "atMinute": 336.0,
+      "template": "unmarked"
+    }
+  ],
+  "hazards": [
+    {
+      "id": "rift-veil",
+      "type": "ionized-nebula",
+      "title": "Rift veil",
+      "startMinute": 0.0,
+      "endMinute": 200.0,
+      "intensity": 0.6,
+      "noise": 0.02,
+      "exposure": 0.2,
+      "concealment": 0.35
+    }
+  ],
+  "shipClass": "home",
+  "sun": null,
+  "sunRadiusKlik": 0.0,
+  "navPoints": [
+    {
+      "id": "vigil-post",
+      "name": "Vigil Post",
+      "kind": "nav",
+      "pos": {
+        "x": 20.0,
+        "y": 74.0,
+        "z": 0.0
+      },
+      "radiusKlik": 14.0,
+      "chartAgeHours": 3.0,
+      "note": "cold hold",
+      "jumpType": "stable",
+      "windowOpen": 0.0,
+      "windowClose": null,
+      "alignmentRequired": 0.6,
+      "interference": 0.0,
+      "dest": null
+    },
+    {
+      "id": "listening-well",
+      "name": "Listening Well",
+      "kind": "nav",
+      "pos": {
+        "x": -66.0,
+        "y": 36.0,
+        "z": 0.0
+      },
+      "radiusKlik": 8.0,
+      "chartAgeHours": 22.0,
+      "note": "mineral-quiet pocket",
+      "jumpType": "stable",
+      "windowOpen": 0.0,
+      "windowClose": null,
+      "alignmentRequired": 0.6,
+      "interference": 0.0,
+      "dest": null
+    }
+  ],
+  "layers": [
+    {
+      "id": "surface",
+      "name": "Surface duct",
+      "zMin": 0.0,
+      "zMax": 10.0,
+      "note": "Loud and exposed: everyone above and below hears you."
+    },
+    {
+      "id": "gradient",
+      "name": "Gradient layer",
+      "zMin": 10.0,
+      "zMax": 22.0,
+      "note": "The boundary itself: crossing it hides you and blinds you."
+    },
+    {
+      "id": "deep",
+      "name": "Deep channel",
+      "zMin": 22.0,
+      "zMax": 40.0,
+      "note": "Quiet and hard to reach; your own sensors reach less far."
+    },
+    {
+      "id": "shadow",
+      "name": "Shadow zone",
+      "zMin": 40.0,
+      "zMax": 50.0,
+      "note": "The deepest band: nearly invisible from above, nearly blind yourself."
+    }
+  ],
+  "environment": "clear-space",
+  "barriers": []
+}

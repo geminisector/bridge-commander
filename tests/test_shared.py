@@ -431,11 +431,10 @@ def test_the_model_ship_class_default_is_a_real_hull():
     assert default in SHIP_CLASSES, default
 
 
-def test_every_art_target_exists_and_the_fallback_agrees():
+def test_every_art_target_exists_and_the_resource_override_agrees():
     import json
 
     from bridge.paths import asset_root, resource_path
-    from bridge.shared.ships import _FALLBACK_ACTION
 
     root = asset_root()
     data = json.loads(resource_path("bridge_ship_art.json").read_text(encoding="utf-8"))
@@ -445,7 +444,7 @@ def test_every_art_target_exists_and_the_fallback_agrees():
         vdu = entry["vdu"].removeprefix("/img/")
         assert (root / action).is_file(), action
         assert (root / vdu).is_file(), vdu
-        stem = _FALLBACK_ACTION[hull_id].removesuffix(".png")
-        assert action == f"action/{stem}.png", hull_id
-        assert vdu == f"vdu/{stem}-vdu.gif", hull_id
+        # The flavor's core/ships.json was migrated from this resource, so the
+        # two must still agree hull-for-hull.
+        assert SHIP_ART[hull_id] == (entry["action"], entry["vdu"]), hull_id
 

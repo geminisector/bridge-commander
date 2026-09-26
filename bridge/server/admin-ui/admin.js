@@ -5,6 +5,7 @@
   let token = '';
   let channels = [];
   let ships = [];
+  let flavors = [];
   let state = null;
   let dragId = null;
   let players = [];
@@ -36,7 +37,7 @@
   const roomOptions = () => {
     $('room').innerHTML = channels.length
       ? channels
-          .map((c) => `<option value="${esc(c.channelId)}">${esc(c.title)} · ${c.status} · ${c.players} crew</option>`)
+          .map((c) => `<option value="${esc(c.channelId)}">${esc(c.title)} · ${c.status} · ${c.players} crew · ${esc(c.flavorId || 'core')}</option>`)
           .join('')
       : '<option value="">No active rooms</option>';
   };
@@ -57,6 +58,62 @@
     $('campaign').innerHTML =
       '<option value="">Default</option>' +
       list.map((c) => `<option value="${esc(c.id)}">${esc(c.title)} · ${esc(c.theater)}</option>`).join('');
+  };
+
+  const flavorOptions = (list) => {
+    $('flavor').innerHTML =
+      '<option value="">Room default</option>' +
+      (list || [])
+        .filter((f) => f.valid !== false)
+        .map(
+          (f) =>
+            `<option value="${esc(f.id)}" ${f.enabled ? '' : 'disabled'}>${esc(f.title)} · ${f.hulls} hulls · ${f.missions} missions${f.enabled ? '' : ' (inactive)'}</option>`,
+        )
+        .join('');
+  };
+
+  // ---- mod manager --------------------------------------------------------
+
+  const renderMods = () => {
+    if (!flavors.length) {
+      $('mods').innerHTML = '<span class="empty">No mods installed.</span>';
+      return;
+    }
+    $('mods').innerHTML = flavors
+      .map((f) => {
+        const tags = [];
+        if (f.core) tags.push('ALWAYS ON');
+        if (f.default) tags.push('DEFAULT');
+        if (!f.valid) tags.push('INVALID');
+        const note = tags.length ? ` · ${tags.join(' · ')}` : '';
+        const detail = f.valid ? '' : ` · ${esc(f.error || 'failed to load')}`;
+        return `<div class="contact mod-row"><span><strong>${esc(f.title)}</strong><small>${esc(f.id)} · ${f.hulls} hulls · ${f.missions} missions${note}${detail}</small></span><span class="mod-actions">${
+          f.core
+            ? ''
+            : `<button data-mod-toggle="${esc(f.id)}" title="${f.enabled ? 'Deactivate this setting server-wide' : 'Activate this setting server-wide'}">${f.enabled ? 'DEACTIVATE' : 'ACTIVATE'}</button>`
+        }<button data-mod-room="${esc(f.id)}" ${f.enabled ? '' : 'disabled'} title="Switch the selected room onto this setting">USE IN ROOM</button><button data-mod-default="${esc(f.id)}" ${f.enabled ? '' : 'disabled'} title="New rooms start on this setting">SET DEFAULT</button></span></div>`;
+      })
+      .join('');
+    document.querySelectorAll('[data-mod-toggle]').forEach((button) => {
+      button.onclick = () =>
+        send({
+          type: button.textContent === 'DEACTIVATE' ? 'admin.deactivateMod' : 'admin.activateMod',
+          flavorId: button.dataset.modToggle,
+        });
+    });
+    document.querySelectorAll('[data-mod-room]').forEach((button) => {
+      button.onclick = () => {
+        const channelId = currentRoom();
+        if (!channelId) return error('Select a room before activating a mod for it.');
+        send({ type: 'admin.activateModForRoom', channelId, flavorId: button.dataset.modRoom });
+      };
+    });
+    document.querySelectorAll('[data-mod-default]').forEach((button) => {
+      button.onclick = () => send({ type: 'admin.setDefaultMod', flavorId: button.dataset.modDefault });
+    });
+    const active = flavors.filter((f) => f.enabled).length;
+    const def = flavors.find((f) => f.default);
+    $('mod-meta').textContent = `${active} active · default ${def ? def.id : 'core'}`;
   };
 
   const fillSpawnType = () => {
@@ -263,10 +320,13 @@
       if (m.type === 'admin.ok') {
         channels = m.channels;
         ships = m.ships || [];
+        flavors = m.flavors || [];
         players = m.players || [];
         roomOptions();
         renderPlayers();
+        renderMods();
         campaignOptions(m.campaigns);
+        flavorOptions(flavors);
         $('crew-ship').innerHTML = shipOptions('');
         $('spawn-ship').innerHTML = shipOptions('');
         if ((m.skills || []).length && !$('skill-name').options.length) {
@@ -286,7 +346,9 @@
     e.preventDefault();
     connect();
   };
-  $('refresh').onclick = () => send({ type: 'admin.list' });
+  $('refresh').onclick = () => send({ type: 'admin.list', channelId: currentRoom() || null });
+  $('room').onchange = () => send({ type: 'admin.list', channelId: currentRoom() || null });
+  $('mod-clear-default').onclick = () => send({ type: 'admin.setDefaultMod', flavorId: null });
   $('skill-btn').onclick = () => {
     const channelId = currentRoom();
     const skill = $('skill-name').value;
@@ -308,6 +370,7 @@
       send({
         type: 'admin.reset',
         channelId,
+        flavorId: $('flavor').value || null,
         campaignId: $('campaign').value || null,
         shipId: $('crew-ship').value || null,
       });

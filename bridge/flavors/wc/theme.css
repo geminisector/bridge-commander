@@ -1,0 +1,27 @@
+/* wc — a Wing Commander-flavoured re-skin of the core watch.
+   Amber phosphor over near-black, with a heavier display face.  This is a
+   straight :root override: every existing markup rule keeps resolving, only
+   the palette and type change. */
+
+:root{
+  --bg:#0a0a0c;
+  --bg-deep:#000;
+  --panel:#141414;
+  --panel-2:#1e1e1e;
+  --line:#3a3a3a;
+  --text:#e8e8e8;
+  --text-dim:#909090;
+  --accent:#ff9c1a;
+  --accent-hover:#ffb84d;
+  --glow:0 0 8px rgba(255,156,26,.35);
+  --glow-hover:0 0 15px rgba(255,184,77,.75),0 0 25px rgba(255,184,77,.35);
+  --radius:8px;
+  --cyan:var(--accent);
+  --dim:#7a88aa;
+  --amber:#f9d71c;
+  --red:#ff6b73;
+  --green:#21d054;
+  --active:#3d2a08;
+  --font-display:'Orbitron',system-ui,sans-serif;
+  --font-mono:'Share Tech Mono',ui-monospace,monospace;
+}

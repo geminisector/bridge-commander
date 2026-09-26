@@ -11,16 +11,21 @@ from __future__ import annotations
 import asyncio
 import inspect
 import json
+import logging
 import threading
 from dataclasses import dataclass
 from typing import Any, Callable
 
 from ..shared.campaigns import campaign_for
+from ..shared.flavors import get as get_flavor
 from ..shared.types import GameState, SeatId
+from . import mods
 from .db import load_room, save_room
 from .engine import create_state
 
 SAVE_DEBOUNCE_SECONDS = 0.15
+
+log = logging.getLogger("bridge.rooms")
 
 
 @dataclass
@@ -106,6 +111,29 @@ def _ws_open(ws: Any) -> bool:
     return getattr(ws, "readyState", 1) == 1
 
 
+def _resolve_room_flavor(state: GameState) -> str:
+    """Pin a loaded room to an activated, installed mod, else the default.
+
+    A flavor removed from disk *or deactivated by the operator* must not brick a
+    saved room (FLAVOR_PLUGIN_PLAN.md invariant 11): the room keeps its campaign
+    but plays it on the default setting.
+    """
+    requested = (state.flavorId or "").strip() or mods.default_flavor()
+    if not mods.is_enabled(requested):
+        fallback = mods.default_flavor()
+        log.warning(
+            "room %s: mod %r is not activated; falling back to %r",
+            state.room.channelId,
+            requested,
+            fallback,
+        )
+        state.flavorId = fallback
+        return fallback
+    resolved = get_flavor(requested)
+    state.flavorId = resolved.id
+    return resolved.id
+
+
 class Room:
     def __init__(self, channel_id: str, instance_id: str, state: GameState) -> None:
         self.channel_id = channel_id
@@ -128,9 +156,12 @@ class Room:
     # -- construction ------------------------------------------------------
 
     @classmethod
-    def load_or_create(cls, channel_id: str, instance_id: str) -> "Room":
+    def load_or_create(
+        cls, channel_id: str, instance_id: str, flavor_id: str | None = None
+    ) -> "Room":
         saved = load_room(channel_id)
         if saved is not None:
+            _resolve_room_flavor(saved)
             room = cls(channel_id, instance_id, saved)
             room.state.room.instanceId = instance_id
             # Seats belong to live connections.  After a restart none of the old
@@ -140,11 +171,55 @@ class Room:
             room.state.hostId = None
             room.state.hostSession = None
             return room
+        resolved = mods.guard_room(flavor_id or mods.default_flavor())
         return cls(
             channel_id,
             instance_id,
-            create_state(channel_id, instance_id, campaign_for(None)),
+            create_state(
+                channel_id,
+                instance_id,
+                campaign_for(None, resolved),
+                flavor_id=resolved,
+            ),
         )
+
+    # -- flavor ------------------------------------------------------------
+
+    @property
+    def flavor_id(self) -> str:
+        return self.state.flavorId
+
+    async def reconfigure(
+        self,
+        *,
+        flavor_id: str | None = None,
+        campaign_id: str | None = None,
+        ship_id: str | None = None,
+    ) -> None:
+        """Rebuild the room on another flavor / mission, preserving seats.
+
+        Per-room selection (FLAVOR_PLUGIN_PLAN.md §"Selection and loader"): a
+        table picks its setting, and the fresh state carries the same claimed
+        seats and host authority so nobody is dropped.
+        """
+        resolved = mods.guard_room(flavor_id or self.state.flavorId)
+        mission = campaign_id or self.state.campaign.id
+        instance_id = self.state.room.instanceId or "bridge"
+        fresh = create_state(
+            self.channel_id,
+            instance_id,
+            campaign_for(mission, resolved),
+            ship_id=ship_id,
+            flavor_id=resolved,
+        )
+        fresh.room.instanceId = instance_id
+        for key, seat in self.state.seats.items():
+            if key in fresh.seats:
+                fresh.seats[key].player = seat.player
+        fresh.hostId = self.state.hostId
+        fresh.hostSession = self.state.hostSession
+        fresh.status = self.state.status
+        await self.reset(fresh)
 
     # -- membership --------------------------------------------------------
 
@@ -272,10 +347,12 @@ class RoomManager:
     def __init__(self) -> None:
         self.rooms: dict[str, Room] = {}
 
-    def get(self, channel_id: str, instance_id: str) -> Room:
+    def get(
+        self, channel_id: str, instance_id: str, flavor_id: str | None = None
+    ) -> Room:
         room = self.rooms.get(channel_id)
         if room is None:
-            room = Room.load_or_create(channel_id, instance_id)
+            room = Room.load_or_create(channel_id, instance_id, flavor_id)
             self.rooms[channel_id] = room
         return room
 

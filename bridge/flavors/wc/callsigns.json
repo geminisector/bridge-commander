@@ -1,0 +1,18 @@
+{
+  "vesselName": "surname",
+  "adjectives": ["Grey", "Blue", "Long", "Red", "Iron", "Bright", "Silent", "Swift"],
+  "nouns": ["Falcon", "Drayman", "Venture", "Tarsus", "Sabre", "Rapier", "Crossbow", "Gladius"],
+  "hostile": {
+    "escort": ["KIS Kamekh-01", "KIS Kamekh-02", "KIS Kamekh-03", "KIS Kamekh-04"],
+    "capship": ["KIS Fralthi-01", "KIS Ralatha-01", "KIS Dorkathi-01", "KIS Fralthi-02"],
+    "fighter": [
+      "KIS Salthi-01",
+      "KIS Salthi-02",
+      "KIS Salthi-03",
+      "KIS Dralthi-04",
+      "KIS Dralthi-05",
+      "KIS Grikath-06",
+      "KIS Grikath-07"
+    ]
+  }
+}

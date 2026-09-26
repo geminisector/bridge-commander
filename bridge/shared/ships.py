@@ -1,4 +1,4 @@
-"""CAPTAIN ship catalog.
+"""CAPTAIN ship catalog, resolved through the flavor system.
 
 Every hull the GM can assign to a scenario.  The three sensor modes read
 different properties off a hull, which is the whole point of letting the admin
@@ -13,74 +13,23 @@ per-band amplitudes that passive listening paints in.  No two hulls share one.
 
 All hulls run on the shared 0-100 kps dial: 15 silent running, 60 cruise,
 100 flank (see ``SILENT_KPS``/``CRUISE_KPS``/``FLANK_KPS``).
+
+The catalog itself is **data**: ``flavors/<id>/ships.json``.  This module is the
+flavor-aware view over it.  The module-level ``SHIP_CLASSES`` / ``SHIP_ART`` /
+``HULL_STATS`` / ``SHIP_NAMES`` / ``DEFAULT_BY_TYPE`` are the ``core`` flavor's
+tables, kept for compatibility; anything that knows which room it is serving
+passes a ``flavor_id`` and gets that setting's catalog instead.
 """
 
 from __future__ import annotations
 
-import json
-
-from ..paths import asset_root, resource_path
-from .shipyard import HULLS
-
-from .constants import CRUISE_KPS, FLANK_KPS, FREQ_BANDS
-from .math_utils import hash_random
+from .flavors import Flavor, get as _get_flavor
+from .flavors import ship_bands  # noqa: F401  (re-exported for callers/tests)
 from .types import AdminShipBrief, ContactType, ShipClass
 
-
-def ship_bands(ship_id: str) -> list[float]:
-    """Deterministic barcode-like frequency profile for a hull id."""
-    seed = sum(ord(ch) for ch in ship_id) or 7
-    bands: list[float] = []
-    for i in range(FREQ_BANDS):
-        v = hash_random(seed, i + 1)
-        # Spiky: quiet gaps, loud ticks, a couple of strong carriers.
-        bands.append(round(v if v > 0.3 else v * 0.25, 3))
-    return bands
-
-
-# ---------------------------------------------------------------------------
-# Ship art — resolved from resources/bridge_ship_art.json and the img tree
-# ---------------------------------------------------------------------------
-
-_HULL_STATS: dict[str, dict[str, float]] = {
-    "home": {"shieldFore": 300, "shieldAft": 200, "shieldRefresh": 150, "armorFore": 35, "armorAft": 25, "armorPort": 5, "armorStarboard": 5, "body": 330, "fuelCapacity": 6},
-    "friendly-corvette": {"shieldFore": 25, "shieldAft": 25, "shieldRefresh": 15, "armorFore": 15, "armorAft": 15, "armorPort": 5, "armorStarboard": 5, "body": 175, "fuelCapacity": 5},
-    "friendly-transport": {"shieldFore": 17, "shieldAft": 15, "shieldRefresh": 9.6, "armorFore": 10, "armorAft": 10, "armorPort": 5, "armorStarboard": 5, "body": 110, "fuelCapacity": 6},
-    "friendly-prospector": {"shieldFore": 6, "shieldAft": 6, "shieldRefresh": 3.6, "armorFore": 8, "armorAft": 8, "armorPort": 6.5, "armorStarboard": 6.5, "body": 30, "fuelCapacity": 3},
-    "friendly-freighter": {"shieldFore": 5, "shieldAft": 5, "shieldRefresh": 4.8, "armorFore": 6, "armorAft": 8, "armorPort": 8, "armorStarboard": 8, "body": 22, "fuelCapacity": 1},
-    "enemy-escort": {"shieldFore": 30, "shieldAft": 30, "shieldRefresh": 18, "armorFore": 20, "armorAft": 20, "armorPort": 5, "armorStarboard": 5, "body": 175, "fuelCapacity": 6},
-    "enemy-fighter": {"shieldFore": 3.5, "shieldAft": 3.5, "shieldRefresh": 2.1, "armorFore": 3, "armorAft": 2, "armorPort": 1.5, "armorStarboard": 1.5, "body": 15, "fuelCapacity": 2},
-    "enemy-heavy-fighter": {"shieldFore": 11, "shieldAft": 11, "shieldRefresh": 6.6, "armorFore": 16, "armorAft": 16, "armorPort": 15, "armorStarboard": 15, "body": 40, "fuelCapacity": 1},
-    "enemy-destroyer": {"shieldFore": 400, "shieldAft": 400, "shieldRefresh": 240, "armorFore": 50, "armorAft": 50, "armorPort": 5, "armorStarboard": 5, "body": 240, "fuelCapacity": 6},
-    "enemy-cruiser": {"shieldFore": 300, "shieldAft": 200, "shieldRefresh": 150, "armorFore": 35, "armorAft": 25, "armorPort": 5, "armorStarboard": 5, "body": 330, "fuelCapacity": 6},
-    "enemy-heavy-transport": {"shieldFore": 19, "shieldAft": 19, "shieldRefresh": 11.4, "armorFore": 17, "armorAft": 17, "armorPort": 5, "armorStarboard": 5, "body": 130, "fuelCapacity": 5},
-    "friendly-carrier": {"shieldFore": 500, "shieldAft": 500, "shieldRefresh": 300, "armorFore": 60, "armorAft": 60, "armorPort": 5, "armorStarboard": 5, "body": 400, "fuelCapacity": 6},
-    "friendly-light-cruiser": {"shieldFore": 200, "shieldAft": 200, "shieldRefresh": 135, "armorFore": 18, "armorAft": 18, "armorPort": 5, "armorStarboard": 5, "body": 220, "fuelCapacity": 5},
-    "enemy-medium-fighter": {"shieldFore": 9, "shieldAft": 9, "shieldRefresh": 5.4, "armorFore": 10, "armorAft": 10, "armorPort": 8, "armorStarboard": 8, "body": 40, "fuelCapacity": 1},
-    "enemy-bomber": {"shieldFore": 30, "shieldAft": 30, "shieldRefresh": 18, "armorFore": 25, "armorAft": 25, "armorPort": 23, "armorStarboard": 23, "body": 50, "fuelCapacity": 1},
-}
-
-# Used only when the DB is unavailable.  These are the bundled placeholder filenames.
-_FALLBACK_ACTION: dict[str, str] = {
-    "home": "friendly-cruiser.png",
-    "friendly-corvette": "friendly-corvette.png",
-    "friendly-transport": "friendly-transport.png",
-    "friendly-prospector": "friendly-prospector.png",
-    "friendly-freighter": "friendly-freighter.png",
-    "enemy-escort": "enemy-escort.png",
-    "enemy-fighter": "enemy-fighter.png",
-    "enemy-heavy-fighter": "enemy-heavy-fighter.png",
-    "enemy-destroyer": "enemy-destroyer.png",
-    "enemy-cruiser": "enemy-cruiser.png",
-    "enemy-heavy-transport": "enemy-heavy-transport.png",
-    "friendly-carrier": "friendly-carrier.png",
-    "friendly-light-cruiser": "friendly-light-cruiser.png",
-    "enemy-medium-fighter": "enemy-medium-fighter.png",
-    "enemy-bomber": "enemy-bomber.png",
-}
-
 # Terrain contacts: the DB has asteroid/debris rows; the rest reuse the closest.
-TERRAIN_IMAGES: dict[ContactType, str] = {
+# A flavor may override named entries through ``ships.json``'s ``terrain`` map.
+TERRAIN_IMAGES: dict[str, str] = {
     "asteroid": "/img/action/asteroid.png",
     "debris": "/img/action/debris.png",
     "nebula": "/img/action/cloud.png",
@@ -89,118 +38,65 @@ TERRAIN_IMAGES: dict[ContactType, str] = {
 }
 
 
-def _as_url(raw: str | None) -> str:
-    raw = (raw or "").strip()
-    if not raw:
-        return ""
-    return raw if raw.startswith("/") else "/" + raw
+def flavor(flavor_id: str | None = None) -> Flavor:
+    """The resolved flavor (cached); unknown ids fall back to ``core``."""
+    return _get_flavor(flavor_id)
 
 
-def _url_exists(url: str) -> bool:
-    if not url.startswith("/img/"):
-        return False
-    return (asset_root() / url.removeprefix("/img/")).is_file()
+def ship_classes(flavor_id: str | None = None) -> dict[str, ShipClass]:
+    return flavor(flavor_id).ship_classes
 
 
-def _candidate_urls(url: str) -> list[str]:
-    """The URL plus same-basename siblings with a swapped extension.
-
-    The data file is not always in step with the files on disk, so a stale
-    extension in ``bridge_ship_art.json`` still resolves to the real file.
-    """
-    url = _as_url(url)
-    if not url:
-        return []
-    base, _, ext = url.rpartition(".")
-    if not base:
-        return [url]
-    candidates = [url]
-    for other in ("png", "gif", "jpg", "jpeg", "webp"):
-        alt = f"{base}.{other}"
-        if alt != url:
-            candidates.append(alt)
-    return candidates
+def default_ship_class(flavor_id: str | None = None) -> str:
+    resolved = flavor(flavor_id)
+    fallback = resolved.defaults.get("unknown") or ""
+    if fallback and fallback in resolved.ship_classes:
+        return fallback
+    return next(iter(resolved.ship_classes), "")
 
 
-def _first_existing(url: str) -> str:
-    for candidate in _candidate_urls(url):
-        if _url_exists(candidate):
-            return candidate
-    return ""
+def ship_art(ship_id: str | None, flavor_id: str | None = None) -> tuple[str, str]:
+    """``(action_url, vdu_url)`` for a hull id."""
+    return flavor(flavor_id).ship_art.get(ship_id or "", ("", ""))
 
 
-def resolve_hull_stats() -> dict[str, dict[str, float]]:
-    return {hull_id: dict(stats) for hull_id, stats in _HULL_STATS.items()}
+def resolve_ship_art(flavor_id: str | None = None) -> dict[str, tuple[str, str]]:
+    """``hull id -> (image_url, vdu_url)`` for a flavor."""
+    return dict(flavor(flavor_id).ship_art)
 
 
-def _load_ship_art_overrides() -> dict[str, tuple[str, str]]:
-    """Canonical ``hull id -> (action, vdu)`` from ``bridge_ship_art.json``.
-
-    The data file is authoritative for hulls it names; anything it does not
-    cover falls through to the per-hull filename.  A malformed or missing file
-    is not fatal.
-    """
-    path = resource_path("bridge_ship_art.json")
-    try:
-        raw = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return {}
-    overrides: dict[str, tuple[str, str]] = {}
-    for hull_id, entry in raw.items():
-        if hull_id.startswith("_") or not isinstance(entry, dict):
-            continue
-        overrides[str(hull_id)] = (
-            str(entry.get("action") or ""),
-            str(entry.get("vdu") or ""),
-        )
-    return overrides
+def resolve_hull_stats(flavor_id: str | None = None) -> dict[str, dict[str, float]]:
+    return {
+        hull_id: dict(stats)
+        for hull_id, stats in flavor(flavor_id).hull_stats.items()
+    }
 
 
-def resolve_ship_art() -> dict[str, tuple[str, str]]:
-    """``hull id -> (image_url, vdu_url)``, verified against the local img tree.
-
-    Precedence: the canonical ``bridge_ship_art.json`` override, then the
-    per-hull fallback filename.  The action art is preferred; when it is not on
-    disk the **VDU image is used in its place**, so ``image`` is always
-    something the UI can render.  An empty string means nothing was found and
-    the caller should show a generic silhouette.
-    """
-    overrides = _load_ship_art_overrides()
-    art: dict[str, tuple[str, str]] = {}
-    for hull in SHIP_CLASSES.values():
-        action = vdu = ""
-        override = overrides.get(hull.id)
-        if override is not None:
-            action = _first_existing(override[0])
-            vdu = _first_existing(override[1])
-        if not action:
-            fallback = _FALLBACK_ACTION.get(hull.id, "")
-            if fallback:
-                action = _first_existing(f"/img/action/{fallback}")
-        # Fall back to the VDU when the main (action) art is unavailable.
-        if not action and vdu:
-            action = vdu
-        art[hull.id] = (action, vdu)
-    return art
+def terrain_image(contact_type: str, flavor_id: str | None = None) -> str:
+    override = flavor(flavor_id).terrain_images.get(contact_type)
+    if override:
+        return override
+    return TERRAIN_IMAGES.get(contact_type, "")
 
 
-def audit_ship_art() -> list[str]:
-    """Findings about the resolved art map.
+def audit_ship_art(flavor_id: str | None = None) -> list[str]:
+    """Findings about a flavor's resolved art map.
 
     ``ERROR:`` lines are failures (a hull with no art, or art pointing at a file
     that is not on disk).  ``INFO:`` lines are decisions to keep on purpose, such
     as two hulls sharing a parent class's art.  Run this in tests and at startup.
     """
+    resolved = flavor(flavor_id)
     findings: list[str] = []
     by_action: dict[str, list[str]] = {}
-    for hull in SHIP_CLASSES.values():
-        action, vdu = SHIP_ART.get(hull.id, ("", ""))
+    for hull in resolved.ship_classes.values():
+        action, vdu = resolved.ship_art.get(hull.id, ("", ""))
         if not action:
             findings.append(f"ERROR: {hull.id}: no art resolved")
             continue
-        if not _url_exists(action):
+        if not resolved.url_exists(action):
             findings.append(f"ERROR: {hull.id}: action art missing on disk: {action}")
-        if vdu and not _url_exists(vdu):
+        if vdu and not resolved.url_exists(vdu):
             findings.append(f"ERROR: {hull.id}: vdu art missing on disk: {vdu}")
         if vdu and action == vdu:
             findings.append(
@@ -213,282 +109,59 @@ def audit_ship_art() -> list[str]:
     return findings
 
 
-
-def ship_art(ship_id: str | None) -> tuple[str, str]:
-    """``(action_url, vdu_url)`` for a hull id."""
-    return SHIP_ART.get(ship_id or "", ("", ""))
-
-
-SHIP_CLASSES: dict[str, ShipClass] = {
-    "home": ShipClass(
-        id="home",
-        name="Friendly_Cruiser",
-        role="Home Carrier",
-        contactType="carrier",
-        massKt=28.8,
-        profile=0.45,
-        stealth=0.55,
-        emission=0.3,
-        sensorQuality=0.92,
-        cruiseSpeed=CRUISE_KPS,
-        maxSpeed=FLANK_KPS,
-        crew=280,
-        blurb="Fast, quiet and sensor-rich. The tripwire hull: see first, be seen last.",
-    ),
-    "friendly-corvette": ShipClass(
-        id="friendly-corvette",
-        name="Friendly_Corvette",
-        role="Corvette",
-        contactType="escort",
-        massKt=6.5,
-        profile=0.6,
-        stealth=0.3,
-        emission=0.5,
-        sensorQuality=0.8,
-        cruiseSpeed=CRUISE_KPS,
-        maxSpeed=FLANK_KPS,
-        crew=60,
-        blurb="General-purpose escort. Loud enough to be found, tough enough to leave.",
-    ),
-    "friendly-transport": ShipClass(
-        id="friendly-transport",
-        name="Friendly_Transport",
-        role="Transport",
-        contactType="freighter",
-        massKt=18,
-        profile=0.8,
-        stealth=0.1,
-        emission=0.55,
-        sensorQuality=0.5,
-        cruiseSpeed=CRUISE_KPS,
-        maxSpeed=FLANK_KPS,
-        crew=24,
-        blurb="Slow, broad and radiating. Passive will find it before it finds you.",
-    ),
-    "friendly-prospector": ShipClass(
-        id="friendly-prospector",
-        name="Friendly_Prospector",
-        role="Prospector",
-        contactType="prospector",
-        massKt=2.5,
-        profile=0.5,
-        stealth=0.2,
-        emission=0.6,
-        sensorQuality=0.6,
-        cruiseSpeed=CRUISE_KPS,
-        maxSpeed=FLANK_KPS,
-        crew=4,
-        blurb="Mining rig with a hot plant. Small, but it chatters on the grill.",
-    ),
-    "friendly-freighter": ShipClass(
-        id="friendly-freighter",
-        name="Friendly_Freighter",
-        role="Freighter",
-        contactType="freighter",
-        massKt=2,
-        profile=0.85,
-        stealth=0.05,
-        emission=0.7,
-        sensorQuality=0.45,
-        cruiseSpeed=CRUISE_KPS,
-        maxSpeed=FLANK_KPS,
-        crew=18,
-        blurb="A city block of cargo with engines. Visible on every sensor ever built.",
-    ),
-    "enemy-escort": ShipClass(
-        id="enemy-escort",
-        name="Enemy_Escort",
-        role="Escort",
-        contactType="escort",
-        massKt=12,
-        profile=0.5,
-        stealth=0.35,
-        emission=0.45,
-        sensorQuality=0.8,
-        cruiseSpeed=CRUISE_KPS,
-        maxSpeed=FLANK_KPS,
-        crew=120,
-        blurb="Hostile escort. Runs dark when hunting; hot when it wants to be found.",
-    ),
-    "enemy-fighter": ShipClass(
-        id="enemy-fighter",
-        name="Enemy_Fighter",
-        role="Fighter",
-        contactType="fighter",
-        massKt=0.9,
-        profile=0.22,
-        stealth=0.65,
-        emission=0.75,
-        sensorQuality=0.7,
-        cruiseSpeed=CRUISE_KPS,
-        maxSpeed=FLANK_KPS,
-        crew=1,
-        blurb="Tiny radar cross-section, huge afterburner. Active barely sees it; passive hears it scream.",
-    ),
-    "enemy-heavy-fighter": ShipClass(
-        id="enemy-heavy-fighter",
-        name="Enemy_HeavyFighter",
-        role="Heavy fighter",
-        contactType="fighter",
-        massKt=2.4,
-        profile=0.38,
-        stealth=0.45,
-        emission=0.65,
-        sensorQuality=0.75,
-        cruiseSpeed=CRUISE_KPS,
-        maxSpeed=FLANK_KPS,
-        crew=2,
-        blurb="Hostile heavy fighter. Patient hunter: runs quiet, then pounces.",
-    ),
-    "enemy-destroyer": ShipClass(
-        id="enemy-destroyer",
-        name="Enemy_Destroyer",
-        role="Destroyer",
-        contactType="capship",
-        massKt=200,
-        profile=0.7,
-        stealth=0.3,
-        emission=0.55,
-        sensorQuality=0.85,
-        cruiseSpeed=CRUISE_KPS,
-        maxSpeed=FLANK_KPS,
-        crew=600,
-        blurb="A wall of armour and emitters. Gravidar reads it clear across the basin.",
-    ),
-    "enemy-cruiser": ShipClass(
-        id="enemy-cruiser",
-        name="Enemy_Cruiser",
-        role="Carrier",
-        contactType="carrier",
-        massKt=320,
-        profile=0.95,
-        stealth=0.25,
-        emission=0.4,
-        sensorQuality=0.9,
-        cruiseSpeed=CRUISE_KPS,
-        maxSpeed=FLANK_KPS,
-        crew=1400,
-        blurb="The big quiet one: enormous mass, disciplined emissions. Find it by patience.",
-    ),
-    "enemy-heavy-transport": ShipClass(
-        id="enemy-heavy-transport",
-        name="Enemy_HeavyTransport",
-        role="Transport",
-        contactType="freighter",
-        massKt=120,
-        profile=0.8,
-        stealth=0.2,
-        emission=0.5,
-        sensorQuality=0.55,
-        cruiseSpeed=CRUISE_KPS,
-        maxSpeed=FLANK_KPS,
-        crew=300,
-        blurb="Fleet resupply hull. Big gravidar arc, ordinary emissions.",
-    ),
-}
-
-# Hulls from the curated catalog that the bridge does not already define.
-for _hull_id, _entry in HULLS.items():
-    if _hull_id in SHIP_CLASSES or not _entry.get("shipType"):
-        continue
-    _art = ("", "")  # filled by the art pass below, once SHIP_ART resolves
-    SHIP_CLASSES[_hull_id] = ShipClass(
-        id=_hull_id,
-        name=str(_entry.get("name") or _hull_id.replace("-", " ").title()),
-        role=str(_entry.get("role") or "Warship"),
-        contactType=_entry.get("contactType", "capship"),
-        massKt=float(_entry.get("massKt") or 100.0),
-        profile=float(_entry.get("profile") or 0.5),
-        stealth=float(_entry.get("stealth") or 0.4),
-        emission=float(_entry.get("emission") or 0.5),
-        sensorQuality=float(_entry.get("sensorQuality") or 0.6),
-        cruiseSpeed=CRUISE_KPS,
-        maxSpeed=FLANK_KPS,
-        crew=int(_entry.get("crew") or 40),
-        blurb=str(_entry.get("blurb") or ""),
-        image=_art[0],
-        vdu=_art[1],
-    )
-
-for _hull in SHIP_CLASSES.values():
-    _hull.bands = ship_bands(_hull.id)
-
-# Resolve the art once, from the ships DB when it is present.
-SHIP_ART: dict[str, tuple[str, str]] = resolve_ship_art()
-for _hull in SHIP_CLASSES.values():
-    _action, _vdu = SHIP_ART.get(_hull.id, ("", ""))
-    _hull.image = _action
-    _hull.vdu = _vdu
-
-# Resolve the hull defences (per-arc shields/armour, refresh, body).
-HULL_STATS: dict[str, dict[str, float]] = resolve_hull_stats()
-for _hull in SHIP_CLASSES.values():
-    for _field, _value in HULL_STATS.get(_hull.id, {}).items():
-        setattr(_hull, _field, float(_value))
-
-DEFAULT_SHIP_CLASS = "home"
-
-# Registry/proper names used when a hull is flown by the crew.  Enemy hulls reuse
-# their callsign-pool entry so a hull the crew flies and the same hull met as a
-# contact agree on the name.
-SHIP_NAMES: dict[str, str] = {
-    "home": "CS Audacity",
-    "friendly-corvette": "CS Resolute",
-    "friendly-transport": "MV Grey Falcon",
-    "friendly-prospector": "MV Lucky Star",
-    "friendly-freighter": "MV Long Haul",
-    "enemy-escort": "Enemy_Escort-01",
-    "enemy-fighter": "Enemy_Fighter-01",
-    "enemy-heavy-fighter": "Enemy_HeavyFighter-01",
-    "enemy-destroyer": "Enemy_Destroyer-01",
-    "enemy-cruiser": "Enemy_Cruiser-01",
-    "enemy-heavy-transport": "Enemy_HeavyTransport-01",
-    "friendly-carrier": "CSV Vanguard",
-    "friendly-light-cruiser": "CSV Lancaster",
-    "enemy-medium-fighter": "Enemy_MediumFighter-01",
-    "enemy-bomber": "Enemy_Bomber-01",
-}
-
-# When a campaign or GM template names no hull, derive one from its contact type
-# so the sensor physics still has real numbers to work with.
-DEFAULT_BY_TYPE: dict[ContactType, str] = {
-    "unknown": DEFAULT_SHIP_CLASS,
-    "prospector": "friendly-prospector",
-    "freighter": "friendly-transport",
-    "liner": "friendly-transport",
-    "escort": "friendly-corvette",
-    "capship": "enemy-destroyer",
-    "fighter": "enemy-fighter",
-    "carrier": "enemy-cruiser",
-    "asteroid": "",
-    "nebula": "",
-    "debris": "",
-    "dust": "",
-    "ice": "",
-}
+def _home_hull(resolved: Flavor) -> ShipClass | None:
+    """The flavor's default crew hull, or ``None`` if its catalog is empty."""
+    home = default_ship_class(resolved.id)
+    return resolved.ship_classes.get(home)
 
 
-def ship_name(ship_id: str | None) -> str:
+def ship_name(ship_id: str | None, flavor_id: str | None = None) -> str:
     """The proper name of the hull when the crew is flying it."""
-    return SHIP_NAMES.get(ship_id or "", SHIP_NAMES[DEFAULT_SHIP_CLASS])
+    resolved = flavor(flavor_id)
+    fallback = default_ship_class(flavor_id)
+    return resolved.ship_names.get(ship_id or "", resolved.ship_names.get(fallback, ""))
 
 
-def ship_class(ship_id: str | None) -> ShipClass:
-    """Look up a hull, falling back to the crew's home hull."""
-    if ship_id and ship_id in SHIP_CLASSES:
-        return SHIP_CLASSES[ship_id]
-    return SHIP_CLASSES[DEFAULT_SHIP_CLASS]
+def ship_class(ship_id: str | None, flavor_id: str | None = None) -> ShipClass:
+    """Look up a hull, falling back to the flavor's default crew hull.
+
+    Validation guarantees a non-empty catalog, but a defensive fallback to core
+    keeps a live room alive if a flavor disappears between load and use.
+    """
+    resolved = flavor(flavor_id)
+    if ship_id and ship_id in resolved.ship_classes:
+        return resolved.ship_classes[ship_id]
+    home = _home_hull(resolved)
+    if home is not None:
+        return home
+    core = _get_flavor("core")
+    return core.ship_classes[default_ship_class("core")]
 
 
-def ship_for_type(contact_type: ContactType, ship_id: str | None = None) -> ShipClass:
-    """Resolve a hull for a contact, preferring the explicit id."""
-    if ship_id and ship_id in SHIP_CLASSES:
-        return SHIP_CLASSES[ship_id]
-    fallback = DEFAULT_BY_TYPE.get(contact_type, DEFAULT_SHIP_CLASS)
-    return SHIP_CLASSES.get(fallback, SHIP_CLASSES[DEFAULT_SHIP_CLASS])
+def ship_for_type(
+    contact_type: ContactType,
+    ship_id: str | None = None,
+    flavor_id: str | None = None,
+) -> ShipClass:
+    """Resolve a hull for a contact, preferring the explicit id.
+
+    A dangling explicit id is a data error that validation catches at load; at
+    runtime it degrades to the type default rather than crashing a live room.
+    """
+    resolved = flavor(flavor_id)
+    if ship_id and ship_id in resolved.ship_classes:
+        return resolved.ship_classes[ship_id]
+    fallback = resolved.defaults.get(contact_type) or ""
+    if fallback in resolved.ship_classes:
+        return resolved.ship_classes[fallback]
+    home = _home_hull(resolved)
+    if home is not None:
+        return home
+    core = _get_flavor("core")
+    return core.ship_classes[default_ship_class("core")]
 
 
-def ship_briefs() -> list[AdminShipBrief]:
+def ship_briefs(flavor_id: str | None = None) -> list[AdminShipBrief]:
     return [
         AdminShipBrief(
             id=s.id,
@@ -501,23 +174,47 @@ def ship_briefs() -> list[AdminShipBrief]:
             emission=s.emission,
             sensorQuality=s.sensorQuality,
         )
-        for s in SHIP_CLASSES.values()
+        for s in flavor(flavor_id).ship_classes.values()
     ]
 
 
+# ---------------------------------------------------------------------------
+# Core-flavor compatibility views
+#
+# These are the historical module-level tables.  They are pinned to ``core``
+# explicitly (not to ``DEFAULT_FLAVOR``) so callers and tests that predate
+# per-flavor catalogs always see the shipped default, whatever the server's boot
+# setting is.
+# ---------------------------------------------------------------------------
+
+_DEFAULT_FLAVOR = _get_flavor("core")
+SHIP_CLASSES: dict[str, ShipClass] = _DEFAULT_FLAVOR.ship_classes
+SHIP_ART: dict[str, tuple[str, str]] = _DEFAULT_FLAVOR.ship_art
+HULL_STATS: dict[str, dict[str, float]] = _DEFAULT_FLAVOR.hull_stats
+SHIP_NAMES: dict[str, str] = _DEFAULT_FLAVOR.ship_names
+DEFAULT_BY_TYPE: dict[ContactType, str] = dict(_DEFAULT_FLAVOR.defaults)  # type: ignore[assignment]
+DEFAULT_SHIP_CLASS: str = default_ship_class("core")
+
+
 __all__ = [
-    "SHIP_CLASSES",
-    "SHIP_ART",
-    "TERRAIN_IMAGES",
-    "DEFAULT_SHIP_CLASS",
     "DEFAULT_BY_TYPE",
+    "DEFAULT_SHIP_CLASS",
+    "HULL_STATS",
+    "SHIP_ART",
+    "SHIP_CLASSES",
     "SHIP_NAMES",
+    "TERRAIN_IMAGES",
+    "audit_ship_art",
+    "default_ship_class",
+    "flavor",
+    "resolve_hull_stats",
+    "resolve_ship_art",
     "ship_art",
     "ship_bands",
-    "ship_class",
-    "ship_name",
-    "ship_for_type",
     "ship_briefs",
-    "resolve_ship_art",
-    "audit_ship_art",
+    "ship_class",
+    "ship_classes",
+    "ship_for_type",
+    "ship_name",
+    "terrain_image",
 ]

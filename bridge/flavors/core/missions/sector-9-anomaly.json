@@ -1,0 +1,243 @@
+{
+  "id": "sector-9-anomaly",
+  "title": "Sector 9 Anomaly",
+  "theater": "Hostile Outer Reach",
+  "brief": "You have CS Audacity. A hostile hunter-killer group is sweeping the drift \u2014 three heavy fighters flying the screen and two destroyers holding the lane. You cannot fight them. Use the debris, dust and ice to break their sensor picture and slip past unseen.",
+  "target": "Avoid detection. Cross the drift without being fixed by the heavy-fighter screen or the destroyer picket. Run dark and let the terrain lie for you.",
+  "startHour": 22.0,
+  "patrol": {
+    "center": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "radiusKlik": 110.0
+  },
+  "clutter": 0.6,
+  "noiseRate": null,
+  "noiseFilter": null,
+  "zBand": null,
+  "escalation": 70.0,
+  "contacts": [
+    {
+      "x": 38.0,
+      "y": 50.0,
+      "z": null,
+      "heading": 79.0,
+      "speed": 100.0,
+      "type": "fighter",
+      "faction": "enemy",
+      "hostile": true,
+      "emitting": true,
+      "name": null,
+      "shipClass": "enemy-heavy-fighter",
+      "radiusKlik": null
+    },
+    {
+      "x": 32.0,
+      "y": -6.0,
+      "z": null,
+      "heading": 83.0,
+      "speed": 100.0,
+      "type": "fighter",
+      "faction": "enemy",
+      "hostile": true,
+      "emitting": true,
+      "name": null,
+      "shipClass": "enemy-heavy-fighter",
+      "radiusKlik": null
+    },
+    {
+      "x": 8.0,
+      "y": -39.0,
+      "z": null,
+      "heading": 5.0,
+      "speed": 86.0,
+      "type": "fighter",
+      "faction": "enemy",
+      "hostile": true,
+      "emitting": true,
+      "name": null,
+      "shipClass": "enemy-heavy-fighter",
+      "radiusKlik": null
+    },
+    {
+      "x": 86.0,
+      "y": -27.0,
+      "z": null,
+      "heading": 42.0,
+      "speed": 50.0,
+      "type": "capship",
+      "faction": "enemy",
+      "hostile": true,
+      "emitting": false,
+      "name": null,
+      "shipClass": "enemy-destroyer",
+      "radiusKlik": null
+    },
+    {
+      "x": 62.0,
+      "y": -19.0,
+      "z": null,
+      "heading": 344.0,
+      "speed": 58.0,
+      "type": "capship",
+      "faction": "enemy",
+      "hostile": true,
+      "emitting": false,
+      "name": null,
+      "shipClass": "enemy-destroyer",
+      "radiusKlik": null
+    },
+    {
+      "x": -34.0,
+      "y": 18.0,
+      "z": null,
+      "heading": 0.0,
+      "speed": 0.0,
+      "type": "debris",
+      "faction": "neutral",
+      "hostile": false,
+      "emitting": false,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    },
+    {
+      "x": 26.0,
+      "y": 42.0,
+      "z": null,
+      "heading": 0.0,
+      "speed": 0.0,
+      "type": "dust",
+      "faction": "neutral",
+      "hostile": false,
+      "emitting": false,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    },
+    {
+      "x": 8.0,
+      "y": -30.0,
+      "z": null,
+      "heading": 0.0,
+      "speed": 0.0,
+      "type": "ice",
+      "faction": "neutral",
+      "hostile": false,
+      "emitting": false,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    },
+    {
+      "x": -52.0,
+      "y": -24.0,
+      "z": null,
+      "heading": 0.0,
+      "speed": 0.0,
+      "type": "asteroid",
+      "faction": "neutral",
+      "hostile": false,
+      "emitting": false,
+      "name": null,
+      "shipClass": null,
+      "radiusKlik": null
+    }
+  ],
+  "events": [
+    {
+      "atMinute": 99.0,
+      "template": "probe"
+    },
+    {
+      "atMinute": 180.0,
+      "template": "unmarked"
+    },
+    {
+      "atMinute": 304.0,
+      "template": "orders"
+    }
+  ],
+  "hazards": [],
+  "shipClass": "home",
+  "sun": {
+    "x": 210.0,
+    "y": -140.0,
+    "z": 0.0
+  },
+  "sunRadiusKlik": 40.0,
+  "navPoints": [
+    {
+      "id": "anomaly-hold",
+      "name": "Hold Point",
+      "kind": "nav",
+      "pos": {
+        "x": -50.0,
+        "y": -46.0,
+        "z": 0.0
+      },
+      "radiusKlik": 9.0,
+      "chartAgeHours": 5.0,
+      "note": "quiet station",
+      "jumpType": "stable",
+      "windowOpen": 0.0,
+      "windowClose": null,
+      "alignmentRequired": 0.6,
+      "interference": 0.0,
+      "dest": null
+    },
+    {
+      "id": "anomaly-screen",
+      "name": "Screen Line",
+      "kind": "nav",
+      "pos": {
+        "x": 58.0,
+        "y": 52.0,
+        "z": 0.0
+      },
+      "radiusKlik": 10.0,
+      "chartAgeHours": 18.0,
+      "note": "terrain cover",
+      "jumpType": "stable",
+      "windowOpen": 0.0,
+      "windowClose": null,
+      "alignmentRequired": 0.6,
+      "interference": 0.0,
+      "dest": null
+    }
+  ],
+  "layers": [
+    {
+      "id": "surface",
+      "name": "Surface duct",
+      "zMin": 0.0,
+      "zMax": 10.0,
+      "note": "Loud and exposed: everyone above and below hears you."
+    },
+    {
+      "id": "gradient",
+      "name": "Gradient layer",
+      "zMin": 10.0,
+      "zMax": 22.0,
+      "note": "The boundary itself: crossing it hides you and blinds you."
+    },
+    {
+      "id": "deep",
+      "name": "Deep channel",
+      "zMin": 22.0,
+      "zMax": 40.0,
+      "note": "Quiet and hard to reach; your own sensors reach less far."
+    },
+    {
+      "id": "shadow",
+      "name": "Shadow zone",
+      "zMin": 40.0,
+      "zMax": 50.0,
+      "note": "The deepest band: nearly invisible from above, nearly blind yourself."
+    }
+  ],
+  "environment": "clear-space",
+  "barriers": []
+}
