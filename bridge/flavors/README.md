@@ -17,6 +17,16 @@ published content (`core/` is the only flavor bundled into the built package):
 
 Copy whichever is closest to what you want and edit it.
 
+## Let an agent interview you
+
+The `bridge-commander-mods` skill (`.agents/skills/bridge-commander-mods/`)
+turns a setting idea into a validated mod by asking the right questions first:
+what the universe is, how ranges and speeds should read, what each ship is
+called and who flies it, where the images come from, the colour theme, callsigns
+and missions. It then generates, validates and activates the package. Deep
+details live in its `references/` (`flavor-format.md`, `art.md`). Ask an agent
+to "create a mod" or "make a new setting", or invoke the skill by name.
+
 ## The 30-second version
 
 ```sh

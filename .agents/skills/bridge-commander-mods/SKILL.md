@@ -1,321 +1,285 @@
 ---
 name: bridge-commander-mods
-description: "Use this skill when adding, editing, validating, or activating a bridge-commander flavor (a mod) under bridge/flavors/. Covers the full data-only package: flavor.json manifest, units.json distance/speed ladders, ships.json hulls plus contact-type defaults, callsigns.json name pools, theme.css :root overrides, missions/*.json CampaignSeed scenarios, the validator's fail-closed rules, and activation through the GM mod manager or DEFAULT_FLAVOR. Triggers on: add flavor, new flavor, add mod, new mod, create setting, flavor.json, ships.json, units.json, callsigns.json, theme.css, flavor mission, hull catalog, distance ladder, contact defaults, mod manager, activate mod, DEFAULT_FLAVOR, FLAVORS_DIR, --check-flavor, --list-flavors."
-whenToUse: "Adding or editing a setting/mod in bridge/flavors, debugging a flavor that fails to load, or wiring a new mod into the GM console. Not for changing simulation mechanics — flavors are presentation and content only."
+description: "A guided, interview-driven workflow for creating a new bridge-commander mod (flavor) from scratch. Asks the author what universe/setting it is, how distances and speeds read, what each ship is called and who flies it, where the images come from, the colour theme, callsigns and missions, then generates, validates and activates the data package. Triggers on: create a mod, make a mod, new mod, add a mod, create a flavor, new setting, new universe, reskin, ship roster, what ships, ship art, where do I get images, design a campaign setting."
+whenToUse: "Use when the user wants to invent or scaffold a new setting/mod for bridge-commander and needs to be walked through the decisions. For editing an existing flavor, the format reference still applies but the interview can be skipped."
 ---
 
-# Adding a flavor (mod) to bridge-commander
+# Creating a new mod for bridge-commander
 
-A **flavor** is a setting: a directory of data that re-skins, re-scales and
-re-narrates the bridge without shipping Python. The loader is
-`bridge/shared/flavors.py`; the design spec is `bridge/FLAVOR_PLUGIN_PLAN.md`;
-the authoring guide is `bridge/flavors/README.md`. Read those for depth — this
-skill is the working procedure.
+You are the author's collaborator. Turn a setting idea into a validated, playable
+flavor by **interviewing first, generating second**. Never dump a wall of
+questions and never write files before you understand the setting.
 
-```
-bridge/flavors/<id>/
-  flavor.json      # manifest: every field optional except "id"
-  units.json       # optional: distance ladder + speed dial labels
-  theme.css        # optional: :root override, served after activity.css
-  ships.json       # optional: hulls, art and contact-type defaults
-  callsigns.json   # optional: generated-name pools
-  missions/*.json  # optional: CampaignSeed-shaped scenarios
-  assets/          # optional: action/ and vdu/ images
-    action/*.png
-    vdu/*.gif
-```
+A flavor is a folder of data (`bridge/flavors/<id>/`) that re-skins ships,
+units, theme, callsigns and missions. It ships no code. The loader is
+`bridge/shared/flavors.py`; `bridge/flavors/README.md` is the human guide.
 
-Shipped flavors to copy from: `core` (the default), `wc`, `stk`, `sw`
-(worked examples). `FLAVORS_DIR` overrides the root at runtime.
+## How to run this skill
 
-## Golden rules
+- **Ask in batches.** Two to four related questions at a time, not fifteen.
+- **Use the question tool for choices** (universe type, inheritance, units, art
+  source, theme, roster shape). Use plain chat for free text — names, blurbs,
+  lore. If no question tool is available, ask in chat.
+- **Always offer a default** and accept "you decide" / "surprise me" / "same as
+  core". A stalled interview is worse than a sensible guess.
+- **Keep a design sheet.** After each phase, append answers to a short markdown
+  summary and read it back before generating. The sheet is the source of truth
+  for Phase 7.
+- **Reuse mechanics, invent flavour.** Copy core hull stats and hardpoints by
+  role; change names, blurbs, art, units, colours and scenarios. A mod never
+  changes simulation rules.
+- **Validate cheaply as you go** (`--check-flavor`) rather than only at the end.
 
-1. **Data only.** JSON, CSS and images. No Python, no templates with code.
-2. **Canonical units on the wire.** Distances stay klik and speeds stay kps in
-   the sim and on the wire; `units.json` converts for display only.
-3. **Fail closed.** A flavor that fails validation does not half-load: the
-   server logs the reason and plays the room on the default setting. Fix the
-   data; never special-case it in code.
-4. **No implicit id inheritance.** Every hull id named in `defaults` or in a
-   mission's `shipClass` must exist in the merged catalog. Dangling ids are load
-   errors by design.
-5. **Namespace new ids.** Use `<id>.<name>` (`stk.miranda`) so flat id
-   namespaces never collide. Core keeps its historical bare ids.
+Phases: **0** ground it → **1** units → **2** theme → **3** ship roster →
+**4** art → **5** callsigns → **6** missions → **7** build → **8** validate,
+activate, document.
 
-## Recipe
+---
 
-```sh
-# 1. Copy the closest example (extends core by default).
-cp -r bridge/flavors/core bridge/flavors/mine
-# 2. Set id + title in the manifest (id MUST match the directory name).
-$EDITOR bridge/flavors/mine/flavor.json
-# 3. Edit the data files you care about; delete the ones you do not override.
-# 4. Validate. This exits non-zero on any validator error.
-.venv/bin/python -m bridge --check-flavor mine
-.venv/bin/python -m bridge --list-flavors
-```
+## Phase 0 — Ground the idea
 
-To replace core wholesale instead of extending it, set `"extends": null` — you
-must then supply your own hull catalog **and** at least one mission.
+Ask:
 
-## flavor.json
+1. *"What's the setting called, and what's the one-line hook?"*
+2. *"Is this your own universe, or a third party's (a film/show/game/book)?"*
+   This decides packaging and licensing (Phase 8): own universes can ship;
+   third-party settings stay local examples.
+3. *"How big is this first pass — a full re-skin of the 15 core hulls, a light
+   reskin of a few, or a standalone setting that replaces core entirely?"*
 
-```json
-{
-  "id": "mine",
-  "title": "My Setting",
-  "extends": "core",
-  "units": "units.json",
-  "theme": "theme.css",
-  "ships": "ships.json",
-  "callsigns": "callsigns.json",
-  "missions": "missions/",
-  "defaultMission": "mine.first"
-}
-```
+Derive the **flavor id**: lowercase, kebab-case, from the title (`"Star Trek"`
+→ `stk`; `"Dune"` → `dune`). It must match the directory name.
 
-`extends` chains (child overrides parent); omit it to inherit `core`; set it to
-`null` to stand alone. A cycle or a missing parent is a load error. A missing
-file reference is simply not overridden. JSON Schema:
-`bridge/flavors/schema/flavor.schema.json`.
+Restate back: *"So: a `<scope>` setting called `<title>`, `<original /
+third-party>`, id `<id>`. Right?"* Then continue.
 
-## units.json — display only
+## Phase 1 — Units (how numbers read)
 
-`min` is in **canonical klik**, not display units: the formatter picks the
-largest rung whose `min` the value reaches. `factor` is canonical units per
-display unit, so the formatter divides. The last rung's `min` must be 0.
+Ask:
 
-```json
-{
-  "distance": {
-    "base": "klik",
-    "ladder": [
-      { "min": 100000000, "unit": "AU", "factor": 149597870.7, "precision": 4 },
-      { "min": 1000, "unit": "Mm", "factor": 1000.0, "precision": 1 },
-      { "min": 0, "unit": "klik", "factor": 1.0, "precision": 1 }
-    ]
-  },
-  "speed": {
-    "base": "kps",
-    "factor": 1.0,
-    "dial": { "15": "Maneuvering", "60": "Cruise", "100": "Full impulse" }
-  }
-}
-```
+- *"How should distances read on the plot — stay in klik, or scale to something
+  bigger? e.g. AU and Mm for a Trek feel, km and Mm for a Wars feel."*
+- *"How should speed read? Keep kps, or a named unit like MGLT / impulse?"*
+- *"What should the speed settings be called?"* (core: Silent Running / Cruise /
+  Flank).
 
-Common mistake: giving an Mm rung `"min": 1.0`. 1 Mm is 1000 klik, so a 40-klik
-knife fight would render as `0.0 Mm`. Use `1000`.
+Rules to state while asking: the simulation and the wire stay in **klik** and
+**kps**; this file only changes display. `min` is a threshold in **canonical
+klik** (1 Mm = 1000 klik, so an Mm rung's `min` is `1000`, not `1`). The last
+rung must be `min: 0`.
 
-## ships.json — hulls, art and defaults
+Default if unsure: keep core's klik ladder and just rename the dial.
 
-Merge is per hull id **and per field**, so an override may change only a name, a
-stat or an art file. Use `hulls` as a map (preferred) or a list with `id` keys.
+## Phase 2 — Theme (how it looks)
 
-```json
-{
-  "hulls": {
-    "mine.miranda": {
-      "name": "Miranda-class cruiser",
-      "role": "Light cruiser",
-      "contactType": "carrier",
-      "massKt": 28.8, "profile": 0.45, "stealth": 0.55,
-      "emission": 0.3, "sensorQuality": 0.92, "crew": 280,
-      "blurb": "A workhorse hull refit a dozen ways.",
-      "art": { "action": "friendly-cruiser.png", "vdu": "friendly-cruiser-vdu.gif" },
-      "stats": {
-        "shieldFore": 300, "shieldAft": 200, "shieldRefresh": 150,
-        "armorFore": 35, "armorAft": 25, "armorPort": 5, "armorStarboard": 5,
-        "body": 330, "fuelCapacity": 6
-      },
-      "hardpoints": [{ "id": "fore-gun", "arc": "fore", "kind": "gun" }],
-      "names": ["CS Audacity"]
-    }
-  },
-  "defaults": {
-    "unknown": "mine.miranda", "escort": "mine.miranda",
-    "capship": "mine.miranda", "fighter": "mine.miranda",
-    "carrier": "mine.miranda", "freighter": "mine.miranda",
-    "prospector": "mine.miranda",
-    "asteroid": "", "nebula": "", "debris": "", "dust": "", "ice": ""
-  },
-  "terrain": { "asteroid": "asteroid.png" }
-}
-```
+Ask:
 
-- Required per hull: `name`, `role`, `contactType`, `stats`, `hardpoints`,
-  `art`. Numeric fields (`massKt`, `profile`, `stealth`, `emission`,
-  `sensorQuality`, `crew`) and every stat value must be numbers.
-- `contactType` is one of: `unknown`, `prospector`, `freighter`, `liner`,
-  `escort`, `capship`, `fighter`, `carrier`, `asteroid`, `nebula`, `debris`,
-  `dust`, `ice`.
-- `hardpoints` is a list of `{id, arc, kind}`; `arc` is `fore|aft|port|starboard|all`,
-  `kind` is `gun|missile|torpedo`.
-- `defaults` maps a contact type to a hull id; **every** contact type you rename
-  the catalog for needs an entry, or a scenario that names no hull flies the
-  wrong ship. Terrain keys map to `""`. Unknown keys and unknown hull values are
-  load errors.
-- `art` is optional in effect: filenames resolve flavor-first, then up the
-  `extends` chain, then the core image tree (`bridge/img`, or `ASSET_DIR`), so a
-  hull can reuse core art by filename. A flavor's own file is served at
-  `/img/f/<id>/action/<file>`. A filename that resolves nowhere is a load error.
-- `terrain` overrides the terrain contact images through the same resolver.
+- *"Describe the look — three or four colours, or 'match <reference>'."* Capture
+  background, panel, accent, text, and a danger/good pair.
+- *"Fonts? Display face and readout face. Default is Zen Dots over Share Tech
+  Mono."*
 
-The physics shapes match the core catalog, so copy a core hull's stats and
-hardpoints and change the names/flavor text rather than inventing numbers.
+If the author has no preference, propose a palette derived from the setting's
+description and say why. `theme.css` is written in Phase 7 from these answers.
 
-## callsigns.json
+## Phase 3 — The ship roster (the heart of the mod)
 
-```json
-{
-  "vesselName": "registry",
-  "adjectives": ["USS", "NCC", "SS"],
-  "nouns": ["Enterprise", "Voyager", "Defiant"],
-  "hostile": {
-    "escort": ["IKS Rotarran-01", "IKS Rotarran-02"],
-    "capship": ["IRW D'deridex-01", "IKS Negh'Var-01"],
-    "fighter": ["Jem'Hadar-01", "Jem'Hadar-02"]
-  }
-}
-```
+This is ship-by-ship. First ask the shape, then walk the roles.
 
-`vesselName` selects the generator: `corporate` (`MV GREY FALCON`), `surname`
-(`Grey Falcon`), `callsign` (`Vanguard 612`), `registry` (`USS Enterprise`).
-Lists replace the inherited list; `hostile` pools merge per role. Hostile pools
-are used for `escort`, `capship` and `fighter` contacts and are de-duplicated
-within a scenario.
+**Ask:** *"Who's in this setting — a friendly navy, a hostile one, civilians?
+Tell me the ships you already know and I'll map them onto the roles the game
+needs."*
 
-## theme.css
+Then explain the roles and fill the gaps together. The core catalog is a
+ready-made checklist; a full re-skin answers all fifteen, a light reskin answers
+only the ones it uses:
 
-A straight `:root` override served after `activity.css`, so all existing markup
-resolves. Set `--font-display` and `--font-mono` to change type; the core values
-are Zen Dots and Share Tech Mono. `@import` a font at the top if you use a new
-one. Copy `bridge/flavors/core/theme.css` and change the palette.
+| Core slot | What it serves | Typical example |
+|---|---|---|
+| `home` | **the ship the players fly** (crew hull) | the hero cruiser |
+| `friendly-corvette` | friendly escort | a patrol corvette |
+| `friendly-transport` | neutral/civilian freighter (`freighter`, `liner`) | a cargo hauler |
+| `friendly-prospector` | `prospector` | a survey/mining hull |
+| `friendly-freighter` | `freighter` | an independent trader |
+| `friendly-carrier` | friendly carrier | a fleet carrier |
+| `friendly-light-cruiser` | friendly light cruiser | a frigate |
+| `enemy-escort` | hostile `escort` | a raider |
+| `enemy-fighter` | hostile `fighter` | a light fighter |
+| `enemy-medium-fighter` | hostile `fighter` | a line fighter |
+| `enemy-heavy-fighter` | hostile `fighter` | a heavy fighter |
+| `enemy-bomber` | hostile `fighter` | a strike bomber |
+| `enemy-destroyer` | hostile `capship` | a destroyer |
+| `enemy-cruiser` | hostile `carrier` | an enemy carrier |
+| `enemy-heavy-transport` | hostile `freighter` | a resupply hull |
 
-## missions/*.json
+For **each** ship the author names, capture:
 
-Mirrors `CampaignSeed` field-for-field; the loader is
-`CampaignSeed.model_validate(doc)`. Positions are explicit, so placement is
-deterministic — a flavor must never introduce its own randomness.
+1. **Class name** — what it is (`Miranda-class cruiser`).
+2. **Role** — a short human label (`Light cruiser`).
+3. **Who flies it** — friendly / neutral / hostile, which sets `contactType`
+   (`escort`, `fighter`, `capship`, `carrier`, `freighter`, `prospector`).
+4. **One-line blurb** — the sensor-catalogue flavour text. Offer to write it if
+   the author is tired of typing.
+5. **Registry name(s)** — the proper name when the crew flies it (`CS Audacity`,
+   `USS Enterprise`). One is enough; a list gives variety.
+6. **Stats** — *"reuse the core stats for that role, or tweak?"* Default: reuse.
+7. **Art** — deferred to Phase 4.
 
-```json
-{
-  "id": "mine.first",
-  "title": "First Patrol",
-  "theater": "My Sector",
-  "brief": "Opening situation.",
-  "target": "What winning looks like.",
-  "startHour": 0,
-  "patrol": { "center": { "x": 0, "y": 0, "z": 0 }, "radiusKlik": 70 },
-  "clutter": 0.3,
-  "escalation": 20,
-  "shipClass": "mine.miranda",
-  "zBand": { "min": 3, "max": 12 },
-  "environment": "clear-space",
-  "contacts": [
-    { "x": 8, "y": -30, "z": 4, "heading": 20, "speed": 62, "type": "escort",
-      "faction": "enemy", "hostile": true, "emitting": true,
-      "name": "IKS Rotarran", "shipClass": "mine.miranda", "radiusKlik": null }
-  ],
-  "events": [{ "atMinute": 60, "template": "fleetnet" }],
-  "hazards": [
-    { "id": "mine.ion", "type": "ion-storm", "title": "Ion storm",
-      "startMinute": 0, "endMinute": 240, "intensity": 1.4,
-      "noise": 0.05, "exposure": 0.5, "concealment": 0.4 }
-  ],
-  "navPoints": [
-    { "id": "mine.relay", "name": "Relay", "kind": "nav",
-      "pos": { "x": 40, "y": 12, "z": 0 }, "radiusKlik": 8, "chartAgeHours": 96 }
-  ],
-  "layers": [
-    { "id": "surface", "name": "Surface duct", "zMin": 0, "zMax": 10, "note": "Loud." }
-  ],
-  "barriers": []
-}
-```
+Ask the "who flies what" question explicitly: *"Which of these does the crew
+fly, which are hostile, and which are civilian traffic?"* The answers drive
+`defaults` (Phase 7): `unknown` must point at the crew hull, and every contact
+type you use must point at a hull, or unnamed contacts fly the wrong ship.
 
-- Required contact fields: `x`, `y`, `heading`, `speed`, `type`, `faction`,
-  `hostile`, `emitting`. Optional: `z`, `name`, `shipClass`, `radiusKlik`.
-- `shipClass` must be a hull id in the merged catalog; the same holds for the
-  mission's own `shipClass` (the crew hull).
-- Explicit `contacts[].name` values must be unique within the mission.
-- `events[].template` must be a core decision-event template: `fleetnet`
-  (`sosus` alias), `unmarked`, `distress`, `orders`, `probe`,
-  `weapons-warning`, `relay`, `challenge`, `civilian`, `false-surrender`,
-  `contactclose`. Flavors cannot add templates.
-- Hazard `type` is matched by substring to an environment: asteroid, nebula,
-  ice, dust, debris, radiation/solar, ion, gravity/well.
+Tips: if the author gives a flat list of names, propose the role mapping
+yourself and ask them to correct it. If they only have three ships, build a
+three-hull catalog and point several `defaults` entries at the same hull — that
+is valid.
 
-## Validate and fix
+## Phase 4 — Art (the "where do the images come from?" question)
+
+Ask directly: *"Do you have ship art, or should we reuse the core placeholder
+images for now?"* Then lay out the three options:
+
+1. **Reuse core art** (default, zero work). In `ships.json`, name an existing
+   core file: `"art": {"action": "friendly-cruiser.png", "vdu":
+   "friendly-cruiser-vdu.gif"}`. Art resolves flavour-first, then down the
+   `extends` chain, then the core `img/` tree, so no `assets/` directory is
+   needed at all.
+2. **Supply your own.** Drop files in
+   `bridge/flavors/<id>/assets/action/<stem>.png` and
+   `bridge/flavors/<id>/assets/vdu/<stem>-vdu.gif`, then name `<stem>.png` in
+   the hull's `art`. The resolver also accepts `.gif/.jpg/.jpeg/.webp` and tries
+   a same-basename extension swap, so a `.png` action with a `.gif` VDU works.
+3. **Generate placeholders.** `tools/generate_placeholder_art.py` paints 128×128
+   labelled placeholders (needs `pip install pillow`; currently paints the core
+   catalog, so copy or adapt it for a new setting). Any external art tool is
+   fine too.
+
+Specs: **128×128**, transparent or dark background reads best; action art is the
+ship portrait, VDU art is the scan/oscilloscope look. A flavor's own art is
+served at `/img/f/<id>/action/<file>`; core art keeps `/img/...`.
+
+Licensing: use your own, public-domain/CC0, or commissioned art. Third-party art
+carries the same exposure as a third-party setting — the contributor's
+responsibility (Phase 8).
+
+See `references/art.md` for naming details and a per-hull checklist.
+
+## Phase 5 — Callsigns (what contacts are called)
+
+Ask:
+
+- *"What naming convention do contacts use?"* Offer the four styles:
+  `corporate` (`MV GREY FALCON`), `surname` (`Grey Falcon`), `callsign`
+  (`Vanguard 612`), `registry` (`USS Enterprise`).
+- *"Give me a dozen name words for civilian traffic"* (adjectives + nouns).
+- *"What are the hostile ships called?"* — pools for `escort`, `capship` and
+  `fighter` roles, so two hostiles never read alike.
+
+Default if unsure: the setting's registry prefixes plus a list of evocative
+nouns. Pool entries carry their own capitalisation.
+
+## Phase 6 — Missions (what the table actually plays)
+
+Ask per mission (start with one; offer two):
+
+- *"Name and location?"* (title + theater)
+- *"What's the situation, and what does winning look like?"* (brief + target)
+- *"Who's out there?"* — the contact mix: types, hulls, hostile/neutral, whether
+  they are emitting, and roughly where.
+- *"Any terrain or weather?"* — asteroid field, dust, ice, ion storm, radiation,
+  debris; these become `hazards`, which also drive the environment.
+- *"Any places to plot to?"* — nav points and jump points.
+- *"Any scripted beats?"* — decision events, from the fixed core template list.
+
+Constraints to state: positions are explicit numbers (no randomness in a
+flavor); every `shipClass` must be a hull in the catalog; explicit contact names
+must be unique; events may only use core templates: `fleetnet` (`sosus` alias),
+`unmarked`, `distress`, `orders`, `probe`, `weapons-warning`, `relay`,
+`challenge`, `civilian`, `false-surrender`, `contactclose`.
+
+## Phase 7 — Build it
+
+Now write files from the design sheet. Exact shapes and field lists are in
+`references/flavor-format.md`; do not guess.
 
 ```sh
-.venv/bin/python -m bridge --check-flavor mine   # load one flavor; exit 1 on error
-.venv/bin/python -m bridge --list-flavors        # all installed flavors + counts
+# Extending core (normal case): copy the closest example.
+cp -r bridge/flavors/core bridge/flavors/<id>
+# Standalone (replaces core): start minimal instead and set "extends": null.
+mkdir -p bridge/flavors/<id>/missions
 ```
 
-The validator rejects, among others: a missing hull catalog or no missions;
-missing required hull fields; non-numeric stats or hull fields; a bad
-`contactType`, hardpoint `arc`/`kind`; art that resolves nowhere; unknown
-`defaults` keys or dangling hull ids; a mission that fails `CampaignSeed`; a
-mission `shipClass` not in the catalog; duplicate contact names; an unsorted
-unit ladder, a non-positive factor, a last rung whose `min` is not 0, or a dial
-key outside 0-100. `--list-flavors` marks invalid flavors `INVALID` with the
-reason; `get()` falls back to core and logs why.
+Then:
 
-## Activate the mod
+1. **`flavor.json`** — `id` matching the directory, `title`, `extends` (`core`,
+   another id, or `null`), file references, `defaultMission`.
+2. **`ships.json`** — one entry per hull, ids namespaced `<id>.<name>`, required
+   fields filled, stats/hardpoints copied from the matching core role,
+   `defaults` covering every contact type you use.
+3. **`units.json`** — the ladder and dial from Phase 1.
+4. **`theme.css`** — the palette from Phase 2 (copy `core/theme.css` and change
+   the `:root` values).
+5. **`callsigns.json`** — from Phase 5.
+6. **`missions/*.json`** — one file per mission, named `<id>.<mission>.json`.
 
-Installed is not the same as active. Mods start **disabled**; `core` is always
-active.
+Delete any copied file you are not overriding. Keep a `defaults` entry for every
+contact type the missions use.
 
-- GM console → **Mods / settings**: ACTIVATE/DEACTIVATE server-wide, USE IN ROOM
-  (rebuilds that room on the setting's `defaultMission`, keeping seats), SET
-  DEFAULT / CLEAR DEFAULT for new rooms. Persisted in the `mods` table in
-  `DATA_DIR/bridge.sqlite`.
-- `DEFAULT_FLAVOR=<id>` or `python -m bridge --flavor <id>` counts as an
-  explicit activation at boot.
-- Programmatically (tests): `from bridge.server import mods; mods.activate("mine")`
-  then `mods.set_default("mine")` if it should be the default.
-
-A room records its `flavorId` in state; if the mod is deactivated or removed
-from disk the room falls back to the default on load and stays playable.
-
-## Test it
-
-Add coverage to `tests/test_flavors.py` (or a sibling). The established pattern:
-build a throwaway flavor tree with the `flavor_home` fixture, or assert on a
-shipped example. Run the repo gates:
+## Phase 8 — Validate, activate, test, document
 
 ```sh
-.venv/bin/python -m pytest -q
-.venv/bin/ruff check bridge tests
-.venv/bin/mypy bridge
-node --check bridge/server/admin-ui/admin.js
+.venv/bin/python -m bridge --check-flavor <id>   # exits 1 on any error
+.venv/bin/python -m bridge --list-flavors        # all flavors + hull/mission counts
 ```
 
-A shipped example should be covered by the parameterised
-`test_example_mods_are_namespaced_and_playable` table (namespaced hulls,
-`defaults` resolve, a room builds and advances). Also add a `--check-flavor`
-assertion if you add a new shipped example.
+Read the validator's reason and fix the data; never patch code to accept a
+broken flavor. Then:
 
-## Packaging and licensing
+- **Activate it.** Installed is not active. In the GM console's **Mods /
+  settings**: ACTIVATE, then USE IN ROOM or SET DEFAULT. Or boot with
+  `DEFAULT_FLAVOR=<id>` / `python -m bridge --flavor <id>`. In tests:
+  `from bridge.server import mods; mods.activate("<id>")`.
+- **Play a room on it** and confirm units, theme, ship name and contact names
+  read correctly.
+- **Add tests** for a shipped example (`tests/test_flavors.py`) and run the
+  gates: `.venv/bin/python -m pytest -q`, `.venv/bin/ruff check bridge tests`,
+  `.venv/bin/mypy bridge`.
+- **Document licensing.** If it names a third party's universe, keep it a local
+  example: do **not** add it to `pyproject.toml` package-data, and note the
+  contributor owns the exposure. If it uses vocabulary that the retired-names
+  gate bans (see `tests/test_no_wing_commander_names.py`), add the flavor to
+  that test's allowlist or the build gate fails.
 
-Only `flavors/core/**`, `flavors/schema/**` and `flavors/README.md` ship in the
-built wheel (`pyproject.toml` `[tool.setuptools.package-data]`). Third-party
-settings (`wc`, `stk`, `sw`) are deliberately local examples: do **not** add a
-new third-party flavor to package-data, and note that a contributed flavor that
-names someone else's universe is the contributor's responsibility. A flavor
-containing retired Wing Commander vocabulary must be added to the allowlist in
-`tests/test_no_wing_commander_names.py` (the gate otherwise fails the build),
-and only if that is the deliberate intent.
+## Interview cheat sheet
 
-## Checklist
+Longer prompts you can lift verbatim:
 
-- [ ] Directory name matches `flavor.json` `id`; ids namespaced `<id>.<name>`.
-- [ ] `ships.json` defines every hull it references, with all required fields.
-- [ ] `defaults` covers every contact type the flavor renames; values resolve.
-- [ ] `units.json` ladder is descending by canonical klik and ends at `min: 0`.
-- [ ] Art filenames resolve (flavor `assets/`, then chain, then core `img/`).
-- [ ] Missions validate, reference known hulls, and have unique explicit names.
-- [ ] `--check-flavor <id>` and `--list-flavors` are clean.
-- [ ] `.venv/bin/python -m pytest -q`, ruff and mypy pass.
-- [ ] Tests added for any shipped example.
-- [ ] Not added to package-data; licensing noted if third-party.
+- *"Let's build a setting. Start me with the universe and the vibe in a
+  sentence."*
+- *"How do you want ranges and speeds to read on the plot?"*
+- *"List the ships you already know about — I'll fit them to the roles the game
+  needs and fill the gaps."*
+- *"For each ship: what's it called, what does it do, and who flies it?"*
+- *"Do you have art, or should I reuse the core placeholder images for now?"*
+- *"What do contact callsigns look like in this universe?"*
+- *"Design me one mission: name, place, who's out there, and what winning looks
+  like."*
+
+Handling common answers:
+
+- **"I don't know."** → propose two concrete options, pick one, and say it is
+  easy to change later.
+- **"Just make it cool."** → choose a coherent palette, roster and one mission,
+  generate it, then show the result and invite edits.
+- **"Reuse everything."** → a minimal flavor is just `flavor.json` plus a theme
+  or units override; that is a complete, valid mod.
+- **A wall of lore.** → extract only what maps to fields (names, blurbs,
+  factions, places) and summarise back.
+
+## References
+
+- `references/flavor-format.md` — every file's exact shape, enums, required
+  fields and validator rules. Read before Phase 7.
+- `references/art.md` — image options, specs, naming, resolution order and
+  licensing. Read before Phase 4.
