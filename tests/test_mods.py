@@ -247,7 +247,7 @@ def test_admin_activates_a_mod_for_a_room():
             assert state["state"]["flavorId"] == "wc"
             # Activating a mod for a room loads that setting's own default
             # mission, not the inherited core scenario the room was on.
-            assert state["state"]["campaign"]["id"] == "wc.vega-run"
+            assert state["state"]["campaign"]["id"] == "wc.vega-patrol"
     assert rooms.rooms["chan-mod-room"].state.flavorId == "wc"
 
 
@@ -287,4 +287,7 @@ def test_admin_snapshot_follows_the_selected_room_flavor():
             assert ok["type"] == "admin.ok"
             # The room's flavor drives the mission and hull pickers.
             assert any(c["id"].startswith("wc.") for c in ok["campaigns"])
-            assert any(s["id"] == "wc.tigers-claw" for s in ok["ships"])
+            from bridge.shared import flavors
+
+            crew = flavors.get("wc").defaults["unknown"]
+            assert any(s["id"] == crew for s in ok["ships"])

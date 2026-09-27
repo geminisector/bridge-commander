@@ -3,16 +3,16 @@
   "adjectives": ["Grey", "Blue", "Long", "Red", "Iron", "Bright", "Silent", "Swift"],
   "nouns": ["Falcon", "Drayman", "Venture", "Tarsus", "Sabre", "Rapier", "Crossbow", "Gladius"],
   "hostile": {
-    "escort": ["KIS Kamekh-01", "KIS Kamekh-02", "KIS Kamekh-03", "KIS Kamekh-04"],
-    "capship": ["KIS Fralthi-01", "KIS Ralatha-01", "KIS Dorkathi-01", "KIS Fralthi-02"],
+    "escort": ["KIS Kamekh-01", "KIS Kamekh-02", "KIS Jalthi-03", "KIS Kamekh-04"],
+    "capship": ["KIS Fralthi-01", "KIS Ralatha-01", "KIS Ralari-01", "KIS Fralthi-02", "KIS Ralatha-02"],
     "fighter": [
-      "KIS Salthi-01",
-      "KIS Salthi-02",
-      "KIS Salthi-03",
-      "KIS Dralthi-04",
-      "KIS Dralthi-05",
-      "KIS Grikath-06",
-      "KIS Grikath-07"
+      "KIS Dralthi-01",
+      "KIS Dralthi-02",
+      "KIS Dralthi-03",
+      "KIS Sartha-04",
+      "KIS Krant-05",
+      "KIS Gratha-06",
+      "KIS Hhriss-07"
     ]
   }
 }

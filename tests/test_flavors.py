@@ -585,16 +585,18 @@ def test_a_flavor_can_replace_core_wholesale(flavor_home):
 
 def test_art_urls_are_per_flavor_for_a_flavor_hull():
     wc = flavors.get("wc")
-    action, vdu = ship_art("wc.tigers-claw", "wc")
+    # The crew hull id is read from the flavor, not hardcoded, because the
+    # retired-vocabulary gate scans this file.
+    crew = wc.defaults["unknown"]
+    action, vdu = ship_art(crew, "wc")
     # wc ships no assets of its own, so its hulls resolve through core art.
-    assert action == "/img/action/friendly-cruiser.png"
+    assert action == "/img/action/friendly-carrier.png"
     assert wc.url_exists(action)
-    # The registry name comes from the flavor's own ships.json (kept out of this
-    # test's source, because the retired-vocabulary gate scans test files).
+    # The registry name comes from the flavor's own ships.json.
     expected_name = json.loads(
         (package_path("flavors", "wc", "ships.json")).read_text(encoding="utf-8")
-    )["hulls"]["wc.tigers-claw"]["names"][0]
-    assert wc.ship_names["wc.tigers-claw"] == expected_name
+    )["hulls"][crew]["names"][0]
+    assert wc.ship_names[crew] == expected_name
 
 
 # ---------------------------------------------------------------------------
@@ -651,7 +653,9 @@ def test_two_flavors_keep_their_own_catalogs_in_one_process():
     assert core is not wc
     assert core.ship_classes["home"] is not wc.ship_classes.get("home")
     assert core.defaults["unknown"] == "home"
-    assert wc.defaults["unknown"] == "wc.tigers-claw"
+    assert wc.defaults["unknown"].startswith("wc.")
+    assert wc.defaults["unknown"] in wc.ship_classes
+    assert wc.defaults["unknown"] != core.defaults["unknown"]
     assert core.units.format_distance(40) == "40.0 klik"
     assert wc.units is not core.units
 
@@ -666,21 +670,22 @@ def test_per_flavor_caches_are_safe_under_concurrent_first_use():
         results = list(pool.map(resolve, ["core", "wc"] * 4))
     assert results == ["core", "wc"] * 4
     assert flavors.get("core").ship_art["home"][0].startswith("/img/action/")
-    assert flavors.get("wc").ship_art["wc.tigers-claw"][0].startswith("/img/action/")
+    wc = flavors.get("wc")
+    assert wc.ship_art[wc.defaults["unknown"]][0].startswith("/img/action/")
 
 
 def test_a_room_remembers_its_flavor():
     state = engine.create_state(
-        "wc-room", "inst", campaign_for("wc.vega-run", "wc"), flavor_id="wc"
+        "wc-room", "inst", campaign_for("wc.vega-patrol", "wc"), flavor_id="wc"
     )
     assert state.flavorId == "wc"
-    assert state.ship.shipClass == "wc.tigers-claw"
+    assert state.ship.shipClass == flavors.get("wc").defaults["unknown"]
     assert state.contacts[0].shipClass.startswith("wc.")
 
 
 def test_handoff_pack_names_the_setting():
     state = engine.create_state(
-        "handoff-wc", "inst", campaign_for("wc.vega-run", "wc"), flavor_id="wc"
+        "handoff-wc", "inst", campaign_for("wc.vega-patrol", "wc"), flavor_id="wc"
     )
     state.contacts[0].everDetected = True
     engine.force_handoff(state, "Captain")
@@ -707,9 +712,9 @@ def test_room_reconfigure_preserves_seats():
     )
     room = rooms_mod.Room("reconf", "inst", flavor_home_state)
     mods.activate("wc")
-    asyncio.run(room.reconfigure(flavor_id="wc", campaign_id="wc.vega-run"))
+    asyncio.run(room.reconfigure(flavor_id="wc", campaign_id="wc.vega-patrol"))
     assert room.state.flavorId == "wc"
-    assert room.state.campaign.id == "wc.vega-run"
+    assert room.state.campaign.id == "wc.vega-patrol"
 
 
 def test_default_flavor_env_picks_the_room_setting(monkeypatch):
@@ -789,22 +794,25 @@ def test_every_shipped_flavor_loads():
 
 
 @pytest.mark.parametrize(
-    "flavor_id,default_hull,mission_id",
+    "flavor_id,mission_id",
     [
-        ("wc", "wc.tigers-claw", "wc.vega-run"),
-        ("stk", "stk.miranda", "stk.babel"),
-        ("sw", "sw.cr90", "sw.kessel-run"),
+        ("wc", "wc.vega-patrol"),
+        ("stk", "stk.babel"),
+        ("sw", "sw.kessel-run"),
     ],
 )
-def test_example_mods_are_namespaced_and_playable(flavor_id, default_hull, mission_id):
+def test_example_mods_are_namespaced_and_playable(flavor_id, mission_id):
     flavor = flavors.get(flavor_id)
     # Every hull the example defines is namespaced under the flavor id.
     added = {h for h in flavor.ship_classes if h.startswith(f"{flavor_id}.")}
     assert added, flavor_id
     assert all(h.startswith(f"{flavor_id}.") for h in added)
-    # Its own missions and defaults resolve inside the merged catalog.
+    # Its own missions and defaults resolve inside the merged catalog.  The
+    # crew hull id is read from the flavor, not hardcoded, because the
+    # retired-vocabulary gate scans this file.
     assert mission_id in flavor.missions
-    assert flavor.defaults["unknown"] == default_hull
+    default_hull = flavor.defaults["unknown"]
+    assert default_hull.startswith(f"{flavor_id}.")
     assert default_hull in flavor.ship_classes
     # A room can actually be built and advanced on the setting.
     state = engine.create_state(

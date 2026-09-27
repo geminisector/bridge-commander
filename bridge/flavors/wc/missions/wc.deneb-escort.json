@@ -1,0 +1,45 @@
+{
+  "id": "wc.deneb-escort",
+  "title": "Deneb Escort",
+  "theater": "Deneb Sector, 2660",
+  "brief": "Two Drayman transports are carrying replacement parts for the Deneb picket line, and the Kilrathi know the schedule. A Venture corvette is already on the convoy; the Tiger's Claw is the heavy cover that keeps the raiders honest.",
+  "target": "Bring both transports through to the jump point. Classify the raiders. Keep the convoy alive.",
+  "startHour": 4,
+  "patrol": { "center": { "x": 0, "y": 0, "z": 0 }, "radiusKlik": 95 },
+  "clutter": 0.15,
+  "escalation": 38,
+  "zBand": { "min": 2, "max": 10 },
+  "shipClass": "wc.bengal",
+  "contacts": [
+    { "x": -34, "y": 30, "z": 4, "heading": 210, "speed": 42, "type": "freighter", "faction": "neutral", "hostile": false, "emitting": false, "name": "MV Grey Drayman", "shipClass": "wc.drayman", "radiusKlik": null },
+    { "x": -18, "y": 46, "z": 5, "heading": 210, "speed": 40, "type": "freighter", "faction": "neutral", "hostile": false, "emitting": false, "name": "MV Grey Drayman-2", "shipClass": "wc.drayman", "radiusKlik": null },
+    { "x": -40, "y": 60, "z": 6, "heading": 210, "speed": 58, "type": "escort", "faction": "friendly", "hostile": false, "emitting": true, "name": "TCS Venture", "shipClass": "wc.venture", "radiusKlik": null },
+    { "x": 26, "y": -30, "z": 5, "heading": 10, "speed": 64, "type": "escort", "faction": "enemy", "hostile": true, "emitting": true, "name": "KIS Kamekh", "shipClass": "wc.kamekh", "radiusKlik": null },
+    { "x": 58, "y": 10, "z": 4, "heading": 300, "speed": 62, "type": "escort", "faction": "enemy", "hostile": true, "emitting": true, "name": "KIS Kamekh-2", "shipClass": "wc.kamekh", "radiusKlik": null },
+    { "x": 12, "y": -64, "z": 6, "heading": 45, "speed": 82, "type": "fighter", "faction": "enemy", "hostile": true, "emitting": true, "name": "KIS Sartha", "shipClass": "wc.sartha", "radiusKlik": null },
+    { "x": -62, "y": -18, "z": 3, "heading": 120, "speed": 80, "type": "fighter", "faction": "enemy", "hostile": true, "emitting": true, "name": "KIS Sartha-2", "shipClass": "wc.sartha", "radiusKlik": null },
+    { "x": 44, "y": 52, "z": 7, "heading": 240, "speed": 86, "type": "fighter", "faction": "enemy", "hostile": true, "emitting": true, "name": "KIS Dralthi", "shipClass": "wc.dralthi", "radiusKlik": null },
+    { "x": 8, "y": 8, "z": 0, "heading": 0, "speed": 0, "type": "dust", "faction": "neutral", "hostile": false, "emitting": false, "name": null, "shipClass": null, "radiusKlik": 14 }
+  ],
+  "events": [
+    { "atMinute": 50, "template": "orders" },
+    { "atMinute": 140, "template": "distress" },
+    { "atMinute": 230, "template": "fleetnet" }
+  ],
+  "hazards": [
+    { "id": "wc.deneb.dust", "type": "dust-front", "title": "Deneb dust front", "startMinute": 80, "endMinute": 240, "intensity": 0.9, "noise": 0.03, "exposure": 0.2, "concealment": 0.3 }
+  ],
+  "navPoints": [
+    { "id": "wc.deneb.handoff", "name": "Convoy Handoff", "kind": "nav", "pos": { "x": 20, "y": 40, "z": 0 }, "radiusKlik": 8, "chartAgeHours": 4, "note": "where the corvette takes over" },
+    { "id": "wc.deneb.jump", "name": "Deneb Jump Point", "kind": "jump", "pos": { "x": -60, "y": 88, "z": 0 }, "radiusKlik": 10, "chartAgeHours": 12, "note": "convoy egress" }
+  ],
+  "layers": [
+    { "id": "surface", "name": "Surface duct", "zMin": 0, "zMax": 10, "note": "Loud and exposed: everyone above and below hears you." },
+    { "id": "gradient", "name": "Gradient layer", "zMin": 10, "zMax": 22, "note": "The boundary itself: crossing it hides you and blinds you." },
+    { "id": "deep", "name": "Deep channel", "zMin": 22, "zMax": 40, "note": "Quiet and hard to reach; your array rides well down here." }
+  ],
+  "environment": "clear-space",
+  "barriers": [
+    { "id": "wc.deneb.picket", "name": "Deneb Picket", "a": { "x": -30, "y": -80, "z": 0 }, "b": { "x": 70, "y": -50, "z": 0 }, "sensitivity": 0.65, "faction": "enemy", "note": "Raider listening line across the convoy route." }
+  ]
+}

@@ -7,5 +7,5 @@
   "ships": "ships.json",
   "callsigns": "callsigns.json",
   "missions": "missions/",
-  "defaultMission": "wc.vega-run"
+  "defaultMission": "wc.vega-patrol"
 }

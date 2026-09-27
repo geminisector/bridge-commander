@@ -1,0 +1,42 @@
+{
+  "id": "wc.gemini-recon",
+  "title": "Gemini Recon",
+  "theater": "Gemini Sector, 2660",
+  "brief": "A Kilrathi heavy destroyer is running dark through the Gemini shoals and command does not know why. The Tiger's Claw goes in alone, cold, and slow: find the hull, map its escort, and get out without giving it a shot.",
+  "target": "Fix the Ralatha and its screen without being detected. Bring the picture home.",
+  "startHour": 1,
+  "patrol": { "center": { "x": 0, "y": 0, "z": 0 }, "radiusKlik": 110 },
+  "clutter": 0.6,
+  "escalation": 25,
+  "zBand": { "min": 4, "max": 16 },
+  "shipClass": "wc.bengal",
+  "contacts": [
+    { "x": -76, "y": -48, "z": 8, "heading": 30, "speed": 26, "type": "capship", "faction": "enemy", "hostile": true, "emitting": false, "name": "KIS Ralatha", "shipClass": "wc.ralatha", "radiusKlik": null },
+    { "x": -30, "y": -20, "z": 10, "heading": 60, "speed": 54, "type": "escort", "faction": "enemy", "hostile": true, "emitting": false, "name": "KIS Kamekh", "shipClass": "wc.kamekh", "radiusKlik": null },
+    { "x": 26, "y": 34, "z": 12, "heading": 200, "speed": 62, "type": "fighter", "faction": "enemy", "hostile": true, "emitting": false, "name": "KIS Drakhri", "shipClass": "wc.drakhri", "radiusKlik": null },
+    { "x": 48, "y": -30, "z": 6, "heading": 300, "speed": 78, "type": "fighter", "faction": "enemy", "hostile": true, "emitting": true, "name": "KIS Sartha", "shipClass": "wc.sartha", "radiusKlik": null },
+    { "x": -8, "y": 58, "z": 9, "heading": 180, "speed": 76, "type": "fighter", "faction": "enemy", "hostile": true, "emitting": true, "name": "KIS Sartha-2", "shipClass": "wc.sartha", "radiusKlik": null },
+    { "x": 0, "y": 0, "z": 0, "heading": 0, "speed": 0, "type": "ice", "faction": "neutral", "hostile": false, "emitting": false, "name": null, "shipClass": null, "radiusKlik": 10 },
+    { "x": 34, "y": 6, "z": 0, "heading": 0, "speed": 0, "type": "ice", "faction": "neutral", "hostile": false, "emitting": false, "name": null, "shipClass": null, "radiusKlik": 10 },
+    { "x": -60, "y": 40, "z": 0, "heading": 0, "speed": 0, "type": "debris", "faction": "neutral", "hostile": false, "emitting": false, "name": null, "shipClass": null, "radiusKlik": 9 }
+  ],
+  "events": [
+    { "atMinute": 80, "template": "probe" },
+    { "atMinute": 180, "template": "unmarked" },
+    { "atMinute": 300, "template": "fleetnet" }
+  ],
+  "hazards": [
+    { "id": "wc.gemini.nebula", "type": "nebula", "title": "Gemini shoal nebula", "startMinute": 0, "endMinute": 360, "intensity": 1.2, "noise": 0.02, "exposure": 0.1, "concealment": 0.5 }
+  ],
+  "navPoints": [
+    { "id": "wc.gemini.datum", "name": "Kinetic Cut", "kind": "nav", "pos": { "x": -30, "y": -30, "z": 0 }, "radiusKlik": 9, "chartAgeHours": 40, "note": "last known datum" },
+    { "id": "wc.gemini.exit", "name": "Gemini Exit", "kind": "jump", "pos": { "x": 84, "y": 66, "z": 0 }, "radiusKlik": 10, "chartAgeHours": 20, "note": "quiet egress" }
+  ],
+  "layers": [
+    { "id": "surface", "name": "Surface duct", "zMin": 0, "zMax": 10, "note": "Loud and exposed: everyone above and below hears you." },
+    { "id": "gradient", "name": "Gradient layer", "zMin": 10, "zMax": 22, "note": "The boundary itself: crossing it hides you and blinds you." },
+    { "id": "deep", "name": "Deep channel", "zMin": 22, "zMax": 40, "note": "Quiet and hard to reach; your array rides well down here." }
+  ],
+  "environment": "clear-space",
+  "barriers": []
+}
