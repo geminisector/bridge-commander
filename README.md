@@ -1,8 +1,42 @@
 # BRIDGE COMMANDER
 
+**Five players. One ship. Nobody wins alone.**
+
 A standalone, browser-based tabletop bridge simulator. Players share a ship, detect and classify contacts, manage the watch, and pause for tabletop handoffs while a server-authoritative hostile force reacts.
 
 The setting and hull catalogue are original to this project and use role-bearing, faction-neutral class names (`Friendly_Cruiser`, `Enemy_Destroyer`, …), so the same mechanics can be re-flavoured. The simulation rules are ported from WCRPG; see [Credits and licensing](bridge/CREDITS.md).
+
+
+## Your crew
+
+Every seat holds information the others need. Talking to each other isn't optional.
+
+| Seat | Role | You are responsible for |
+|------|------|-------------------------|
+| **Captain (CO)** | Command | Controlling time and making fleet-level decisions |
+| **Ops (XO)** | Helm | Navigation and speed |
+| **Sensors** | Science | Working out what the enemy is and where it's hiding |
+| **Comms** | Signals | Classifying contacts as friend or foe |
+| **Catalogue** | Records | Identifying the signals Sensors picks up |
+
+| | |
+|---|---|
+| ![Captain](./bridge-captain.png) | ![Ops](./bridge-ops.png) |
+| ![Sensors](./bridge-sensors.png) | ![Comms](./bridge-comms.png) |
+| ![Catalogue](./bridge-catalog.png) | ![After-action log](./bridge-log.png) |
+
+## How a contact flows through the ship
+
+Sensors detects a signal → Catalogue identifies it → Comms classifies it as friend or foe → the Captain decides → Ops moves the ship.
+Miss a link in the chain and the enemy gets the first move.
+
+## After-action review
+
+When the mission ends, the log lets the crew replay their decisions and see where the chain broke down, so the next watch goes better.
+
+## The Game Master
+
+The game master is the one orchestrating the scenario. They have their own admin panel on port `8788` by default. ![Game Master View](./gm-console.png)
 
 This repository is an unofficial, non-commercial fan project. It is not affiliated with or endorsed by the rights holders. See [Credits and licensing](bridge/CREDITS.md).
 
@@ -28,10 +62,10 @@ bridge
 
 ## Features
 
-- Four cooperative bridge stations: Command, Ops, Sensors/EW, and Comms/Weapons
+- Four cooperative bridge stations: Command, Ops, Sensors/[EW](https://en.wikipedia.org/wiki/Electronic_warfare), and Comms/Weapons
 - Server-authoritative pause, 1x, 4x, warp, and manual time controls
-- Passive, active-radar, gravidar, EM, buoy, IFF, TMA, and datum mechanics
-- Fuel, navigation, jumps, heat, fatigue, environments, maintenance, and ship systems
+- [Passive](https://en.wikipedia.org/wiki/Passive_radar), active-[radar](https://en.wikipedia.org/wiki/Radar), gravidar, [EM](https://en.wikipedia.org/wiki/Electromagnetic_radiation), [buoy](https://en.wikipedia.org/wiki/Sonobuoy), [IFF](https://en.wikipedia.org/wiki/Identification_friend_or_foe), [TMA](https://en.wikipedia.org/wiki/Target_motion_analysis), and datum mechanics
+- Fuel, navigation, jumps, heat, fatigue, environments, [maintenance](https://en.wikipedia.org/wiki/Maintenance_(technical)), and ship systems
 - Decision events, hostile escalation, career progression, and tabletop handoff packs
 - Fifteen hulls, arc-coded hardpoints, modules, weapons, campaign events, hazards, and nav charts
 - Bundled player UI and GM console with no frontend build step
