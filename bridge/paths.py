@@ -67,17 +67,19 @@ def _manifest(flavor_id: str) -> dict:
 def flavor_extends(flavor_id: str) -> str | None:
     """The id this flavor extends, or ``None`` for a standalone flavor.
 
-    ``core`` never extends.  Any other manifest that omits ``extends`` inherits
-    ``core``; an explicit ``"extends": null`` opts out and replaces core
-    wholesale.
+    Inheritance is **opt-in**.  A manifest that omits ``extends`` (or sets it to
+    ``null``) is standalone and carries its own complete catalog.  Mods are
+    alternative settings played one at a time, so a mod that silently inherited
+    the shipped ``core`` catalog would mix another universe's hulls and missions
+    into its own; a flavor must name a parent to get one.
+
+    ``core`` never extends.
     """
     if flavor_id == CORE_FLAVOR_ID:
         return None
     doc = _manifest(flavor_id)
-    if "extends" in doc:
-        value = doc.get("extends")
-        return str(value) if value else None
-    return CORE_FLAVOR_ID
+    value = doc.get("extends")
+    return str(value) if value else None
 
 
 def flavor_chain(flavor_id: str) -> list[str]:

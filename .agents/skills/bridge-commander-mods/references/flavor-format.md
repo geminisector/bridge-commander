@@ -10,7 +10,6 @@ Exact shapes for everything under `bridge/flavors/<id>/`. JSON Schemas live in
 {
   "id": "mine",
   "title": "My Setting",
-  "extends": "core",
   "units": "units.json",
   "theme": "theme.css",
   "ships": "ships.json",
@@ -21,8 +20,11 @@ Exact shapes for everything under `bridge/flavors/<id>/`. JSON Schemas live in
 ```
 
 - `id` is required and **must match the directory name**.
-- `extends` chains (child overrides parent); omitted means `core`; `null` means
-  stand alone (you must then supply your own hull catalog and a mission).
+- `extends` is **opt-in**: omit it (or write `null`) and the mod is standalone,
+  carrying its own complete hull catalog and at least one mission. Name a parent
+  (`"extends": "core"`, or another flavor id) to chain onto it, in which case you
+  may ship only the files you override — but the parent's other hulls and
+  scenarios stay in play.
 - A missing file reference is simply not overridden; a missing parent or a cycle
   is a load error.
 

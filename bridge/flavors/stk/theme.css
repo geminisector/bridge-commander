@@ -1,8 +1,9 @@
 /* stk — a Star Trek-flavoured re-skin of the core watch.
-   LCARS-inspired: black panels, warm orange controls, a violet secondary.
-   Straight :root override, served after activity.css. */
+   LCARS-inspired: black panels with a violet elbow rail, pill-shaped controls,
+   warm orange readouts and geometric capitals.  Served after activity.css, so
+   every rule here overrides the core look. */
 
-@import url('https://fonts.googleapis.com/css2?family=Antonio&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Roboto+Mono:wght@400;500&display=swap');
 
 :root{
   --bg:#050507;
@@ -16,13 +17,37 @@
   --accent-hover:#ffb964;
   --glow:0 0 8px rgba(255,156,63,.35);
   --glow-hover:0 0 15px rgba(255,185,100,.75),0 0 25px rgba(255,185,100,.35);
-  --radius:8px;
+  --radius:18px;
   --cyan:#8f7bd6;
   --dim:#8f7bd6;
   --amber:#ffcc66;
   --red:#ff6b73;
   --green:#5fd39a;
   --active:#3a2109;
-  --font-display:'Antonio','Zen Dots',system-ui,sans-serif;
-  --font-mono:'Share Tech Mono',ui-monospace,monospace;
+  --font-display:'Orbitron',system-ui,sans-serif;
+  --font-mono:'Roboto Mono',ui-monospace,monospace;
+  --tint-rgb:255,156,63;
+  /* The violet left rail is painted into the panel background itself. */
+  --panel-bg:linear-gradient(90deg,rgba(143,123,214,.85) 0 10px,rgba(20,17,24,.96) 10px);
+  --wash:
+    radial-gradient(900px 600px at 12% -10%,rgba(143,123,214,.22),transparent 62%),
+    radial-gradient(900px 620px at 96% 112%,rgba(255,156,63,.12),transparent 66%),
+    radial-gradient(120% 90% at 50% 50%,transparent 55%,rgba(0,0,0,.62) 100%);
 }
+
+/* Geometric capitals and rounded controls.  Orbitron is a wide face, so the
+   tracking stays modest — the LCARS feel comes from the rail and the pills. */
+h1{font-family:var(--font-display);text-transform:uppercase;letter-spacing:.18em}
+.card h2,.card h3,.section-head h2,.sensor-card h3{
+  text-transform:uppercase;
+  letter-spacing:.18em;
+}
+small,.label{letter-spacing:.16em}
+button,select{
+  border-radius:999px;
+  font-family:var(--font-display);
+  text-transform:uppercase;
+  letter-spacing:.12em;
+}
+.tabs button{border-radius:999px 999px 0 0}
+header::after{left:0;right:45%;height:3px;opacity:.9}

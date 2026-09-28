@@ -22,6 +22,7 @@ from ..shared.types import GameState, SeatId
 from . import mods
 from .db import load_room, save_room
 from .engine import create_state
+from .voice import voice_room
 
 SAVE_DEBOUNCE_SECONDS = 0.15
 
@@ -95,6 +96,30 @@ def public_state(state: GameState) -> dict[str, Any]:
                     "sensor": {},
                 }
             )
+    # Derived, not stored: every client computes the same voice room from its own
+    # copy of the state (see ``server/voice.py``).
+    data["voiceRoom"] = voice_room(
+        data["room"]["channelId"], data["room"]["instanceId"], data["campaign"]["id"]
+    )
+    # The room's display units ride along, so the UI renders the flavor's own
+    # distance ladder and speed scale instead of hardcoded klik/kps.  Canonical
+    # values on the wire are unchanged; this is presentation only.
+    units = get_flavor(state.flavorId).units
+    data["units"] = {
+        "distance": {
+            "base": units.distance_base,
+            "ladder": [
+                {
+                    "min": rung.min,
+                    "unit": rung.unit,
+                    "factor": rung.factor,
+                    "precision": rung.precision,
+                }
+                for rung in units.ladder
+            ],
+        },
+        "speed": {"base": units.speed_base, "factor": units.speed_factor},
+    }
     return data
 
 
@@ -112,17 +137,17 @@ def _ws_open(ws: Any) -> bool:
 
 
 def _resolve_room_flavor(state: GameState) -> str:
-    """Pin a loaded room to an activated, installed mod, else the default.
+    """Pin a loaded room to the active mod.
 
-    A flavor removed from disk *or deactivated by the operator* must not brick a
+    A flavor removed from disk *or unloaded by the operator* must not brick a
     saved room (FLAVOR_PLUGIN_PLAN.md invariant 11): the room keeps its campaign
-    but plays it on the default setting.
+    but plays it on the setting that is actually loaded.
     """
-    requested = (state.flavorId or "").strip() or mods.default_flavor()
+    requested = (state.flavorId or "").strip() or mods.active_mod()
     if not mods.is_enabled(requested):
-        fallback = mods.default_flavor()
+        fallback = mods.active_mod()
         log.warning(
-            "room %s: mod %r is not activated; falling back to %r",
+            "room %s: mod %r is not active; falling back to %r",
             state.room.channelId,
             requested,
             fallback,
@@ -171,7 +196,7 @@ class Room:
             room.state.hostId = None
             room.state.hostSession = None
             return room
-        resolved = mods.guard_room(flavor_id or mods.default_flavor())
+        resolved = mods.guard_room(flavor_id or mods.active_mod())
         return cls(
             channel_id,
             instance_id,
@@ -196,15 +221,15 @@ class Room:
         campaign_id: str | None = None,
         ship_id: str | None = None,
     ) -> None:
-        """Rebuild the room on another flavor / mission, preserving seats.
+        """Rebuild the room on the active mod / another mission, preserving seats.
 
-        Per-room selection (FLAVOR_PLUGIN_PLAN.md §"Selection and loader"): a
-        table picks its setting, and the fresh state carries the same claimed
-        seats and host authority so nobody is dropped.
+        Exactly one mod is loaded at a time, so the fresh state plays that
+        setting.  The claimed seats and host authority carry over so nobody is
+        dropped when the operator loads a different universe.
 
         With no explicit mission, the setting's own ``defaultMission`` is used —
-        activating a mod for a room should show that mod's content, not the
-        inherited core scenario that happened to be running.
+        loading a mod should show that mod's content, not the scenario that
+        happened to be running before.
         """
         resolved = mods.guard_room(flavor_id or self.state.flavorId)
         mission = campaign_id or get_flavor(resolved).first_mission_or(

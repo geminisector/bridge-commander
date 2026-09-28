@@ -83,28 +83,69 @@ containing `index.html`) or the packaged `bridge/activity/dist`. Contact art
 referenced at `/img/...` is served from `ASSET_DIR`, defaulting to packaged
 `bridge/img`.
 
+### Voice
+
+Each game room has a **VOICE** tab that embeds an audio-only [Jitsi
+Meet](https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-iframe/) call, so
+the crew can talk while they work different stations. The call keeps running when
+a player switches tabs; it ends only when they leave it.
+
+The room id is a **UUIDv5 derived from the watch and its mission**
+(`server/voice.py`) rather than a random one, which is what makes it work with no
+coordination at all:
+
+- everyone playing that mission computes the identical UUID, so they all land in
+  the same call — nobody has to share a link;
+- it is stable across reloads, reconnects and restarts, because nothing is
+  stored;
+- it is mission-scoped, so switching missions moves the crew to a fresh room
+  instead of dropping a new game into the last one's channel. Every client sees
+  the same state, so they regroup together rather than splitting.
+
+It is a *name*, not a credential: anyone who knows the channel, instance and
+mission ids can derive it, so it hides a room from casual guessing but does not
+make a public Jitsi instance private. For a private table, point `JITSI_DOMAIN`
+at your own deployment.
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `JITSI_DOMAIN` | `meet.jit.si` | Jitsi Meet host to embed. An **empty** value hides the tab. |
+
+Two limits are worth knowing before a session:
+
+- **The microphone needs a secure context.** `getUserMedia` only works over
+  `https://` or on `localhost`. The default `http://127.0.0.1:8787` is fine for
+  the machine running the server, but a player opening `http://192.168.x.x:8787`
+  gets no microphone at all. Put the app behind TLS (a reverse proxy, or
+  `mkcert` with the CA trusted on each device) for LAN play.
+- **The public `meet.jit.si` is no longer anonymous** — since 8x8 ended anonymous
+  meetings there, someone has to sign in as moderator to start a room, and a
+  publicly-guessable room name can be joined by anyone who guesses it. For a
+  private table, point `JITSI_DOMAIN` at your own Jitsi deployment.
+
 ### Settings (flavors)
 
 A **flavor** is a setting — a mod — as data: a directory under
 `bridge/flavors/<id>/` with a `flavor.json` manifest plus the JSON, CSS and
 images it overrides. `core` is the shipped default; `wc`, `stk` (Star Trek) and
 `sw` (Star Wars) are worked examples of the seam.
-A flavor inherits from `core` by default, ships no code, and provides only what
-it changes (see `FLAVOR_PLUGIN_PLAN.md` for the design and `flavors/README.md`
-for the authoring guide).
+A flavor is **standalone by default** and carries its own hull catalog, missions
+and theme; naming a parent with `extends` opts into inheriting one instead. It
+ships no code (see `FLAVOR_PLUGIN_PLAN.md` for the design and
+`flavors/README.md` for the authoring guide).
 
 ```bash
 python -m bridge --list-flavors         # installed settings, hull/mission counts
 python -m bridge --check-flavor wc      # load + validate one flavor, exit 1 on error
-python -m bridge --flavor wc            # new rooms start on wc
+python -m bridge --flavor wc            # load wc at boot
 ```
 
-Installed settings are **inert until activated**. The GM console's *Mods /
-settings* panel switches a mod on or off server-wide, applies it to a room
-(rebuilding that room on the setting), or makes it the default for new rooms;
-the choice persists in the rooms database. `DEFAULT_FLAVOR` / `--flavor` counts
-as an explicit activation at boot. A room whose mod is deactivated or removed
-falls back to the default and stays playable.
+Installed settings are **inert until loaded**, and **one mod is loaded at a
+time**: the GM console's *Mods / settings* panel loads a mod and unloads every
+other — `core` included — rebuilding live rooms onto it; the choice persists in
+the rooms database. `DEFAULT_FLAVOR` / `--flavor` loads a setting at boot, and
+`--flavor` persists it. A room whose mod was unloaded, or whose package was
+removed from disk, is rebuilt onto the loaded setting and stays playable.
 
 Units, theme, hulls, art, callsigns and missions are independently flavorable.
 Distances and speeds stay canonical (`klik`, `kps`) everywhere on the wire and in

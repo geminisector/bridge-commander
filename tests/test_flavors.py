@@ -50,10 +50,15 @@ def _write(path: Path, doc: object) -> None:
 
 
 def _flavor(root: Path, fid: str, manifest: dict | None = None, **files: object) -> Path:
-    """Create a flavor directory with a manifest and inline JSON files."""
+    """Create a flavor directory with a manifest and inline JSON files.
+
+    Inheritance is opt-in, and these fixtures are mostly *overrides* of the
+    shipped setting, so they extend ``core`` unless the manifest says otherwise
+    (``{"extends": None}`` for a standalone one).
+    """
     directory = root / fid
     directory.mkdir(parents=True, exist_ok=True)
-    doc = {"id": fid, "title": fid.upper()}
+    doc = {"id": fid, "title": fid.upper(), "extends": "core"}
     for name in files:
         doc.setdefault(name, f"{name}.json")
     doc.update(manifest or {})
@@ -583,6 +588,34 @@ def test_a_flavor_can_replace_core_wholesale(flavor_home):
     assert state.contacts[0].shipClass == "solo.one"
 
 
+def test_inheritance_is_opt_in(flavor_home):
+    """A manifest only inherits when it *names* a parent."""
+    from bridge.paths import flavor_extends
+
+    _flavor(flavor_home, "named", {"extends": "core"})
+    directory = flavor_home / "unnamed"
+    directory.mkdir(parents=True, exist_ok=True)
+    _write(directory / "flavor.json", {"id": "unnamed"})
+
+    assert flavor_extends("named") == "core"
+    assert flavor_extends("unnamed") is None
+
+
+def test_the_example_universe_mods_are_standalone():
+    """Mods are alternative universes: no core hull or mission may leak in."""
+    core = flavors.get("core")
+    core_hulls = set(core.hull_defs)
+    core_missions = set(core.missions)
+    for fid in ("wc", "stk", "sw"):
+        mod = flavors.get(fid)
+        assert mod.extends is None
+        assert not (set(mod.hull_defs) & core_hulls), fid
+        assert not (set(mod.missions) & core_missions), fid
+        # Everything is namespaced under the mod's own id.
+        assert all(h.startswith(f"{fid}.") for h in mod.hull_defs), fid
+        assert all(m.startswith(f"{fid}.") for m in mod.missions), fid
+
+
 def test_art_urls_are_per_flavor_for_a_flavor_hull():
     wc = flavors.get("wc")
     # The crew hull id is read from the flavor, not hardcoded, because the
@@ -613,7 +646,7 @@ def test_core_theme_is_unchanged():
 def test_flavor_theme_overrides_core(flavor_home):
     directory = _flavor(flavor_home, "dark", {})
     (directory / "theme.css").write_text(":root{--bg:#000}", encoding="utf-8")
-    _write(directory / "flavor.json", {"id": "dark", "theme": "theme.css"})
+    _write(directory / "flavor.json", {"id": "dark", "extends": "core", "theme": "theme.css"})
     flavors.reset_cache()
     assert flavors.get("dark").theme_css == ":root{--bg:#000}"
 
@@ -632,6 +665,56 @@ def test_index_injection_places_the_theme_after_activity_css():
     css_at = html.index('href="/activity.css"')
     theme_at = html.index('href="/flavor/wc/theme.css"')
     assert css_at < theme_at
+    # The link is addressable so the client can swap it without a reload.
+    assert 'id="flavor-theme"' in html
+
+
+def _theme_var(css: str, name: str) -> str:
+    import re
+
+    match = re.search(rf"{re.escape(name)}\s*:\s*([^;]+);", css)
+    assert match, f"{name} missing from theme"
+    return match.group(1).strip()
+
+
+def test_every_mod_ships_its_own_distinct_theme():
+    """Each universe brings its own palette, type pairing and surface tokens."""
+    themes = {fid: flavors.get(fid).theme_css for fid in ("core", "wc", "stk", "sw")}
+    for fid, css in themes.items():
+        assert css.strip(), fid
+        for token in ("--bg:", "--accent:", "--font-display:", "--font-mono:"):
+            assert token in css, f"{fid} is missing {token}"
+        # Surface tokens are what stop a mod from fighting hardcoded core cyan.
+        _theme_var(css, "--tint-rgb")
+        _theme_var(css, "--panel-bg")
+
+    def values(name):
+        return {fid: _theme_var(css, name) for fid, css in themes.items()}
+
+    # Every mod brings its own palette, type and panel surface.
+    for token in ("--font-display", "--font-mono", "--accent", "--tint-rgb", "--panel-bg"):
+        assert len(set(values(token).values())) == 4, f"mods share {token}"
+
+
+@pytest.mark.parametrize(
+    ("fid", "family"),
+    [("wc", "Chakra Petch"), ("stk", "Orbitron"), ("sw", "Oxanium")],
+)
+def test_each_mod_uses_and_fetches_its_display_face(fid, family):
+    """Naming a family without importing it silently falls back to system-ui."""
+    css = flavors.get(fid).theme_css
+    assert _theme_var(css, "--font-display").startswith(f"'{family}'")
+    assert f"family={family.replace(' ', '+')}" in css
+
+
+def test_a_mods_theme_is_served_at_its_own_route():
+    from bridge.server.main import flavor_theme
+
+    core = asyncio.run(flavor_theme("core"))
+    wc = asyncio.run(flavor_theme("wc"))
+    assert core.status_code == 200 and wc.status_code == 200
+    assert core.body != wc.body
+    assert b"Chakra Petch" in wc.body  # wc ships and loads its own display face
 
 
 def test_theme_route_serves_css():

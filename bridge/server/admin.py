@@ -281,6 +281,9 @@ async def _handle(
         if not ok:
             await _send(websocket, MsgAdminError(message=reason))
             return
+        # Mods are exclusive, so a room still on the previous setting would keep
+        # the unloaded universe (and its art) in play.  Move every room over.
+        await _sweep_rooms_onto_active_mod()
         await _send(websocket, _admin_snapshot())
         return
 
@@ -289,28 +292,8 @@ async def _handle(
         if not ok:
             await _send(websocket, MsgAdminError(message=reason))
             return
+        await _sweep_rooms_onto_active_mod()
         await _send(websocket, _admin_snapshot())
-        return
-
-    if msg.type == "admin.setDefaultMod":
-        ok, reason = mods.set_default(msg.flavorId)
-        if not ok:
-            await _send(websocket, MsgAdminError(message=reason))
-            return
-        await _send(websocket, _admin_snapshot())
-        return
-
-    if msg.type == "admin.activateModForRoom":
-        room = _room_for(msg.channelId)
-        if not mods.is_enabled(msg.flavorId):
-            await _send(
-                websocket,
-                MsgAdminError(message=f"mod {msg.flavorId!r} is not activated"),
-            )
-            return
-        await room.reconfigure(flavor_id=msg.flavorId)
-        await _send(websocket, MsgAdminState(channelId=room.channel_id, state=room.state))
-        await _send(websocket, _admin_snapshot(room.channel_id))
         return
 
     if msg.type == "admin.kick":
@@ -328,13 +311,7 @@ async def _handle(
     if msg.type == "admin.reset":
         room = _room_for(msg.channelId)
         instance_id = room.state.room.instanceId or "gm-prep"
-        if msg.flavorId and not mods.is_enabled(msg.flavorId):
-            await _send(
-                websocket,
-                MsgAdminError(message=f"mod {msg.flavorId!r} is not activated"),
-            )
-            return
-        flavor_id = msg.flavorId or mods.guard_room(room.state.flavorId)
+        flavor_id = mods.active_mod()
         fresh = create_state(
             room.channel_id,
             instance_id,
@@ -350,7 +327,7 @@ async def _handle(
 
 def _admin_snapshot(channel_id: str | None = None) -> MsgAdminOk:
     room = rooms.rooms.get(channel_id) if channel_id else None
-    flavor_id = room.state.flavorId if room is not None else mods.default_flavor()
+    flavor_id = room.state.flavorId if room is not None else mods.active_mod()
     players = [
         AdminPlayer(
             sessionId=client.sessionId,
@@ -390,7 +367,6 @@ def _admin_snapshot(channel_id: str | None = None) -> MsgAdminOk:
                 valid=bool(row.get("valid", True)),
                 error=row.get("error", ""),
                 enabled=bool(row.get("enabled", False)),
-                default=bool(row.get("default", False)),
                 core=bool(row.get("core", False)),
             )
             for row in mods.list_mods()
@@ -398,6 +374,20 @@ def _admin_snapshot(channel_id: str | None = None) -> MsgAdminOk:
         players=players,
         skills=list(ALL_SKILLS),
     )
+
+
+async def _sweep_rooms_onto_active_mod() -> None:
+    """Move every live room onto the newly active mod.
+
+    Loading a mod unloads the previous one, so leaving a room behind would leave
+    the unloaded universe (its hulls, missions and art) in play.
+    """
+    active = mods.active_mod()
+    for room in list(rooms.rooms.values()):
+        if room.state.flavorId == active:
+            continue
+        # ``reconfigure`` pushes the fresh state to every connected client.
+        await room.reconfigure(flavor_id=active)
 
 
 def admin_snapshot() -> MsgAdminOk:

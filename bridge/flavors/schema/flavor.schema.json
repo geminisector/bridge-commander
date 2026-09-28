@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://bridge-commander.local/flavors/schema/flavor.schema.json",
   "title": "Flavor manifest (flavor.json)",
-  "description": "A setting (mod) is a directory under bridge/flavors/<id>/ with this manifest plus the files it overrides. Every field is optional except id; a flavor inherits from core unless it sets extends: null.",
+  "description": "A setting (mod) is a directory under bridge/flavors/<id>/ with this manifest plus the files it overrides. Every field is optional except id. A flavor is standalone unless it names a parent with extends.",
   "type": "object",
   "required": ["id"],
   "additionalProperties": false,
@@ -15,7 +15,7 @@
     "title": { "type": "string", "description": "Human-readable setting name." },
     "extends": {
       "type": ["string", "null"],
-      "description": "Flavor id to inherit from. Omitted means core; null means replace core wholesale."
+      "description": "Flavor id to inherit from. Omit it (or set null) for a standalone setting that carries its own complete catalog."
     },
     "units": {
       "type": "string",

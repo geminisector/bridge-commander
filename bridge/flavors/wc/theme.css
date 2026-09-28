@@ -1,7 +1,9 @@
 /* wc — a Wing Commander-flavoured re-skin of the core watch.
-   Amber phosphor over near-black, with a heavier display face.  This is a
-   straight :root override: every existing markup rule keeps resolving, only
-   the palette and type change. */
+   Amber phosphor over near-black with stencilled capitals and squared-off
+   panels: a carrier's flight-deck console rather than a sector hub.  Served
+   after activity.css, so every rule here overrides the core look. */
+
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap');
 
 :root{
   --bg:#0a0a0c;
@@ -15,13 +17,30 @@
   --accent-hover:#ffb84d;
   --glow:0 0 8px rgba(255,156,26,.35);
   --glow-hover:0 0 15px rgba(255,184,77,.75),0 0 25px rgba(255,184,77,.35);
-  --radius:8px;
+  --radius:2px;
   --cyan:var(--accent);
-  --dim:#7a88aa;
+  --dim:#8a8a8a;
   --amber:#f9d71c;
   --red:#ff6b73;
   --green:#21d054;
   --active:#3d2a08;
-  --font-display:'Orbitron',system-ui,sans-serif;
-  --font-mono:'Share Tech Mono',ui-monospace,monospace;
+  --font-display:'Chakra Petch',system-ui,sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,monospace;
+  --tint-rgb:255,156,26;
+  --panel-bg:linear-gradient(180deg,rgba(28,28,28,.96),rgba(10,10,10,.96));
+  --wash:
+    radial-gradient(1100px 640px at 82% -14%,rgba(255,156,26,.11),transparent 60%),
+    radial-gradient(820px 560px at 4% 110%,rgba(120,60,0,.20),transparent 68%),
+    radial-gradient(120% 90% at 50% 50%,transparent 52%,rgba(0,0,0,.68) 100%);
 }
+
+/* Stencilled capitals and hard corners: nothing here is consumer chrome. */
+h1{text-transform:uppercase;letter-spacing:.24em}
+.card h2,.card h3,.section-head h2,.sensor-card h3{
+  text-transform:uppercase;
+  letter-spacing:.18em;
+}
+button,select{text-transform:uppercase;letter-spacing:.09em;font-weight:600}
+header::after{height:2px;opacity:.85}
+.contact{border-left:3px solid rgba(var(--tint-rgb),.55)}
+.tabs button.active{background:var(--active);color:var(--accent)}

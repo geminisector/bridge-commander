@@ -44,8 +44,12 @@ Ask:
 2. *"Is this your own universe, or a third party's (a film/show/game/book)?"*
    This decides packaging and licensing (Phase 8): own universes can ship;
    third-party settings stay local examples.
-3. *"How big is this first pass — a full re-skin of the 15 core hulls, a light
-   reskin of a few, or a standalone setting that replaces core entirely?"*
+3. *"How big is this first pass — a full setting with its own roster, or a light
+   reskin that keeps another catalog and changes a few hulls?"* Most mods are
+   **standalone**: their own hulls, missions and theme, with no core content in
+   play. A reskin instead names a parent (`"extends": "core"`, or another mod)
+   and ships only what it changes — cheaper, but the parent's other hulls and
+   scenarios stay in the game.
 
 Derive the **flavor id**: lowercase, kebab-case, from the title (`"Star Trek"`
 → `stk`; `"Dune"` → `dune`). It must match the directory name.
@@ -91,8 +95,9 @@ Tell me the ships you already know and I'll map them onto the roles the game
 needs."*
 
 Then explain the roles and fill the gaps together. The core catalog is a
-ready-made checklist; a full re-skin answers all fifteen, a light reskin answers
-only the ones it uses:
+ready-made checklist to raid for stats and hardpoints. A **standalone** mod
+answers every role it needs with its own hull ids; a **reskin** that extends
+another setting answers only the ones it changes and inherits the rest:
 
 | Core slot | What it serves | Typical example |
 |---|---|---|
@@ -142,9 +147,9 @@ images for now?"* Then lay out the three options:
 
 1. **Reuse core art** (default, zero work). In `ships.json`, name an existing
    core file: `"art": {"action": "friendly-cruiser.png", "vdu":
-   "friendly-cruiser-vdu.gif"}`. Art resolves flavour-first, then down the
-   `extends` chain, then the core `img/` tree, so no `assets/` directory is
-   needed at all.
+   "friendly-cruiser-vdu.gif"}`. Art resolves flavor-first, then down the
+   `extends` chain, then the packaged `bridge/img/` tree — which is searched even
+   for a standalone mod, so no `assets/` directory is needed at all.
 2. **Supply your own.** Drop files in
    `bridge/flavors/<id>/assets/action/<stem>.png` and
    `bridge/flavors/<id>/assets/vdu/<stem>-vdu.gif`, then name `<stem>.png` in
@@ -204,22 +209,26 @@ Now write files from the design sheet. Exact shapes and field lists are in
 `references/flavor-format.md`; do not guess.
 
 ```sh
-# Extending core (normal case): copy the closest example.
+# Standalone (the default): start from a complete catalog and edit it.
 cp -r bridge/flavors/core bridge/flavors/<id>
-# Standalone (replaces core): start minimal instead and set "extends": null.
+# Then change id/title in flavor.json and delete whatever you replace.
+# Building on another setting instead? Ship only the overrides and name the
+# parent: "extends": "core" (or another flavor id). Omit it to stay standalone.
 mkdir -p bridge/flavors/<id>/missions
 ```
 
 Then:
 
-1. **`flavor.json`** — `id` matching the directory, `title`, `extends` (`core`,
-   another id, or `null`), file references, `defaultMission`.
+1. **`flavor.json`** — `id` matching the directory, `title`, file references,
+   `defaultMission`. Add `extends` only to inherit from another setting; omit it
+   (or write `null`) for a standalone mod with its own complete catalog.
 2. **`ships.json`** — one entry per hull, ids namespaced `<id>.<name>`, required
    fields filled, stats/hardpoints copied from the matching core role,
    `defaults` covering every contact type you use.
 3. **`units.json`** — the ladder and dial from Phase 1.
 4. **`theme.css`** — the palette from Phase 2 (copy `core/theme.css` and change
-   the `:root` values).
+   the `:root` values, including the surface tokens `--tint-rgb`, `--panel-bg`
+   and `--wash`).
 5. **`callsigns.json`** — from Phase 5.
 6. **`missions/*.json`** — one file per mission, named `<id>.<mission>.json`.
 
@@ -236,8 +245,9 @@ contact type the missions use.
 Read the validator's reason and fix the data; never patch code to accept a
 broken flavor. Then:
 
-- **Activate it.** Installed is not active. In the GM console's **Mods /
-  settings**: ACTIVATE, then USE IN ROOM or SET DEFAULT. Or boot with
+- **Load it.** Installed is not loaded. One mod is loaded at a time: in the GM
+  console's **Mods / settings**, ACTIVATE loads it and unloads every other
+  (core included), rebuilding live rooms onto it. Or boot with
   `DEFAULT_FLAVOR=<id>` / `python -m bridge --flavor <id>`. In tests:
   `from bridge.server import mods; mods.activate("<id>")`.
 - **Play a room on it** and confirm units, theme, ship name and contact names
@@ -272,8 +282,10 @@ Handling common answers:
   easy to change later.
 - **"Just make it cool."** → choose a coherent palette, roster and one mission,
   generate it, then show the result and invite edits.
-- **"Reuse everything."** → a minimal flavor is just `flavor.json` plus a theme
-  or units override; that is a complete, valid mod.
+- **"Reuse everything."** → point the new setting at a parent with
+  `"extends": "core"` and ship only a theme or units override; that is a
+  complete, valid mod. Say plainly that the parent's hulls and scenarios stay in
+  play, and go standalone if they should not.
 - **A wall of lore.** → extract only what maps to fields (names, blurbs,
   factions, places) and summarise back.
 

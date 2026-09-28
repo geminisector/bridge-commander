@@ -42,7 +42,7 @@ def init_db(data_dir: str | None = None) -> sqlite3.Connection:
         """
     )
     # Mod (flavor) activation: installed flavors are inert until an operator
-    # activates them.  ``is_default`` marks the setting new rooms start on.
+    # loads them, and exactly one may be loaded at a time.
     _conn.execute(
         """
         CREATE TABLE IF NOT EXISTS mods (
@@ -50,6 +50,16 @@ def init_db(data_dir: str | None = None) -> sqlite3.Connection:
           enabled INTEGER NOT NULL DEFAULT 0,
           is_default INTEGER NOT NULL DEFAULT 0
         );
+        """
+    )
+    # Databases written before mods became exclusive may hold several enabled
+    # rows (and a separate default).  Keep the first and clear the rest, so the
+    # store satisfies "exactly one loaded mod" the moment it is opened.
+    _conn.execute(
+        """
+        UPDATE mods SET enabled = 0, is_default = 0
+        WHERE enabled = 1
+          AND rowid NOT IN (SELECT rowid FROM mods WHERE enabled = 1 ORDER BY rowid LIMIT 1);
         """
     )
     _conn.commit()
@@ -92,10 +102,12 @@ def _now_ms() -> int:
 # ---------------------------------------------------------------------------
 # Mod (flavor) activation
 #
-# Installed flavors are inert until activated.  ``core`` is implicit and never
-# stored.  ``is_default`` marks the setting new rooms start on.  These helpers
-# degrade to empty/false rather than raising: a mod store that cannot be read
-# must not take the server down (activation is a convenience, not sim state).
+# Installed flavors are inert until activated, and at most one is active: mods
+# are alternative universes, so activating one unloads every other.  The single
+# active row is stored here; ``is_default`` is a leftover from the era of an
+# enabled *set* plus a separate default and is no longer read.  These helpers
+# degrade to empty rather than raising: a mod store that cannot be read must not
+# take the server down (activation is a convenience, not sim state).
 # ---------------------------------------------------------------------------
 
 
@@ -103,52 +115,31 @@ def _mods_conn() -> sqlite3.Connection:
     return _conn if _conn is not None else init_db()
 
 
-def load_enabled_mods() -> set[str]:
+def load_active_mod() -> str | None:
+    """The one activated mod, or ``None`` when the operator never chose one."""
     try:
-        rows = _mods_conn().execute(
-            "SELECT flavor_id FROM mods WHERE enabled = 1"
-        ).fetchall()
-    except sqlite3.Error:
-        return set()
-    return {str(row[0]) for row in rows}
-
-
-def set_mod_enabled(flavor_id: str, enabled: bool) -> None:
-    conn = _mods_conn()
-    if enabled:
-        conn.execute(
-            """INSERT INTO mods (flavor_id, enabled, is_default) VALUES (?, 1, 0)
-               ON CONFLICT(flavor_id) DO UPDATE SET enabled = 1""",
-            (flavor_id,),
+        row = (
+            _mods_conn()
+            .execute("SELECT flavor_id FROM mods WHERE enabled = 1 LIMIT 1")
+            .fetchone()
         )
-    else:
-        # Deactivating the default clears the default too, so a disabled mod
-        # cannot be selected for new rooms.
-        conn.execute(
-            """INSERT INTO mods (flavor_id, enabled, is_default) VALUES (?, 0, 0)
-               ON CONFLICT(flavor_id) DO UPDATE SET enabled = 0, is_default = 0""",
-            (flavor_id,),
-        )
-    conn.commit()
-
-
-def load_default_mod() -> str | None:
-    try:
-        row = _mods_conn().execute(
-            "SELECT flavor_id FROM mods WHERE is_default = 1 LIMIT 1"
-        ).fetchone()
     except sqlite3.Error:
         return None
     return str(row[0]) if row else None
 
 
-def set_default_mod(flavor_id: str | None) -> None:
+def set_active_mod(flavor_id: str | None) -> None:
+    """Make *flavor_id* the only active mod; ``None`` clears the selection.
+
+    Every other row is switched off in the same transaction, so the store can
+    never hold two active mods between writes.
+    """
     conn = _mods_conn()
-    conn.execute("UPDATE mods SET is_default = 0")
+    conn.execute("UPDATE mods SET enabled = 0, is_default = 0")
     if flavor_id:
         conn.execute(
-            """INSERT INTO mods (flavor_id, enabled, is_default) VALUES (?, 1, 1)
-               ON CONFLICT(flavor_id) DO UPDATE SET is_default = 1, enabled = 1""",
+            """INSERT INTO mods (flavor_id, enabled, is_default) VALUES (?, 1, 0)
+               ON CONFLICT(flavor_id) DO UPDATE SET enabled = 1, is_default = 0""",
             (flavor_id,),
         )
     conn.commit()
@@ -167,8 +158,6 @@ __all__ = [
     "initDb",
     "saveRoom",
     "loadRoom",
-    "load_enabled_mods",
-    "set_mod_enabled",
-    "load_default_mod",
-    "set_default_mod",
+    "load_active_mod",
+    "set_active_mod",
 ]

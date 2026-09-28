@@ -11,7 +11,7 @@ published content (`core/` is the only flavor bundled into the built package):
 
 | Flavor | Setting | Shows off |
 |---|---|---|
-| `wc/` | space combat (the acceptance test) | namespaced hulls, overridden `defaults`, surname callsigns, an Mm distance ladder |
+| `wc/` | space combat (the acceptance test) | namespaced hulls, its own `defaults`, surname callsigns, an Mm distance ladder |
 | `stk/` | Star Trek | an AU/Mm auto-scaling ladder, a standalone LCARS theme, registry callsigns (`USS Enterprise`) |
 | `sw/` | Star Wars | a km/Mm ladder with `MGLT` speed, a crawl-yellow theme, registry callsigns (`ISD Devastator`) |
 
@@ -35,8 +35,8 @@ $EDITOR bridge/flavors/mine/flavor.json     # { "id": "mine", "title": "My Setti
 python -m bridge --list-flavors             # loads and validates every flavor
 ```
 
-That is a working flavor: it inherits everything from `core` and overrides
-nothing. Change only what your setting needs.
+That is a working flavor: a private copy of the shipped setting's hulls,
+missions and theme. Change only what your setting needs.
 
 ## Layout
 
@@ -53,9 +53,14 @@ bridge/flavors/<id>/
     vdu/*.gif
 ```
 
-Inheritance is `core` unless the manifest says `"extends": null`, which makes the
-flavor standalone. A manifest may also extend another flavor; chains are walked
-until `core`, and a cycle is a load error.
+Inheritance is **opt-in**. A manifest with no `extends` is standalone and must
+carry its own hulls and missions; name a parent (`"extends": "core"`) to build on
+one instead. `"extends": null` states the standalone choice explicitly. Chains
+are walked until `core`, and a cycle is a load error.
+
+Standalone is the default because mods are alternative universes played one at a
+time: a mod that silently inherited `core` would mix another setting's hulls,
+missions and scenarios into its own.
 
 ## Rules a flavor must keep
 
@@ -77,7 +82,7 @@ listed with the reason, and valid ones report hull and mission counts.
 | File | Overrides | Notes |
 |---|---|---|
 | `units.json` | distance ladder, speed factor, dial labels | `factor` is canonical units per display unit, so the formatter divides. The ladder auto-scales: pick the largest rung whose `min` the value reaches. |
-| `theme.css` | the `:root` custom properties | Served after `activity.css`, so all existing markup resolves. Set `--font-display` and `--font-mono` to change type. |
+| `theme.css` | the `:root` custom properties | Served after `activity.css`, so all existing markup resolves. Set `--font-display` and `--font-mono` for type, the palette (`--bg`, `--accent`, …) for colour, and the surface tokens (`--tint-rgb`, `--panel-bg`, `--wash`) for panel borders, glows and the background wash. `core/theme.css` lists the full set. |
 | `ships.json` | hulls, art, `defaults`, terrain images | Merge is per hull id and per field: an override may change just a name, a stat or an art file. Art resolves through the flavor chain, so a hull with no `assets/` falls back to core art. Add a `defaults` entry for every contact type you rename the catalog for. |
 | `callsigns.json` | name adjectives, nouns, naming style, hostile pools | Lists replace; hostile pools merge per role. `vesselName` is one of `corporate` (`MV GREY FALCON`), `surname` (`Grey Falcon`), `callsign` (`Vanguard 612`) or `registry` (`USS Enterprise`). |
 | `missions/*.json` | scenarios | Mirrors `CampaignSeed` field-for-field. Explicit positions keep placement deterministic. |
@@ -91,34 +96,36 @@ and CI. Point your editor at the schema with a `$schema` key:
 
 ## Selecting a flavor
 
-* `DEFAULT_FLAVOR=wc` (or `python -m bridge --flavor wc`) sets the setting new
-  rooms start on.
+* **Exactly one mod is loaded at a time.** Activating a mod unloads every other
+  one, `core` included, and every live room is rebuilt onto it.
+* The loaded mod is what new rooms start on, so there is no separate "default".
+* `DEFAULT_FLAVOR=wc` (or `python -m bridge --flavor wc`) loads that setting at
+  boot. `--flavor` also persists the choice, so it beats whatever the console
+  last loaded.
 * A room records its `flavorId` in game state, so reconnecting clients render
-  the same units and art, and the handoff names the setting.
-* The GM console can set a room's flavor when starting a new engagement, and a
-  host may pass `flavorId` on `start`.
+  the same units and art, the page theme follows the setting, and the handoff
+  names it.
 
-If a room's flavor disappears from disk, the room stays playable on `core` and
-the server logs the fallback.
+If a room's flavor disappears from disk, the room stays playable on the loaded
+setting and the server logs the fallback.
 
-## Activating a mod
+## Loading a mod
 
-Installing a flavor on disk makes it a **candidate**, not an active setting. It
-does nothing until an operator activates it in the GM console's **Mods /
-settings** panel:
+Installing a flavor on disk makes it a **candidate**, not a loaded setting. It
+does nothing until an operator loads it in the GM console's **Mods / settings**
+panel:
 
 | Action | Effect |
 |---|---|
-| **ACTIVATE / DEACTIVATE** | Server-wide: whether any room may play this setting. `core` is always on and cannot be deactivated. |
-| **USE IN ROOM** | Switches the selected room onto this setting (rebuilds it on that setting's default mission, keeping claimed seats). Only available for activated mods. |
-| **SET DEFAULT** | New rooms start on this setting. Only available for activated mods; **CLEAR DEFAULT** returns to `core`. |
-| **DEFAULT_FLAVOR / `--flavor`** | Counts as an explicit operator activation for that flavor at boot. Deactivating an env-selected mod is refused until the variable is unset. |
+| **ACTIVATE** | Loads this setting and unloads every other mod, `core` included. Live rooms are rebuilt onto it, keeping their claimed seats. A package that fails validation cannot be activated. |
+| **UNLOAD** | Unloads the loaded mod and falls back to `core`. `core` is never unloaded directly — load another mod instead. |
+| **DEFAULT_FLAVOR / `--flavor`** | Loads that setting at boot; `--flavor` persists it. |
 
-The enabled set and the default persist in the rooms database, so they survive a
-restart. A room whose mod is deactivated or removed from disk falls back to the
-default setting (normally `core`) on load and stays playable; the server logs
-the reason. `python -m bridge --list-flavors` shows what is installed;
-`--check-flavor <id>` validates one package.
+The loaded mod persists in the rooms database, so it survives a restart. A room
+whose mod was unloaded, or whose package was removed from disk, is rebuilt onto
+the loaded setting on load and stays playable; the server logs the reason.
+`python -m bridge --list-flavors` shows what is installed; `--check-flavor <id>`
+validates one package.
 
 ## Licensing
 

@@ -18,6 +18,9 @@
     <section id="watch" class="watch"></section>
     <nav id="tabs" class="tabs"></nav>
     <section id="content"></section>
+    <!-- The voice call lives outside #content: renderContent() rewrites
+         #content on every state message, which would tear a live call down. -->
+    <section id="voice-pane" hidden></section>
     <footer class="legal-disclaimer">
       Unofficial, non-commercial fan simulation with an original setting. Not affiliated with or endorsed by any rights holder.
     </footer>

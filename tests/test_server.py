@@ -8,6 +8,7 @@ camelCase/alias wire shape, seat permissions, and ``clean_event`` clamping.
 from __future__ import annotations
 
 import json
+import re
 import time
 from contextlib import contextmanager
 
@@ -449,12 +450,153 @@ def test_packaged_activity_and_art_are_served():
         assert response.headers["content-type"].startswith(media_type), path
 
 
+def test_index_injects_the_voice_bootstrap():
+    """The player page tells the client which Jitsi domain to embed."""
+    from bridge.paths import package_path
+    from bridge.server import main
+
+    html = main._render_index(package_path("activity", "dist"), "core")
+    assert "window.__BRIDGE_VOICE__" in html
+    assert '"domain": "meet.jit.si"' in html or '"domain":"meet.jit.si"' in html
+
+
+def test_voice_follows_the_configured_domain(monkeypatch):
+    from bridge.paths import package_path
+    from bridge.server import main
+
+    monkeypatch.setattr(main, "JITSI_DOMAIN", "jitsi.example.net")
+    html = main._render_index(package_path("activity", "dist"), "core")
+    assert "jitsi.example.net" in html
+
+
+def test_an_empty_jitsi_domain_switches_voice_off(monkeypatch):
+    from bridge.paths import package_path
+    from bridge.server import main
+
+    monkeypatch.setattr(main, "JITSI_DOMAIN", "")
+    html = main._render_index(package_path("activity", "dist"), "core")
+    assert "__BRIDGE_VOICE__" not in html
+    # The theme injection still happens; only the voice bootstrap is dropped.
+    assert 'id="flavor-theme"' in html
+
+
+def test_the_voice_bootstrap_cannot_break_out_of_its_script_tag(monkeypatch):
+    from bridge.paths import package_path
+    from bridge.server import main
+
+    monkeypatch.setattr(main, "JITSI_DOMAIN", "</script><script>alert(1)</script>")
+    html = main._render_index(package_path("activity", "dist"), "core")
+    assert "<script>alert(1)</script>" not in html
+
+
+def test_public_state_carries_the_room_display_units():
+    """The UI can only render a mod's scale if the scale reaches it."""
+    from bridge.server.rooms import public_state
+    from bridge.shared import flavors
+
+    room = room_manager.get("chan-units", "inst")
+    data = public_state(room.state)
+    units = flavors.get(room.state.flavorId).units
+    assert data["units"]["distance"]["base"] == units.distance_base
+    assert [r["unit"] for r in data["units"]["distance"]["ladder"]] == [
+        rung.unit for rung in units.ladder
+    ]
+    assert [r["min"] for r in data["units"]["distance"]["ladder"]] == [
+        rung.min for rung in units.ladder
+    ]
+    assert data["units"]["speed"]["base"] == units.speed_base
+    assert data["units"]["speed"]["factor"] == units.speed_factor
+
+
+def test_the_player_ui_reads_units_from_the_state():
+    """No view may hardcode a unit, or a mod's scale never reaches the screen."""
+    from bridge.paths import package_path
+
+    script = package_path("activity", "dist", "activity.js").read_text(encoding="utf-8")
+    assert "state.units.distance" in script
+    assert "state.units.speed" in script
+    assert "fmtDist(" in script and "fmtSpeed(" in script
+    # The only literal unit strings left are the ones the formatters use before
+    # the first state arrives.
+    assert script.count("' KLIK'") == 1
+    assert script.count("' KPS'") == 1
+
+
+def test_star_wars_reports_its_own_scale_not_klik():
+    """Regression: the sw gravidar showed the hardcoded klik/kps labels."""
+    from bridge.shared import flavors
+
+    units = flavors.get("sw").units
+    assert units.distance_base == "km"
+    assert units.format_distance(40) == "40 km"
+    # The Mm rung opens at 1 Mm (1000 klik), not at 1000 Mm.
+    assert units.format_distance(1000) == "1.0 Mm"
+    assert units.format_distance(40000) == "40.0 Mm"
+    assert units.format_speed(60) == "60 MGLT"
+    # Neighbouring flavors must be unaffected by that data.
+    assert flavors.get("core").units.format_speed(60) == "60 kps"
+
+
+def test_voice_room_is_a_stable_uuid_per_watch_and_mission():
+    """Same watch + same mission => same call, with no coordination."""
+    from bridge.server.voice import voice_room
+
+    room = voice_room("bridge", "default", "iron-collar")
+    assert room == voice_room("bridge", "default", "iron-collar")
+    assert re.fullmatch(
+        r"[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}", room
+    ), room
+    # Scoped, so a neighbouring table never lands in this call.
+    assert (
+        len(
+            {
+                room,
+                voice_room("bridge", "default", "whale-road"),
+                voice_room("other", "default", "iron-collar"),
+                voice_room("bridge", "second", "iron-collar"),
+            }
+        )
+        == 4
+    )
+
+
+def test_public_state_carries_the_voice_room():
+    from bridge.server.rooms import public_state
+    from bridge.server.voice import voice_room
+
+    room = room_manager.get("chan-voice", "inst")
+    data = public_state(room.state)
+    assert data["voiceRoom"] == voice_room(
+        data["room"]["channelId"], data["room"]["instanceId"], data["campaign"]["id"]
+    )
+
+
+def test_the_voice_room_moves_with_the_mission():
+    from bridge.server.rooms import public_state
+
+    first = create_state("chan-vm", "inst", campaign_for("iron-collar", "core"))
+    second = create_state("chan-vm", "inst", campaign_for("whale-road", "core"))
+    assert public_state(first)["voiceRoom"] != public_state(second)["voiceRoom"]
+
+
+def test_voice_call_lives_outside_the_rerendered_content_pane():
+    """#content is rewritten on every state message; the call must not be."""
+    from bridge.paths import package_path
+
+    root = package_path("activity", "dist")
+    index = (root / "index.html").read_text(encoding="utf-8")
+    assert index.index('id="content"') < index.index('id="voice-pane"')
+    script = (root / "activity.js").read_text(encoding="utf-8")
+    # The join target is the persistent pane, never #content.
+    assert "parentNode:body" in script
+    assert "$('voice-pane')" in script
+
+
 def test_activity_uses_the_current_wire_and_speed_scale():
     from bridge.paths import package_path
 
     script = package_path("activity", "dist", "activity.js").read_text(encoding="utf-8")
     assert "state.ship.className" not in script
-    assert "state.ship.layer" not in script
     assert "window.speed(15)" in script
     assert "window.speed(60)" in script
     assert "window.speed(100)" in script

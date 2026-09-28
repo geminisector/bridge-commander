@@ -1,17 +1,18 @@
 """Mod (flavor) activation registry.
 
 A **flavor** is a setting deployed on disk; a **mod** is that flavor switched on.
-Installed flavors are inert until an operator activates them from the GM console
-(or via ``DEFAULT_FLAVOR``/``--flavor``, which counts as an explicit operator
-activation).  This module is the single place that answers "may this room play
-this setting?" so the fail-closed rule stays honest:
+Mods are alternative universes, so **exactly one is active at a time**:
+activating a mod unloads every other one, ``core`` included.  That single active
+mod is what every room plays and what new rooms start on, so this module is the
+single place that answers "which setting is the table playing?":
 
-* ``core`` is always active — it is the fallback every other path degrades to.
-* Only installed, valid, *activated* mods may be selected for a room.
-* The server-wide default mod is persisted and must itself be activated.
+* Exactly one mod is active; ``core`` is the fallback when none was ever chosen.
+* Only installed, valid mods may be activated.
+* The active mod is persisted, so it survives a restart.
 
-The enabled set and the default live in the rooms database
-(``bridge/server/db.py``), so they survive a restart.
+``core`` is an ordinary mod here, not a privileged one: it can be unloaded like
+any other, and it is only special in that it is the setting the registry falls
+back to when the persisted choice names something no longer installed.
 """
 
 from __future__ import annotations
@@ -48,104 +49,91 @@ def _env_default() -> str:
     return ""
 
 
-def is_enabled(flavor_id: str | None) -> bool:
-    """Whether a mod may be used for a room.
+def active_mod() -> str:
+    """The single active mod: the persisted choice, else ``DEFAULT_FLAVOR``.
 
-    ``core`` is always on.  An installed mod is on when an operator activated it
-    in the console or when ``DEFAULT_FLAVOR`` names it (an explicit boot-time
-    activation).
+    Falls back to ``core`` when nothing was chosen, or when the persisted mod is
+    no longer installed (a flavor deleted from disk must not brick the server).
     """
-    fid = _clean(flavor_id)
-    if not fid:
-        return False
-    if fid == CORE:
-        return True
-    if fid not in _installed():
-        return False
-    if fid == _env_default():
-        return True
-    return fid in db.load_enabled_mods()
-
-
-def enabled_ids() -> list[str]:
-    return [fid for fid in flavors.available() if is_enabled(fid)]
-
-
-def activate(flavor_id: str | None) -> tuple[bool, str]:
-    """Switch a mod on.  Returns ``(ok, reason)``."""
-    fid = _clean(flavor_id)
-    if fid == CORE:
-        return True, "core is always active"
-    if fid not in _installed():
-        return False, f"no such mod: {fid!r}"
-    summary = next(
-        (row for row in flavors.summaries() if row["id"] == fid),
-        None,
-    )
-    if summary is None:
-        return False, f"no such mod: {fid!r}"
-    if not summary.get("valid", False):
-        return False, f"mod {fid!r} is invalid: {summary.get('error', 'failed to load')}"
-    db.set_mod_enabled(fid, True)
-    log.info("mod %s activated", fid)
-    return True, ""
-
-
-def deactivate(flavor_id: str | None) -> tuple[bool, str]:
-    """Switch a mod off.  Returns ``(ok, reason)``."""
-    fid = _clean(flavor_id)
-    if fid == CORE:
-        return False, "core cannot be deactivated"
-    if fid not in _installed():
-        return False, f"no such mod: {fid!r}"
-    if fid == _env_default():
-        return (
-            False,
-            f"{fid!r} is selected by DEFAULT_FLAVOR; unset it before deactivating",
-        )
-    db.set_mod_enabled(fid, False)
-    log.info("mod %s deactivated", fid)
-    return True, ""
-
-
-def default_flavor() -> str:
-    """The setting new rooms start on: persisted default, else env, else core."""
-    persisted = _clean(db.load_default_mod())
-    if persisted and is_enabled(persisted):
+    persisted = _clean(db.load_active_mod())
+    if persisted and persisted in _installed():
         return persisted
     configured = _env_default()
-    if configured and is_enabled(configured):
+    if configured:
         return configured
     return CORE
 
 
-def set_default(flavor_id: str | None) -> tuple[bool, str]:
-    """Persist the server-wide default.  ``None``/"" clears it.  Returns ``(ok, reason)``."""
+def is_enabled(flavor_id: str | None) -> bool:
+    """Whether this mod is *the* active one.
+
+    There is no "enabled set" any more: a mod is either the setting in play or
+    it is unloaded.
+    """
+    fid = _clean(flavor_id)
+    if not fid or fid != active_mod():
+        return False
+    return fid == CORE or fid in _installed()
+
+
+def enabled_ids() -> list[str]:
+    """The active mods.  Always exactly one entry, or none with no flavors."""
+    active = active_mod()
+    return [active] if is_enabled(active) else []
+
+
+def activate(flavor_id: str | None) -> tuple[bool, str]:
+    """Make one mod the active setting, unloading every other.  ``(ok, reason)``."""
     fid = _clean(flavor_id)
     if not fid:
-        db.set_default_mod(None)
-        return True, ""
-    if not is_enabled(fid):
-        return False, f"mod {fid!r} must be activated before it can be the default"
-    db.set_default_mod(fid)
-    log.info("default mod set to %s", fid)
+        return False, "no mod given"
+    if fid not in _installed():
+        return False, f"no such mod: {fid!r}"
+    summary = next((row for row in flavors.summaries() if row["id"] == fid), None)
+    if summary is None:
+        return False, f"no such mod: {fid!r}"
+    if not summary.get("valid", False):
+        return False, f"mod {fid!r} is invalid: {summary.get('error', 'failed to load')}"
+    previous = active_mod()
+    db.set_active_mod(fid)
+    if previous != fid:
+        log.info("mod %s activated; %s unloaded", fid, previous)
+    else:
+        log.info("mod %s activated", fid)
+    return True, ""
+
+
+def deactivate(flavor_id: str | None) -> tuple[bool, str]:
+    """Unload a mod.  Returns ``(ok, reason)``.
+
+    Because one mod is always active, unloading the active mod loads ``core``
+    in its place: the table always has *some* setting.  ``core`` itself is
+    therefore never "deactivated" directly — pick another mod instead.
+    """
+    fid = _clean(flavor_id)
+    if fid not in _installed():
+        return False, f"no such mod: {fid!r}"
+    if fid != active_mod():
+        return False, f"mod {fid!r} is not the active setting"
+    if fid == CORE:
+        return False, "core is the fallback setting; activate another mod instead"
+    db.set_active_mod(CORE)
+    log.info("mod %s unloaded; core is active", fid)
     return True, ""
 
 
 def guard_room(flavor_id: str | None) -> str:
-    """The flavor a room may actually use, falling back to the default/core."""
+    """The flavor a room may actually use — always the one active mod."""
     fid = _clean(flavor_id)
-    if fid and is_enabled(fid):
-        return fid
-    fallback = default_flavor()
-    if fid and fallback != fid:
-        log.warning("mod %r is not activated; falling back to %r", fid, fallback)
-    return fallback
+    active = active_mod()
+    if fid and fid != active:
+        log.warning("mod %r is not active; room plays %r instead", fid, active)
+    return active
 
 
 def list_mods() -> list[dict]:
     """Every installed flavor with its activation state, for the GM console."""
-    current_default = default_flavor()
+    active = active_mod()
     rows: list[dict] = []
     for summary in flavors.summaries():
         fid = summary["id"]
@@ -158,8 +146,7 @@ def list_mods() -> list[dict]:
                 "missions": summary.get("missions", 0),
                 "valid": bool(summary.get("valid", True)),
                 "error": summary.get("error", ""),
-                "enabled": is_enabled(fid),
-                "default": fid == current_default,
+                "enabled": fid == active,
                 "core": fid == CORE,
             }
         )
@@ -169,11 +156,10 @@ def list_mods() -> list[dict]:
 __all__ = [
     "CORE",
     "activate",
+    "active_mod",
     "deactivate",
-    "default_flavor",
     "enabled_ids",
     "guard_room",
     "is_enabled",
     "list_mods",
-    "set_default",
 ]

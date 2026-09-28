@@ -1,7 +1,7 @@
 {
   "id": "wc",
   "title": "Wing Commander",
-  "extends": "core",
+  "extends": null,
   "units": "units.json",
   "theme": "theme.css",
   "ships": "ships.json",

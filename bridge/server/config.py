@@ -39,6 +39,10 @@ ASSET_DIR: str = os.getenv("ASSET_DIR", "")
 FLAVORS_DIR: str = os.getenv("FLAVORS_DIR", "")
 # The setting new rooms start on.  Unset / unknown ids fall back to ``core``.
 DEFAULT_FLAVOR: str = os.getenv("DEFAULT_FLAVOR", "")
+# Voice: the Jitsi Meet domain the activity embeds so a crew can talk while it
+# plays.  Unset means the public ``meet.jit.si``; an *empty* value disables the
+# voice tab entirely (useful for an offline or locked-down table).
+JITSI_DOMAIN: str = os.getenv("JITSI_DOMAIN", "meet.jit.si")
 # ``Number(process.env.ADMIN_PORT) || 0`` — an unset/blank/invalid value is 0.
 try:
     ADMIN_PORT: int = int(os.getenv("ADMIN_PORT") or "0")
@@ -61,6 +65,7 @@ class Config:
     assetDir: str = ASSET_DIR
     flavorsDir: str = FLAVORS_DIR
     defaultFlavor: str = DEFAULT_FLAVOR
+    jitsiDomain: str = JITSI_DOMAIN
     adminPort: int = ADMIN_PORT
     adminToken: str = ADMIN_TOKEN
     adminHost: str = ADMIN_HOST
@@ -76,6 +81,7 @@ config = Config(
     assetDir=ASSET_DIR,
     flavorsDir=FLAVORS_DIR,
     defaultFlavor=DEFAULT_FLAVOR,
+    jitsiDomain=JITSI_DOMAIN,
     adminPort=ADMIN_PORT,
     adminToken=ADMIN_TOKEN,
     adminHost=ADMIN_HOST,
@@ -95,6 +101,7 @@ __all__ = [
     "ASSET_DIR",
     "FLAVORS_DIR",
     "DEFAULT_FLAVOR",
+    "JITSI_DOMAIN",
     "ADMIN_PORT",
     "ADMIN_TOKEN",
     "ADMIN_HOST",

@@ -60,20 +60,10 @@
       list.map((c) => `<option value="${esc(c.id)}">${esc(c.title)} · ${esc(c.theater)}</option>`).join('');
   };
 
-  const flavorOptions = (list) => {
-    $('flavor').innerHTML =
-      '<option value="">Room default</option>' +
-      (list || [])
-        .filter((f) => f.valid !== false)
-        .map(
-          (f) =>
-            `<option value="${esc(f.id)}" ${f.enabled ? '' : 'disabled'}>${esc(f.title)} · ${f.hulls} hulls · ${f.missions} missions${f.enabled ? '' : ' (inactive)'}</option>`,
-        )
-        .join('');
-  };
-
   // ---- mod manager --------------------------------------------------------
 
+  // One mod is loaded at a time, so each row offers exactly one action:
+  // ACTIVATE loads it (unloading every other) and UNLOAD drops back to core.
   const renderMods = () => {
     if (!flavors.length) {
       $('mods').innerHTML = '<span class="empty">No mods installed.</span>';
@@ -82,38 +72,32 @@
     $('mods').innerHTML = flavors
       .map((f) => {
         const tags = [];
-        if (f.core) tags.push('ALWAYS ON');
-        if (f.default) tags.push('DEFAULT');
+        if (f.enabled) tags.push('LOADED');
         if (!f.valid) tags.push('INVALID');
         const note = tags.length ? ` · ${tags.join(' · ')}` : '';
         const detail = f.valid ? '' : ` · ${esc(f.error || 'failed to load')}`;
-        return `<div class="contact mod-row"><span><strong>${esc(f.title)}</strong><small>${esc(f.id)} · ${f.hulls} hulls · ${f.missions} missions${note}${detail}</small></span><span class="mod-actions">${
-          f.core
-            ? ''
-            : `<button data-mod-toggle="${esc(f.id)}" title="${f.enabled ? 'Deactivate this setting server-wide' : 'Activate this setting server-wide'}">${f.enabled ? 'DEACTIVATE' : 'ACTIVATE'}</button>`
-        }<button data-mod-room="${esc(f.id)}" ${f.enabled ? '' : 'disabled'} title="Switch the selected room onto this setting">USE IN ROOM</button><button data-mod-default="${esc(f.id)}" ${f.enabled ? '' : 'disabled'} title="New rooms start on this setting">SET DEFAULT</button></span></div>`;
+        let action;
+        if (!f.valid) {
+          action = '';
+        } else if (f.enabled && f.core) {
+          action = '<button disabled title="Core is the fallback setting">IN USE</button>';
+        } else if (f.enabled) {
+          action = `<button data-mod-activate="${esc(f.id)}" data-mod-off="1" title="Unload this mod and fall back to core">UNLOAD</button>`;
+        } else {
+          action = `<button data-mod-activate="${esc(f.id)}" title="Load this setting and unload every other mod">ACTIVATE</button>`;
+        }
+        return `<div class="contact mod-row"><span><strong>${esc(f.title)}</strong><small>${esc(f.id)} · ${f.hulls} hulls · ${f.missions} missions${note}${detail}</small></span><span class="mod-actions">${action}</span></div>`;
       })
       .join('');
-    document.querySelectorAll('[data-mod-toggle]').forEach((button) => {
+    document.querySelectorAll('[data-mod-activate]').forEach((button) => {
       button.onclick = () =>
         send({
-          type: button.textContent === 'DEACTIVATE' ? 'admin.deactivateMod' : 'admin.activateMod',
-          flavorId: button.dataset.modToggle,
+          type: button.dataset.modOff ? 'admin.deactivateMod' : 'admin.activateMod',
+          flavorId: button.dataset.modActivate,
         });
     });
-    document.querySelectorAll('[data-mod-room]').forEach((button) => {
-      button.onclick = () => {
-        const channelId = currentRoom();
-        if (!channelId) return error('Select a room before activating a mod for it.');
-        send({ type: 'admin.activateModForRoom', channelId, flavorId: button.dataset.modRoom });
-      };
-    });
-    document.querySelectorAll('[data-mod-default]').forEach((button) => {
-      button.onclick = () => send({ type: 'admin.setDefaultMod', flavorId: button.dataset.modDefault });
-    });
-    const active = flavors.filter((f) => f.enabled).length;
-    const def = flavors.find((f) => f.default);
-    $('mod-meta').textContent = `${active} active · default ${def ? def.id : 'core'}`;
+    const active = flavors.find((f) => f.enabled);
+    $('mod-meta').textContent = active ? `loaded: ${active.id}` : 'nothing loaded';
   };
 
   const fillSpawnType = () => {
@@ -326,7 +310,6 @@
         renderPlayers();
         renderMods();
         campaignOptions(m.campaigns);
-        flavorOptions(flavors);
         $('crew-ship').innerHTML = shipOptions('');
         $('spawn-ship').innerHTML = shipOptions('');
         if ((m.skills || []).length && !$('skill-name').options.length) {
@@ -348,7 +331,6 @@
   };
   $('refresh').onclick = () => send({ type: 'admin.list', channelId: currentRoom() || null });
   $('room').onchange = () => send({ type: 'admin.list', channelId: currentRoom() || null });
-  $('mod-clear-default').onclick = () => send({ type: 'admin.setDefaultMod', flavorId: null });
   $('skill-btn').onclick = () => {
     const channelId = currentRoom();
     const skill = $('skill-name').value;
@@ -370,7 +352,6 @@
       send({
         type: 'admin.reset',
         channelId,
-        flavorId: $('flavor').value || null,
         campaignId: $('campaign').value || null,
         shipId: $('crew-ship').value || null,
       });

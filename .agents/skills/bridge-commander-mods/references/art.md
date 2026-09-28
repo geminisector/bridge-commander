@@ -15,8 +15,9 @@ directory at all:
 ```
 
 The resolver searches the flavor's own `assets/` first, then up the `extends`
-chain, then the core image tree (`bridge/img`, or `ASSET_DIR`). A flavor that
-re-skins in words only does not need a single image.
+chain, then the packaged image tree (`bridge/img`, or `ASSET_DIR`). The packaged
+tree is searched even for a standalone mod, so a setting that re-skins in words
+only does not need a single image.
 
 Core files to borrow from, by role:
 
@@ -77,8 +78,8 @@ right names.
 ## If a hull has no art of its own
 
 - Deleting `art.action`/`art.vdu` from an override inherits the parent's art —
-  when you `extends` core and re-declare a core hull id, omitting `art` keeps the
-  core image.
+  when you `extends` a setting and re-declare one of its hull ids, omitting `art`
+  keeps that image.
 - A brand-new hull with `art` naming a file that resolves nowhere is a **load
   error** (fail closed), so name a core file or ship the image.
 - If the action image is missing but the VDU resolves, the VDU is used as the

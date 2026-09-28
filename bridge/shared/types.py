@@ -1122,9 +1122,9 @@ class AdminFlavorBrief(WireModel):
     missions: int = 0
     valid: bool = True
     error: str = ""
-    # Activation state: a mod is inert until an operator switches it on.
+    # Activation state: a mod is inert until an operator loads it, and only one
+    # mod is ever the active setting.
     enabled: bool = False
-    default: bool = False
     core: bool = False
 
 

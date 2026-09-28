@@ -581,8 +581,6 @@ class MsgAdminReset(WireModel):
     campaignId: str | None = None
     # Optional crew hull for the new scenario; falls back to the campaign default.
     shipId: str | None = None
-    # Optional setting for the room; falls back to the room's current flavor.
-    flavorId: str | None = None
 
 
 class MsgAdminSetShip(WireModel):
@@ -630,32 +628,17 @@ class MsgAdminSkills(WireModel):
 
 
 class MsgAdminActivateMod(WireModel):
-    """Activate an installed setting server-wide so rooms may use it."""
+    """Load a setting, unloading every other mod (including ``core``)."""
 
     type: Literal["admin.activateMod"]
     flavorId: str
 
 
 class MsgAdminDeactivateMod(WireModel):
-    """Deactivate a setting; rooms on it fall back to the current default."""
+    """Unload a setting; ``core`` takes over as the fallback setting."""
 
     type: Literal["admin.deactivateMod"]
     flavorId: str
-
-
-class MsgAdminActivateModForRoom(WireModel):
-    """Switch a room onto an activated setting (rebuilds it, keeping seats)."""
-
-    type: Literal["admin.activateModForRoom"]
-    channelId: str
-    flavorId: str
-
-
-class MsgAdminSetDefaultMod(WireModel):
-    """Set (or clear, with null) the setting new rooms start on."""
-
-    type: Literal["admin.setDefaultMod"]
-    flavorId: str | None = None
 
 
 AdminC2S = Annotated[
@@ -678,8 +661,6 @@ AdminC2S = Annotated[
         MsgAdminSkills,
         MsgAdminActivateMod,
         MsgAdminDeactivateMod,
-        MsgAdminActivateModForRoom,
-        MsgAdminSetDefaultMod,
     ],
     Field(discriminator="type"),
 ]

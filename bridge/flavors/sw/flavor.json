@@ -1,7 +1,7 @@
 {
   "id": "sw",
   "title": "Star Wars",
-  "extends": "core",
+  "extends": null,
   "units": "units.json",
   "theme": "theme.css",
   "ships": "ships.json",

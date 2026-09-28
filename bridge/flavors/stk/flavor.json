@@ -1,7 +1,7 @@
 {
   "id": "stk",
   "title": "Star Trek",
-  "extends": "core",
+  "extends": null,
   "units": "units.json",
   "theme": "theme.css",
   "ships": "ships.json",

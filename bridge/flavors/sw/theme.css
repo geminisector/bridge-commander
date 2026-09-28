@@ -1,8 +1,9 @@
 /* sw — a Star Wars-flavoured re-skin of the core watch.
-   Opening-crawl yellow over deep black, with a cold ion-blue secondary.
-   Straight :root override, served after activity.css. */
+   Opening-crawl gold over deep black with a cold ion-blue secondary, thin
+   hairlines and wide-tracked Oxanium capitals.  Served after activity.css, so
+   every rule here overrides the core look. */
 
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oxanium:wght@500;700&family=Space+Mono:wght@400;700&display=swap');
 
 :root{
   --bg:#05060a;
@@ -16,13 +17,29 @@
   --accent-hover:#fff27a;
   --glow:0 0 8px rgba(255,232,31,.30);
   --glow-hover:0 0 15px rgba(255,242,122,.70),0 0 25px rgba(255,242,122,.30);
-  --radius:6px;
+  --radius:4px;
   --cyan:#4fc3f7;
-  --dim:#6f7ea8;
+  --dim:#7f93c8;
   --amber:#ffb545;
   --red:#ff5d6c;
   --green:#5ce08a;
   --active:#3a3406;
-  --font-display:'Orbitron',system-ui,sans-serif;
-  --font-mono:'Share Tech Mono',ui-monospace,monospace;
+  --font-display:'Oxanium',system-ui,sans-serif;
+  --font-mono:'Space Mono',ui-monospace,monospace;
+  --tint-rgb:255,232,31;
+  --panel-bg:linear-gradient(180deg,rgba(17,20,28,.97),rgba(6,7,11,.97));
+  --wash:
+    radial-gradient(1000px 520px at 50% -20%,rgba(255,232,31,.10),transparent 64%),
+    radial-gradient(820px 620px at 6% 108%,rgba(79,195,247,.16),transparent 66%),
+    radial-gradient(120% 90% at 50% 50%,transparent 50%,rgba(0,0,0,.72) 100%);
 }
+
+/* Ion-blue hairlines under gold headings. */
+header::after{
+  left:0;right:0;height:2px;opacity:.75;
+  background:linear-gradient(90deg,var(--cyan),var(--accent),var(--cyan));
+}
+h1{letter-spacing:.3em}
+.card h2,.card h3,.section-head h2,.sensor-card h3{letter-spacing:.24em}
+.contact,.catalogue-entry{border-color:rgba(79,195,247,.45)}
+.tabs button.active{background:var(--active);color:var(--accent)}

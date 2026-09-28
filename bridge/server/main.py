@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import contextlib
+import json
 import os
 import threading
 import time
@@ -41,6 +42,7 @@ from .config import (
     DATA_DIR,
     DEFAULT_FLAVOR,
     HOST,
+    JITSI_DOMAIN,
     PORT,
 )
 from .db import init_db
@@ -92,16 +94,12 @@ def _report_flavors() -> None:
     print(format_summary())
     if DEFAULT_FLAVOR:
         print(f"[bridge] DEFAULT_FLAVOR={DEFAULT_FLAVOR}")
-    activated = [row["id"] for row in mods.list_mods() if row["enabled"]]
-    print(
-        "[bridge] activated mods: "
-        + (", ".join(activated) if activated else "core only")
-        + f"; default for new rooms: {mods.default_flavor()}"
-    )
-    # Force-load the boot default so a broken default is reported now, not at
-    # the first websocket hello.
-    resolved = get_flavor(mods.default_flavor())
-    print(f"[bridge] serving new rooms on flavor: {resolved.id} ({resolved.title})")
+    active = mods.active_mod()
+    print(f"[bridge] active mod: {active}")
+    # Force-load the active mod so a broken setting is reported now, not at the
+    # first websocket hello.
+    resolved = get_flavor(active)
+    print(f"[bridge] serving rooms on flavor: {resolved.id} ({resolved.title})")
     from ..shared.ships import audit_ship_art
 
     for finding in audit_ship_art(resolved.id):
@@ -186,19 +184,44 @@ def _room_flavor(request: Request) -> str:
     room = rooms.rooms.get(channel_id) if channel_id else None
     if room is not None:
         return room.state.flavorId
-    return mods.default_flavor()
+    return mods.active_mod()
+
+
+def _voice_bootstrap() -> str:
+    """The Jitsi settings the activity client reads (see ``activity.js``).
+
+    Returns ``""`` when voice is switched off, which also hides the tab.
+    """
+    domain = JITSI_DOMAIN.strip()
+    if not domain:
+        return ""
+    payload = json.dumps({"domain": domain})
+    # No ``<`` may survive into the tag, whatever the environment says.
+    return f"<script>window.__BRIDGE_VOICE__={payload.replace('<', chr(92) + 'u003c')};</script>"
 
 
 def _render_index(dist: Path, flavor_id: str) -> str:
-    """Inject the flavor theme after activity.css, so it overrides cleanly."""
+    """Inject the flavor theme after activity.css, so it overrides cleanly.
+
+    The link carries an id so the activity client can swap it in place when the
+    room's mod changes without a page reload.  The voice bootstrap rides along
+    here so the client knows which Jitsi domain to embed.
+    """
     html = (dist / "index.html").read_text(encoding="utf-8")
-    link = f'<link rel="stylesheet" href="/flavor/{flavor_id}/theme.css">'
-    if link in html:
-        return html
-    marker = '<link rel="stylesheet" href="/activity.css">'
-    if marker in html:
-        return html.replace(marker, marker + "\n  " + link, 1)
-    return html.replace("</head>", "  " + link + "\n</head>", 1)
+    link = (
+        f'<link rel="stylesheet" id="flavor-theme" '
+        f'href="/flavor/{flavor_id}/theme.css">'
+    )
+    if link not in html:
+        marker = '<link rel="stylesheet" href="/activity.css">'
+        if marker in html:
+            html = html.replace(marker, marker + "\n  " + link, 1)
+        else:
+            html = html.replace("</head>", "  " + link + "\n</head>", 1)
+    voice = _voice_bootstrap()
+    if voice and voice not in html:
+        html = html.replace("</head>", "  " + voice + "\n</head>", 1)
+    return html
 
 
 @app.get("/", include_in_schema=False)
@@ -356,6 +379,14 @@ def main() -> None:
 
         _flavors.reset_cache()
     init_db(DATA_DIR)
+    if args.flavor:
+        # ``--flavor`` is an operator activation, so it persists: the CLI choice
+        # wins over whatever the console last selected.
+        from . import mods
+
+        ok, reason = mods.activate(args.flavor)
+        if not ok:
+            print(f"[bridge] --flavor {args.flavor}: {reason}")
     uvicorn.run(app, host=HOST, port=PORT)
 
 

@@ -1,6 +1,11 @@
 /* core — the shipped deep-space watch theme (values verbatim from the
    original activity.css :root block).  Served after activity.css, so a
-   flavor theme overrides it wholesale. */
+   flavor theme overrides it wholesale.
+
+   This file doubles as the reference for a mod author: everything a theme can
+   change lives here.  The palette drives colour, ``--font-display`` /
+   ``--font-mono`` drive type, and the surface tokens drive the panels, glows
+   and background wash (see the same block in ``activity.css``). */
 
 :root{
   --bg:#0b0d17;
@@ -24,4 +29,10 @@
   --active:#0d3646;
   --font-display:'Zen Dots',sans-serif;
   --font-mono:'Share Tech Mono',monospace;
+  --tint-rgb:0,240,255;
+  --panel-bg:linear-gradient(180deg,rgba(21,25,40,.94),rgba(13,16,28,.94));
+  --wash:
+    radial-gradient(1000px 620px at 84% -12%,rgba(0,240,255,.12),transparent 62%),
+    radial-gradient(760px 520px at 6% 108%,rgba(138,43,226,.14),transparent 66%),
+    radial-gradient(120% 90% at 50% 50%,transparent 55%,rgba(0,0,4,.55) 100%);
 }

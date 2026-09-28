@@ -27,7 +27,9 @@ Adding a setting today is a fork. This plan makes a setting a data package.
 - Any setting — a re-skinned core, Star Trek, Star Wars, BSG, Farscape — loads as
   a **data-only** package.
 - `core` is the default flavor and stays exactly as playable as today.
-- A flavor extends core (override two hulls) or replaces it wholesale.
+- A flavor is standalone by default, or names a parent to extend (override two
+  hulls of a base setting) — inheritance is opt-in, so no mod silently mixes
+  another universe's hulls and missions into its own.
 - Units, theme, hulls, art, callsigns and missions are independently
   flavorable; a flavor provides only what it overrides.
 - No flavor executes code.
@@ -83,8 +85,9 @@ bridge/flavors/
     assets/vdu/*.gif
 ```
 
-A flavor inherits from `core` by default, so a minimal flavor is four small
-files. Art is optional: a flavor with no `assets/` uses core art.
+A flavor is standalone by default and carries its own catalog; naming `extends`
+opts into another setting's data. Art is optional either way: a flavor with no
+`assets/` falls back to the packaged `img/` tree.
 
 ## Manifest
 
@@ -101,8 +104,9 @@ files. Art is optional: a flavor with no `assets/` uses core art.
 }
 ```
 
-Every field is optional except `id`. `extends` chains, so `stk extends core
-extends default`. Ids are namespaced `<flavor>.<name>` (`stk.miranda`) to keep
+Every field is optional except `id`. `extends` is opt-in: omit it (or write
+`null`) for a standalone setting, or name a parent to chain onto. Ids are
+namespaced `<flavor>.<name>` (`stk.miranda`) to keep
 the flat id namespaces in `ships.py` and the state blob from colliding. Core ids
 keep their current names so existing scenarios keep resolving.
 
@@ -276,10 +280,18 @@ sequence: generic first, then flavorful through the mechanism.
 
 ## Selection and loader
 
-**Per-room, with a boot default.** A room records its `flavorId` in
-`GameState`; the server env var `DEFAULT_FLAVOR` picks the fallback. Per-room is
-the right default because a LAN party wants different settings per table, and it
-is what makes the plugin system worth having over a config file.
+**One mod at a time, per server.** A room records its `flavorId` in
+`GameState`, but that id is always the single mod the operator has loaded, and
+loading a mod rebuilds every live room onto it. Mods are alternative universes,
+not per-table skins, so a room is never left playing a setting that has been
+unloaded — `core` included.
+
+*Amended after the first pass:* this started as a per-room selection with a boot
+default. The per-flavor isolation it bought is still exactly what makes the
+one-at-a-time model work (`asset_root(flavor_id)`, per-flavor hull/art caches,
+a flavor id on the state blob, per-flavor themes served at
+`/flavor/<id>/theme.css`), and rebuilding a room onto the loaded mod reuses the
+same path as a restart.
 
 The cost is that `ASSET_DIR` and the unit formatter stop being process-global.
 `asset_root()` becomes `asset_root(flavor_id)`, threaded through the art
@@ -381,9 +393,11 @@ where the plan either works or does not.
 
 ## Open questions
 
-1. **Per-room or per-server flavors?** Recommend per-room (above). Per-server is
-   materially cheaper — no per-flavor cache, no flavor id on the state blob — and
-   is the right call if the LAN setup never wants two settings at once.
+1. **Per-room or per-server flavors?** *Resolved: per-server, one mod at a
+   time.* Per-room was the recommendation here, but mods turned out to be whole
+   universes rather than per-table skins, so the operator loads one and every
+   room plays it. The per-flavor cache and the flavor id on the state blob were
+   kept anyway — they are what let a room be rebuilt onto a different setting.
 2. **Do flavor units change the numbers, or only the labels?** Recommend labels
    only (invariant 10). Letting a flavor rescale the 42-klik passive range is
    tempting for AU-scale play, but it breaks determinism comparisons across
@@ -429,17 +443,23 @@ Landed with these decisions, which supersede the text above where they differ.
   `STATE_SCHEMA_VERSION` did not need a bump. A room whose flavor is no longer
   installed falls back to `core` on load with a logged reason.
 - **Selection surfaces:** `DEFAULT_FLAVOR` / `--flavor`, `MsgStart.flavorId`,
-  `admin.reset { flavorId }`, and a SETTING picker in the GM console. Open
-  question 3's previews remain out of scope.
-- **A mod manager gates what rooms may play.** Landed after the first pass:
-  installed flavors are *inert* until activated (`bridge/server/mods.py`; the
-  enabled set and server default persist in the rooms DB). The GM console's
-  *Mods / settings* panel activates/deactivates server-wide, applies an
-  activated mod to a room (`admin.activateModForRoom`, which rebuilds the room
-  and keeps seats), and sets/clears the default for new rooms. `core` is always
-  active and cannot be deactivated; `DEFAULT_FLAVOR`/`--flavor` counts as an
-  explicit activation. Disabled mods are refused by `admin.reset` and guarded at
-  room load, which also covers a deactivated saved room.
+  and the GM console's *Mods / settings* panel (load/unload). There is no
+  per-room picker: the loaded mod is the setting, and loading one rebuilds the
+  rooms onto it. Open question 3's previews remain out of scope.
+- **A mod manager gates what rooms play.** Landed after the first pass:
+  installed flavors are *inert* until loaded (`bridge/server/mods.py`; the loaded
+  mod persists in the rooms DB). The GM console's *Mods / settings* panel loads
+  one mod and shows what is loaded; because mods are exclusive, loading one
+  unloads every other — `core` is an ordinary mod and can be unloaded like any
+  other. Loading a mod rebuilds every live room onto it, keeping claimed seats,
+  so nothing is left playing an unloaded universe. A flavor that fails
+  validation cannot be loaded, unloaded mods are guarded at room load, and
+  `DEFAULT_FLAVOR`/`--flavor` loads a setting at boot (`--flavor` persists it).
+- **Inheritance is opt-in.** A manifest that omits `extends` is standalone;
+  naming a parent is what pulls in another setting's hulls, missions, units and
+  callsigns. This is what keeps a mod's catalog to its own universe — the
+  shipped `wc`/`stk`/`sw` examples are standalone and share no hull ids with
+  `core`.
 - **Validator hardened after audit.** The loader now type-checks numeric hull
   fields, stats, hardpoint shape/arc/kind and terrain overrides; requires a
   non-empty hull catalog and at least one mission; and wraps validate+compile so
