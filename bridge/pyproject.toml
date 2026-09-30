@@ -49,9 +49,7 @@ bridge = [
     "img/*/*.png",
     "resources/*.json",
     "server/admin-ui/*",
-    "flavors/core/*.json",
-    "flavors/core/*.css",
-    "flavors/core/missions/*.json",
-    "flavors/README.md",
-    "flavors/schema/*.json",
 ]
+# NOTE: the project root's pyproject.toml is the authoritative build config.
+# Flavors now live in the project-root `mods/` folder; the root setup.py build
+# hook copies the shipped `core` and schemas into the wheel.

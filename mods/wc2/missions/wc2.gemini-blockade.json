@@ -1,0 +1,45 @@
+{
+  "id": "wc2.gemini-blockade",
+  "title": "Gemini Blockade",
+  "theater": "Gemini Sector, 2660",
+  "brief": "The Kilrathi have sealed the Gemini jump lane with a full battle line: a Fralthi cruiser on the picket, a Ralari behind it, and a Snakeir fleet carrier holding the far side. The Tiger's Claw is ordered through anyway, because the alternatives are worse.",
+  "target": "Break the blockade line and make the jump. Everything you meet is hostile and everything is in range.",
+  "startHour": 20,
+  "patrol": { "center": { "x": 0, "y": 0, "z": 0 }, "radiusKlik": 120 },
+  "clutter": 0.4,
+  "escalation": 65,
+  "zBand": { "min": 0, "max": 12 },
+  "shipClass": "wc2.bengal",
+  "contacts": [
+    { "x": 40, "y": 10, "z": 5, "heading": 270, "speed": 34, "type": "capship", "faction": "enemy", "hostile": true, "emitting": true, "name": "KIS Fralthi", "shipClass": "wc2.fralthi", "radiusKlik": null },
+    { "x": -30, "y": -50, "z": 4, "heading": 0, "speed": 44, "type": "capship", "faction": "enemy", "hostile": true, "emitting": true, "name": "KIS Ralari", "shipClass": "wc2.ralari", "radiusKlik": null },
+    { "x": 96, "y": 80, "z": 6, "heading": 200, "speed": 24, "type": "carrier", "faction": "enemy", "hostile": true, "emitting": false, "name": "KIS Snakeir", "shipClass": "wc2.snakeir", "radiusKlik": null },
+    { "x": 6, "y": 42, "z": 8, "heading": 200, "speed": 74, "type": "fighter", "faction": "enemy", "hostile": true, "emitting": true, "name": "KIS Dralthi", "shipClass": "wc2.dralthi", "radiusKlik": null },
+    { "x": -54, "y": 26, "z": 7, "heading": 30, "speed": 76, "type": "fighter", "faction": "enemy", "hostile": true, "emitting": true, "name": "KIS Dralthi-2", "shipClass": "wc2.dralthi", "radiusKlik": null },
+    { "x": 20, "y": -72, "z": 5, "heading": 340, "speed": 50, "type": "fighter", "faction": "enemy", "hostile": true, "emitting": true, "name": "KIS Grikath", "shipClass": "wc2.grikath", "radiusKlik": null },
+    { "x": -70, "y": 60, "z": 6, "heading": 120, "speed": 80, "type": "fighter", "faction": "enemy", "hostile": true, "emitting": true, "name": "KIS Sartha", "shipClass": "wc2.sartha", "radiusKlik": null },
+    { "x": 0, "y": 0, "z": 0, "heading": 0, "speed": 0, "type": "asteroid", "faction": "neutral", "hostile": false, "emitting": false, "name": null, "shipClass": null, "radiusKlik": 12 }
+  ],
+  "events": [
+    { "atMinute": 45, "template": "contactclose" },
+    { "atMinute": 150, "template": "weapons-warning" },
+    { "atMinute": 260, "template": "orders" }
+  ],
+  "hazards": [
+    { "id": "wc2.gemini.dust", "type": "dust-front", "title": "Gemini dust curtain", "startMinute": 60, "endMinute": 300, "intensity": 1.0, "noise": 0.035, "exposure": 0.2, "concealment": 0.3 }
+  ],
+  "navPoints": [
+    { "id": "wc2.gemini.line", "name": "Blockade Line", "kind": "nav", "pos": { "x": 0, "y": -60, "z": 0 }, "radiusKlik": 9, "chartAgeHours": 4, "note": "where the picket sits" },
+    { "id": "wc2.gemini.jump", "name": "Gemini Jump Point", "kind": "jump", "pos": { "x": 92, "y": 84, "z": 0 }, "radiusKlik": 10, "chartAgeHours": 16, "note": "run for it" }
+  ],
+  "layers": [
+    { "id": "surface", "name": "Surface duct", "zMin": 0, "zMax": 10, "note": "Loud and exposed: everyone above and below hears you." },
+    { "id": "gradient", "name": "Gradient layer", "zMin": 10, "zMax": 22, "note": "The boundary itself: crossing it hides you and blinds you." },
+    { "id": "deep", "name": "Deep channel", "zMin": 22, "zMax": 40, "note": "Quiet and hard to reach; your array rides well down here." }
+  ],
+  "environment": "clear-space",
+  "barriers": [
+    { "id": "wc2.gemini.picket-a", "name": "Blockade Line North", "a": { "x": -80, "y": -60, "z": 0 }, "b": { "x": 20, "y": -80, "z": 0 }, "sensitivity": 0.75, "faction": "enemy", "note": "Mines and sensor buoys strung across the lane." },
+    { "id": "wc2.gemini.picket-b", "name": "Blockade Line South", "a": { "x": 20, "y": -80, "z": 0 }, "b": { "x": 90, "y": -40, "z": 0 }, "sensitivity": 0.7, "faction": "enemy", "note": "The second half of the picket." }
+  ]
+}

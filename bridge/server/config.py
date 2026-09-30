@@ -35,7 +35,8 @@ ACTIVITY_DIST: str = os.getenv("ACTIVITY_DIST", "")
 # When unset the server uses the packaged ``bridge/img`` tree.
 ASSET_DIR: str = os.getenv("ASSET_DIR", "")
 # Optional directory holding the flavor packages.  When unset the server uses
-# the packaged ``bridge/flavors`` tree.
+# the project-root ``mods/`` folder, falling back to the packaged
+# ``bridge/flavors`` tree (a wheel install).
 FLAVORS_DIR: str = os.getenv("FLAVORS_DIR", "")
 # The setting new rooms start on.  Unset / unknown ids fall back to ``core``.
 DEFAULT_FLAVOR: str = os.getenv("DEFAULT_FLAVOR", "")

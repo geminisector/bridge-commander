@@ -45,14 +45,11 @@ bridge = [
     "img/*/*.png",
     "resources/*.json",
     "server/admin-ui/*",
-    # The shipped setting.  Contributed flavors (e.g. the local `wc` example)
-    # are deliberately not published with the app; see bridge/flavors/README.md.
-    "flavors/core/*.json",
-    "flavors/core/*.css",
-    "flavors/core/missions/*.json",
-    "flavors/README.md",
-    "flavors/schema/*.json",
 ]
+# The shipped setting lives in the project-root `mods/` folder.  It is not part
+# of the `bridge` package, so setup.py's build hook copies `mods/core` (and the
+# authoring schemas) into `bridge/flavors/` for the wheel.  The example settings
+# (`wc`, `stk`, `sw`, `wc2`) are deliberately not published.
 
 [tool.pytest.ini_options]
 addopts = "-ra"

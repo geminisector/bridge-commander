@@ -1,4 +1,4 @@
-"""One-off migration: export the legacy in-code core catalog to ``bridge/flavors/core``.
+"""One-off migration: export the legacy in-code core catalog to ``mods/core``.
 
 The flavor plugin system (``bridge/FLAVOR_PLUGIN_PLAN.md``) makes a setting a
 data package.  Before the refactor, ``core`` lived in Python: the hull catalog in
@@ -27,10 +27,10 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from bridge.paths import package_path  # noqa: E402
+from bridge.paths import PROJECT_ROOT, package_path  # noqa: E402
 from bridge.shared import campaigns, ships, shipyard  # noqa: E402
 
-OUT = package_path("flavors", "core")
+OUT = PROJECT_ROOT / "mods" / "core"
 
 STAT_KEYS = (
     "shieldFore",
@@ -152,14 +152,10 @@ def main() -> None:
             "See FLAVOR_PLUGIN_PLAN.md and tools/README if you need to rebuild core."
         )
     (OUT / "missions").mkdir(parents=True, exist_ok=True)
+    # No "id" (the directory name is the id) and no file references (the
+    # conventional names are discovered automatically).
     flavor = {
-        "id": "core",
         "title": "Core",
-        "units": "units.json",
-        "theme": "theme.css",
-        "ships": "ships.json",
-        "callsigns": "callsigns.json",
-        "missions": "missions/",
         "defaultMission": "iron-collar",
     }
     _write(OUT / "flavor.json", flavor)

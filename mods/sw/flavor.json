@@ -1,0 +1,5 @@
+{
+  "title": "Star Wars",
+  "extends": null,
+  "defaultMission": "sw.kessel-run"
+}

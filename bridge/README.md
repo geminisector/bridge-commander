@@ -9,11 +9,11 @@ WebSocket protocol defined in `bridge/shared/protocol.py`.
 ```
 bridge/
   activity/dist/  player UI
-  flavors/        settings (mods) as data: core plus the wc example
   img/            128x128 placeholder hull, terrain, and contact art
   resources/      events, hazards, environments, hulls, and modules
   server/         FastAPI, WebSocket, persistence, engine, and GM console
   shared/         types, constants, math, flavors, campaigns, events, and protocol
+mods/             settings (mods) as data at the project root: core plus examples
 tests/            shared, engine, flavor, protocol, and server integration tests
 pyproject.toml    install, test, lint, type-check, and package metadata
 ```
@@ -125,14 +125,19 @@ Two limits are worth knowing before a session:
 
 ### Settings (flavors)
 
-A **flavor** is a setting — a mod — as data: a directory under
-`bridge/flavors/<id>/` with a `flavor.json` manifest plus the JSON, CSS and
-images it overrides. `core` is the shipped default; `wc`, `stk` (Star Trek) and
+A **flavor** is a setting — a mod — as data: a directory under the
+project-root `mods/` folder (the wheel falls back to the packaged
+`bridge/flavors` tree, which ships `core`). The **directory name is the id**, and
+the conventional files (`units.json`, `theme.css`, `ships.json`,
+`callsigns.json`, `missions/`) are discovered automatically, so `cp -r` of an
+existing flavor is all it takes to start a new one. `flavor.json` is an optional
+manifest for a `title`, an `extends` parent, a `defaultMission` or a
+non-standard path. `core` is the shipped default; `wc`, `stk` (Star Trek) and
 `sw` (Star Wars) are worked examples of the seam.
 A flavor is **standalone by default** and carries its own hull catalog, missions
 and theme; naming a parent with `extends` opts into inheriting one instead. It
-ships no code (see `FLAVOR_PLUGIN_PLAN.md` for the design and
-`flavors/README.md` for the authoring guide).
+ships no code (see `FLAVOR_PLUGIN_PLAN.md` for the design and `mods/README.md`
+for the authoring guide).
 
 ```bash
 python -m bridge --list-flavors         # installed settings, hull/mission counts

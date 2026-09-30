@@ -76,13 +76,15 @@ ALLOWLIST = {
     "tests/test_no_wing_commander_names.py",
 }
 
-#: Directories that legitimately name the retired material.  ``flavors/wc`` is
+#: Directories that legitimately name the retired material.  ``mods/wc`` is
 #: the plugin plan's acceptance-test setting: it exists *because* the vocabulary
 #: is now data, so it is the one place the retired names are supposed to appear.
 #: It is a local/community example and is not shipped in the wheel (see
-#: ``pyproject.toml`` package-data).
+#: ``pyproject.toml`` package-data).  ``mods/wc2`` is a second local WC
+#: example (a copy of ``wc``) and carries the same vocabulary by construction.
 ALLOWLIST_PREFIXES = (
-    "bridge/flavors/wc/",
+    "mods/wc/",
+    "mods/wc2/",
 )
 
 SKIP_DIRS = {

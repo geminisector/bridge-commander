@@ -1,0 +1,1437 @@
+{
+  "hulls": {
+    "wc2.bengal": {
+      "name": "Bengal-class carrier",
+      "role": "Strike carrier",
+      "contactType": "carrier",
+      "massKt": 80.0,
+      "profile": 0.92,
+      "stealth": 0.1,
+      "emission": 0.85,
+      "sensorQuality": 0.8,
+      "crew": 2400,
+      "blurb": "The old fleet carrier: flight deck, catapults and a reactor that will not shut up.",
+      "art": {
+        "action": "friendly-carrier.png",
+        "vdu": "friendly-carrier-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 520,
+        "shieldAft": 520,
+        "shieldRefresh": 312,
+        "armorFore": 65,
+        "armorAft": 65,
+        "armorPort": 18,
+        "armorStarboard": 18,
+        "body": 460
+      },
+      "hardpoints": [
+        {
+          "id": "HL1-LB",
+          "arc": "port",
+          "kind": "gun"
+        },
+        {
+          "id": "HL1-RB",
+          "arc": "port",
+          "kind": "gun"
+        },
+        {
+          "id": "HL2-FB",
+          "arc": "fore",
+          "kind": "gun"
+        },
+        {
+          "id": "HL2-CB",
+          "arc": "port",
+          "kind": "gun"
+        },
+        {
+          "id": "HL2-AB",
+          "arc": "aft",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Friendly_Carrier",
+      "gunners": 5,
+      "cargoHold": 2200.0,
+      "names": [
+        "TCS Tiger's Claw"
+      ]
+    },
+    "wc2.stiletto": {
+      "name": "Stiletto-class light scout",
+      "role": "Light scout",
+      "contactType": "fighter",
+      "massKt": 0.014,
+      "profile": 0.22,
+      "stealth": 0.65,
+      "emission": 0.75,
+      "sensorQuality": 0.7,
+      "crew": 1,
+      "blurb": "Fast, fragile and built to look, not to fight.",
+      "art": {
+        "action": "enemy-fighter.png",
+        "vdu": "enemy-fighter-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 10,
+        "shieldAft": 10,
+        "shieldRefresh": 6,
+        "armorFore": 8,
+        "armorAft": 7,
+        "armorPort": 5,
+        "armorStarboard": 5,
+        "body": 30
+      },
+      "hardpoints": [
+        {
+          "id": "fore-gun",
+          "arc": "fore",
+          "kind": "gun"
+        },
+        {
+          "id": "fore-missile",
+          "arc": "fore",
+          "kind": "missile"
+        }
+      ],
+      "shipType": "Enemy_Fighter",
+      "gunners": 0,
+      "cargoHold": 2.0,
+      "names": [
+        "TCS Stiletto"
+      ]
+    },
+    "wc2.rapier": {
+      "name": "Rapier-class medium fighter",
+      "role": "Medium fighter",
+      "contactType": "fighter",
+      "massKt": 0.0135,
+      "profile": 0.35,
+      "stealth": 0.6,
+      "emission": 0.5,
+      "sensorQuality": 0.6,
+      "crew": 1,
+      "blurb": "The line medium: good guns, good speed, no drama.",
+      "art": {
+        "action": "enemy-medium-fighter.png",
+        "vdu": "enemy-medium-fighter-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 10,
+        "shieldAft": 10,
+        "shieldRefresh": 6,
+        "armorFore": 8,
+        "armorAft": 7,
+        "armorPort": 5,
+        "armorStarboard": 5,
+        "body": 30
+      },
+      "hardpoints": [
+        {
+          "id": "fore-gun",
+          "arc": "fore",
+          "kind": "gun"
+        },
+        {
+          "id": "fore-missile",
+          "arc": "fore",
+          "kind": "missile"
+        }
+      ],
+      "shipType": "Enemy_MediumFighter",
+      "gunners": 0,
+      "cargoHold": 5.0,
+      "names": [
+        "TCS Rapier"
+      ]
+    },
+    "wc2.sabre": {
+      "name": "Sabre-class heavy fighter",
+      "role": "Heavy fighter",
+      "contactType": "fighter",
+      "massKt": 0.022,
+      "profile": 0.38,
+      "stealth": 0.45,
+      "emission": 0.65,
+      "sensorQuality": 0.75,
+      "crew": 2,
+      "blurb": "A heavy fighter that can take a hit and keep its nose on target.",
+      "art": {
+        "action": "enemy-heavy-fighter.png",
+        "vdu": "enemy-heavy-fighter-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 16,
+        "shieldAft": 16,
+        "shieldRefresh": 10,
+        "armorFore": 14,
+        "armorAft": 14,
+        "armorPort": 12,
+        "armorStarboard": 12,
+        "body": 45
+      },
+      "hardpoints": [
+        {
+          "id": "A",
+          "arc": "all",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Enemy_HeavyFighter",
+      "gunners": 1,
+      "cargoHold": 15.0,
+      "names": [
+        "TCS Sabre"
+      ]
+    },
+    "wc2.sabre-bomber": {
+      "name": "Sabre-class heavy bomber",
+      "role": "Heavy bomber",
+      "contactType": "fighter",
+      "massKt": 0.022,
+      "profile": 0.55,
+      "stealth": 0.4,
+      "emission": 0.6,
+      "sensorQuality": 0.55,
+      "crew": 3,
+      "blurb": "A Sabre with the guns traded for torpedoes and a lot of armour.",
+      "art": {
+        "action": "enemy-bomber.png",
+        "vdu": "enemy-bomber-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 16,
+        "shieldAft": 16,
+        "shieldRefresh": 10,
+        "armorFore": 14,
+        "armorAft": 14,
+        "armorPort": 12,
+        "armorStarboard": 12,
+        "body": 45
+      },
+      "hardpoints": [
+        {
+          "id": "A",
+          "arc": "all",
+          "kind": "gun"
+        },
+        {
+          "id": "L",
+          "arc": "port",
+          "kind": "gun"
+        },
+        {
+          "id": "R",
+          "arc": "starboard",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Enemy_Bomber",
+      "gunners": 3,
+      "cargoHold": 6.0,
+      "names": [
+        "TCS Sabre"
+      ]
+    },
+    "wc2.raptor": {
+      "name": "Raptor-class heavy fighter",
+      "role": "Heavy fighter",
+      "contactType": "fighter",
+      "massKt": 0.02,
+      "profile": 0.38,
+      "stealth": 0.45,
+      "emission": 0.65,
+      "sensorQuality": 0.75,
+      "crew": 2,
+      "blurb": "An older heavy fighter, still dangerous in a turning fight.",
+      "art": {
+        "action": "enemy-heavy-fighter.png",
+        "vdu": "enemy-heavy-fighter-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 16,
+        "shieldAft": 16,
+        "shieldRefresh": 10,
+        "armorFore": 14,
+        "armorAft": 14,
+        "armorPort": 12,
+        "armorStarboard": 12,
+        "body": 45
+      },
+      "hardpoints": [
+        {
+          "id": "A",
+          "arc": "all",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Enemy_HeavyFighter",
+      "gunners": 1,
+      "cargoHold": 15.0,
+      "names": [
+        "TCS Raptor"
+      ]
+    },
+    "wc2.venture": {
+      "name": "Venture-class corvette",
+      "role": "Corvette",
+      "contactType": "escort",
+      "massKt": 1.0,
+      "profile": 0.6,
+      "stealth": 0.3,
+      "emission": 0.5,
+      "sensorQuality": 0.8,
+      "crew": 60,
+      "blurb": "Small, quick and built to screen something bigger than herself.",
+      "art": {
+        "action": "friendly-corvette.png",
+        "vdu": "friendly-corvette-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 30,
+        "shieldAft": 30,
+        "shieldRefresh": 18,
+        "armorFore": 14,
+        "armorAft": 14,
+        "armorPort": 6,
+        "armorStarboard": 6,
+        "body": 110
+      },
+      "hardpoints": [
+        {
+          "id": "V-LT",
+          "arc": "port",
+          "kind": "gun"
+        },
+        {
+          "id": "V-RT",
+          "arc": "starboard",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Friendly_Corvette",
+      "gunners": 2,
+      "cargoHold": 300.0,
+      "names": [
+        "TCS Venture"
+      ]
+    },
+    "wc2.exeter": {
+      "name": "Exeter-class light destroyer",
+      "role": "Destroyer",
+      "contactType": "capship",
+      "massKt": 8.0,
+      "profile": 0.78,
+      "stealth": 0.2,
+      "emission": 0.7,
+      "sensorQuality": 0.75,
+      "crew": 680,
+      "blurb": "A light destroyer: thin hull, respectable guns, everywhere at once.",
+      "art": {
+        "action": "friendly-light-cruiser.png",
+        "vdu": "friendly-light-cruiser-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 160,
+        "shieldAft": 160,
+        "shieldRefresh": 96,
+        "armorFore": 35,
+        "armorAft": 35,
+        "armorPort": 8,
+        "armorStarboard": 8,
+        "body": 220
+      },
+      "hardpoints": [
+        {
+          "id": "HL2-FB",
+          "arc": "fore",
+          "kind": "gun"
+        },
+        {
+          "id": "HL2-CB",
+          "arc": "port",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Friendly_LightCruiser",
+      "gunners": 2,
+      "cargoHold": 900.0,
+      "names": [
+        "TCS Exeter"
+      ]
+    },
+    "wc2.durango": {
+      "name": "Durango-class escort carrier",
+      "role": "Escort carrier",
+      "contactType": "carrier",
+      "massKt": 45.0,
+      "profile": 0.8,
+      "stealth": 0.2,
+      "emission": 0.5,
+      "sensorQuality": 0.55,
+      "crew": 300,
+      "blurb": "A transport hull with a flight deck bolted on: it carries fighters and hopes for the best.",
+      "art": {
+        "action": "friendly-carrier.png",
+        "vdu": "friendly-carrier-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 320,
+        "shieldAft": 320,
+        "shieldRefresh": 192,
+        "armorFore": 45,
+        "armorAft": 45,
+        "armorPort": 12,
+        "armorStarboard": 12,
+        "body": 380
+      },
+      "hardpoints": [
+        {
+          "id": "Fk-M",
+          "arc": "fore",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Enemy_HeavyTransport",
+      "gunners": 1,
+      "cargoHold": 3000.0,
+      "names": [
+        "BWS Intrepid"
+      ]
+    },
+    "wc2.gilgamesh": {
+      "name": "Gilgamesh-class heavy destroyer",
+      "role": "Destroyer",
+      "contactType": "capship",
+      "massKt": 9.0,
+      "profile": 0.7,
+      "stealth": 0.3,
+      "emission": 0.55,
+      "sensorQuality": 0.85,
+      "crew": 600,
+      "blurb": "More armour than a ship that size should carry.",
+      "art": {
+        "action": "enemy-destroyer.png",
+        "vdu": "enemy-destroyer-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 160,
+        "shieldAft": 160,
+        "shieldRefresh": 96,
+        "armorFore": 35,
+        "armorAft": 35,
+        "armorPort": 8,
+        "armorStarboard": 8,
+        "body": 220
+      },
+      "hardpoints": [
+        {
+          "id": "Fk-L",
+          "arc": "fore",
+          "kind": "gun"
+        },
+        {
+          "id": "Fk-Lb",
+          "arc": "fore",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Enemy_Destroyer",
+      "gunners": 2,
+      "cargoHold": 750.0,
+      "names": [
+        "TCS Gilgamesh"
+      ]
+    },
+    "wc2.waterloo": {
+      "name": "Waterloo-class cruiser",
+      "role": "Cruiser",
+      "contactType": "capship",
+      "massKt": 19.0,
+      "profile": 0.95,
+      "stealth": 0.25,
+      "emission": 0.4,
+      "sensorQuality": 0.9,
+      "crew": 1400,
+      "blurb": "A cruiser that trades speed for a wall of turrets.",
+      "art": {
+        "action": "enemy-cruiser.png",
+        "vdu": "enemy-cruiser-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 340,
+        "shieldAft": 320,
+        "shieldRefresh": 204,
+        "armorFore": 55,
+        "armorAft": 50,
+        "armorPort": 15,
+        "armorStarboard": 15,
+        "body": 350
+      },
+      "hardpoints": [
+        {
+          "id": "HL1-FB",
+          "arc": "fore",
+          "kind": "gun"
+        },
+        {
+          "id": "HL1-SB",
+          "arc": "port",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Enemy_Cruiser",
+      "gunners": 2,
+      "cargoHold": 1000.0,
+      "names": [
+        "TCS Waterloo"
+      ]
+    },
+    "wc2.gettysburg": {
+      "name": "Gettysburg-class heavy cruiser",
+      "role": "Cruiser",
+      "contactType": "capship",
+      "massKt": 16.0,
+      "profile": 0.95,
+      "stealth": 0.25,
+      "emission": 0.4,
+      "sensorQuality": 0.9,
+      "crew": 1400,
+      "blurb": "The fleet's problem-solver, and it knows it.",
+      "art": {
+        "action": "enemy-cruiser.png",
+        "vdu": "enemy-cruiser-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 260,
+        "shieldAft": 260,
+        "shieldRefresh": 156,
+        "armorFore": 45,
+        "armorAft": 40,
+        "armorPort": 12,
+        "armorStarboard": 12,
+        "body": 300
+      },
+      "hardpoints": [
+        {
+          "id": "HL1-FB",
+          "arc": "fore",
+          "kind": "gun"
+        },
+        {
+          "id": "HL1-SB",
+          "arc": "port",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Enemy_Cruiser",
+      "gunners": 2,
+      "cargoHold": 1000.0,
+      "names": [
+        "TCS Gettysburg"
+      ]
+    },
+    "wc2.drayman": {
+      "name": "Drayman-class transport",
+      "role": "Transport",
+      "contactType": "freighter",
+      "massKt": 0.8,
+      "profile": 0.8,
+      "stealth": 0.1,
+      "emission": 0.55,
+      "sensorQuality": 0.5,
+      "crew": 24,
+      "blurb": "A civil hull with a big hold and a transponder that never stops talking.",
+      "art": {
+        "action": "friendly-transport.png",
+        "vdu": "friendly-transport-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 15.0,
+        "shieldAft": 15.0,
+        "shieldRefresh": 9.0,
+        "armorFore": 7.0,
+        "armorAft": 7.0,
+        "armorPort": 3.0,
+        "armorStarboard": 3.0,
+        "body": 110
+      },
+      "hardpoints": [
+        {
+          "id": "Fk-L",
+          "arc": "fore",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Friendly_Transport",
+      "gunners": 1,
+      "cargoHold": 1000.0,
+      "names": [
+        "MV Grey Drayman"
+      ]
+    },
+    "wc2.tarsus": {
+      "name": "Tarsus-class prospector",
+      "role": "Prospector",
+      "contactType": "prospector",
+      "massKt": 0.028,
+      "profile": 0.5,
+      "stealth": 0.2,
+      "emission": 0.6,
+      "sensorQuality": 0.6,
+      "crew": 4,
+      "blurb": "Survey gear, a hot plant and a crew of four who know every seam.",
+      "art": {
+        "action": "friendly-prospector.png",
+        "vdu": "friendly-prospector-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 8.0,
+        "shieldAft": 8.0,
+        "shieldRefresh": 5.0,
+        "armorFore": 7.0,
+        "armorAft": 7.0,
+        "armorPort": 6.0,
+        "armorStarboard": 6.0,
+        "body": 45
+      },
+      "hardpoints": [
+        {
+          "id": "fore-gun",
+          "arc": "fore",
+          "kind": "gun"
+        },
+        {
+          "id": "fore-missile",
+          "arc": "fore",
+          "kind": "missile"
+        }
+      ],
+      "shipType": "Friendly_Prospector",
+      "gunners": 0,
+      "cargoHold": 125.0,
+      "names": [
+        "MV Lucky Tarsus"
+      ]
+    },
+    "wc2.sartha": {
+      "name": "Sartha-class light fighter",
+      "role": "Light fighter",
+      "contactType": "fighter",
+      "massKt": 0.012,
+      "profile": 0.22,
+      "stealth": 0.65,
+      "emission": 0.75,
+      "sensorQuality": 0.7,
+      "crew": 1,
+      "blurb": "Cheap, quick and thrown at you in threes.",
+      "art": {
+        "action": "enemy-fighter.png",
+        "vdu": "enemy-fighter-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 6,
+        "shieldAft": 6,
+        "shieldRefresh": 4,
+        "armorFore": 4,
+        "armorAft": 3,
+        "armorPort": 2,
+        "armorStarboard": 2,
+        "body": 18
+      },
+      "hardpoints": [
+        {
+          "id": "fore-gun",
+          "arc": "fore",
+          "kind": "gun"
+        },
+        {
+          "id": "fore-missile",
+          "arc": "fore",
+          "kind": "missile"
+        }
+      ],
+      "shipType": "Enemy_Fighter",
+      "gunners": 0,
+      "cargoHold": 2.0,
+      "names": [
+        "KIS Sartha"
+      ]
+    },
+    "wc2.krant": {
+      "name": "Krant-class medium fighter",
+      "role": "Medium fighter",
+      "contactType": "fighter",
+      "massKt": 0.016,
+      "profile": 0.35,
+      "stealth": 0.6,
+      "emission": 0.5,
+      "sensorQuality": 0.6,
+      "crew": 1,
+      "blurb": "The Kilrathi line medium: unglamorous and everywhere.",
+      "art": {
+        "action": "enemy-medium-fighter.png",
+        "vdu": "enemy-medium-fighter-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 10,
+        "shieldAft": 10,
+        "shieldRefresh": 6,
+        "armorFore": 8,
+        "armorAft": 7,
+        "armorPort": 5,
+        "armorStarboard": 5,
+        "body": 30
+      },
+      "hardpoints": [
+        {
+          "id": "fore-gun",
+          "arc": "fore",
+          "kind": "gun"
+        },
+        {
+          "id": "fore-missile",
+          "arc": "fore",
+          "kind": "missile"
+        }
+      ],
+      "shipType": "Enemy_MediumFighter",
+      "gunners": 0,
+      "cargoHold": 5.0,
+      "names": [
+        "KIS Krant"
+      ]
+    },
+    "wc2.dralthi": {
+      "name": "Dralthi-class medium interceptor",
+      "role": "Medium interceptor",
+      "contactType": "fighter",
+      "massKt": 0.014,
+      "profile": 0.35,
+      "stealth": 0.6,
+      "emission": 0.5,
+      "sensorQuality": 0.6,
+      "crew": 1,
+      "blurb": "The iconic interceptor: fast enough to choose the fight.",
+      "art": {
+        "action": "enemy-medium-fighter.png",
+        "vdu": "enemy-medium-fighter-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 10,
+        "shieldAft": 10,
+        "shieldRefresh": 6,
+        "armorFore": 8,
+        "armorAft": 7,
+        "armorPort": 5,
+        "armorStarboard": 5,
+        "body": 30
+      },
+      "hardpoints": [
+        {
+          "id": "fore-gun",
+          "arc": "fore",
+          "kind": "gun"
+        },
+        {
+          "id": "fore-missile",
+          "arc": "fore",
+          "kind": "missile"
+        }
+      ],
+      "shipType": "Enemy_MediumFighter",
+      "gunners": 0,
+      "cargoHold": 5.0,
+      "names": [
+        "KIS Dralthi"
+      ]
+    },
+    "wc2.drakhri": {
+      "name": "Drakhri-class medium scout",
+      "role": "Medium scout",
+      "contactType": "fighter",
+      "massKt": 0.014,
+      "profile": 0.35,
+      "stealth": 0.6,
+      "emission": 0.5,
+      "sensorQuality": 0.6,
+      "crew": 1,
+      "blurb": "A scout that finds you and leaves before you can answer.",
+      "art": {
+        "action": "enemy-medium-fighter.png",
+        "vdu": "enemy-medium-fighter-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 10,
+        "shieldAft": 10,
+        "shieldRefresh": 6,
+        "armorFore": 8,
+        "armorAft": 7,
+        "armorPort": 5,
+        "armorStarboard": 5,
+        "body": 30
+      },
+      "hardpoints": [
+        {
+          "id": "fore-gun",
+          "arc": "fore",
+          "kind": "gun"
+        },
+        {
+          "id": "fore-missile",
+          "arc": "fore",
+          "kind": "missile"
+        }
+      ],
+      "shipType": "Enemy_MediumFighter",
+      "gunners": 0,
+      "cargoHold": 5.0,
+      "names": [
+        "KIS Drakhri"
+      ]
+    },
+    "wc2.gratha": {
+      "name": "Gratha-class heavy fighter",
+      "role": "Heavy fighter",
+      "contactType": "fighter",
+      "massKt": 0.018,
+      "profile": 0.38,
+      "stealth": 0.45,
+      "emission": 0.65,
+      "sensorQuality": 0.75,
+      "crew": 2,
+      "blurb": "A heavy fighter built to win the first pass.",
+      "art": {
+        "action": "enemy-heavy-fighter.png",
+        "vdu": "enemy-heavy-fighter-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 10,
+        "shieldAft": 10,
+        "shieldRefresh": 6,
+        "armorFore": 8,
+        "armorAft": 7,
+        "armorPort": 5,
+        "armorStarboard": 5,
+        "body": 30
+      },
+      "hardpoints": [
+        {
+          "id": "A",
+          "arc": "all",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Enemy_HeavyFighter",
+      "gunners": 1,
+      "cargoHold": 15.0,
+      "names": [
+        "KIS Gratha"
+      ]
+    },
+    "wc2.hhriss": {
+      "name": "Hhriss-class space superiority",
+      "role": "Space superiority",
+      "contactType": "fighter",
+      "massKt": 0.02,
+      "profile": 0.38,
+      "stealth": 0.45,
+      "emission": 0.65,
+      "sensorQuality": 0.75,
+      "crew": 2,
+      "blurb": "Fast, agile and flown by their best.",
+      "art": {
+        "action": "enemy-heavy-fighter.png",
+        "vdu": "enemy-heavy-fighter-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 16,
+        "shieldAft": 16,
+        "shieldRefresh": 10,
+        "armorFore": 14,
+        "armorAft": 14,
+        "armorPort": 12,
+        "armorStarboard": 12,
+        "body": 45
+      },
+      "hardpoints": [
+        {
+          "id": "A",
+          "arc": "all",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Enemy_HeavyFighter",
+      "gunners": 1,
+      "cargoHold": 15.0,
+      "names": [
+        "KIS Hhriss"
+      ]
+    },
+    "wc2.jalthi": {
+      "name": "Jalthi-class gunboat",
+      "role": "Gunboat",
+      "contactType": "escort",
+      "massKt": 0.022,
+      "profile": 0.5,
+      "stealth": 0.35,
+      "emission": 0.45,
+      "sensorQuality": 0.8,
+      "crew": 120,
+      "blurb": "Six guns on a hull that should not carry them.",
+      "art": {
+        "action": "enemy-escort.png",
+        "vdu": "enemy-escort-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 16,
+        "shieldAft": 16,
+        "shieldRefresh": 10,
+        "armorFore": 14,
+        "armorAft": 14,
+        "armorPort": 12,
+        "armorStarboard": 12,
+        "body": 45
+      },
+      "hardpoints": [
+        {
+          "id": "Fk-M",
+          "arc": "fore",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Enemy_Escort",
+      "gunners": 1,
+      "cargoHold": 420.0,
+      "names": [
+        "KIS Jalthi"
+      ]
+    },
+    "wc2.grikath": {
+      "name": "Grikath-class bomber",
+      "role": "Bomber",
+      "contactType": "fighter",
+      "massKt": 0.026,
+      "profile": 0.55,
+      "stealth": 0.4,
+      "emission": 0.6,
+      "sensorQuality": 0.55,
+      "crew": 3,
+      "blurb": "Slow, plated, and carrying torpedoes meant for capitals.",
+      "art": {
+        "action": "enemy-bomber.png",
+        "vdu": "enemy-bomber-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 16,
+        "shieldAft": 16,
+        "shieldRefresh": 10,
+        "armorFore": 14,
+        "armorAft": 14,
+        "armorPort": 12,
+        "armorStarboard": 12,
+        "body": 45
+      },
+      "hardpoints": [
+        {
+          "id": "A",
+          "arc": "all",
+          "kind": "gun"
+        },
+        {
+          "id": "L",
+          "arc": "port",
+          "kind": "gun"
+        },
+        {
+          "id": "R",
+          "arc": "starboard",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Enemy_Bomber",
+      "gunners": 3,
+      "cargoHold": 6.0,
+      "names": [
+        "KIS Grikath"
+      ]
+    },
+    "wc2.gothri": {
+      "name": "Gothri-class strike bomber",
+      "role": "Strike bomber",
+      "contactType": "fighter",
+      "massKt": 0.024,
+      "profile": 0.55,
+      "stealth": 0.4,
+      "emission": 0.6,
+      "sensorQuality": 0.55,
+      "crew": 3,
+      "blurb": "Runs in fast, drops, and runs.",
+      "art": {
+        "action": "enemy-bomber.png",
+        "vdu": "enemy-bomber-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 16,
+        "shieldAft": 16,
+        "shieldRefresh": 10,
+        "armorFore": 14,
+        "armorAft": 14,
+        "armorPort": 12,
+        "armorStarboard": 12,
+        "body": 45
+      },
+      "hardpoints": [
+        {
+          "id": "A",
+          "arc": "all",
+          "kind": "gun"
+        },
+        {
+          "id": "L",
+          "arc": "port",
+          "kind": "gun"
+        },
+        {
+          "id": "R",
+          "arc": "starboard",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Enemy_Bomber",
+      "gunners": 3,
+      "cargoHold": 6.0,
+      "names": [
+        "KIS Gothri"
+      ]
+    },
+    "wc2.kamekh": {
+      "name": "Kamekh-class corvette",
+      "role": "Corvette",
+      "contactType": "escort",
+      "massKt": 2.0,
+      "profile": 0.5,
+      "stealth": 0.35,
+      "emission": 0.45,
+      "sensorQuality": 0.8,
+      "crew": 120,
+      "blurb": "Hunts in pairs and calls in the big hull.",
+      "art": {
+        "action": "enemy-escort.png",
+        "vdu": "enemy-escort-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 60,
+        "shieldAft": 60,
+        "shieldRefresh": 36,
+        "armorFore": 22,
+        "armorAft": 22,
+        "armorPort": 8,
+        "armorStarboard": 8,
+        "body": 160
+      },
+      "hardpoints": [
+        {
+          "id": "Fk-M",
+          "arc": "fore",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Enemy_Escort",
+      "gunners": 1,
+      "cargoHold": 420.0,
+      "names": [
+        "KIS Kamekh"
+      ]
+    },
+    "wc2.ralari": {
+      "name": "Ralari-class light destroyer",
+      "role": "Destroyer",
+      "contactType": "capship",
+      "massKt": 11.0,
+      "profile": 0.7,
+      "stealth": 0.3,
+      "emission": 0.55,
+      "sensorQuality": 0.85,
+      "crew": 600,
+      "blurb": "A picket with teeth.",
+      "art": {
+        "action": "enemy-destroyer.png",
+        "vdu": "enemy-destroyer-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 200,
+        "shieldAft": 200,
+        "shieldRefresh": 120,
+        "armorFore": 45,
+        "armorAft": 45,
+        "armorPort": 10,
+        "armorStarboard": 10,
+        "body": 260
+      },
+      "hardpoints": [
+        {
+          "id": "Fk-L",
+          "arc": "fore",
+          "kind": "gun"
+        },
+        {
+          "id": "Fk-Lb",
+          "arc": "fore",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Enemy_Destroyer",
+      "gunners": 2,
+      "cargoHold": 750.0,
+      "names": [
+        "KIS Ralari"
+      ]
+    },
+    "wc2.ralatha": {
+      "name": "Ralatha-class heavy destroyer",
+      "role": "Heavy destroyer",
+      "contactType": "capship",
+      "massKt": 12.0,
+      "profile": 0.7,
+      "stealth": 0.3,
+      "emission": 0.55,
+      "sensorQuality": 0.85,
+      "crew": 600,
+      "blurb": "A wall of armour and emitters.",
+      "art": {
+        "action": "enemy-destroyer.png",
+        "vdu": "enemy-destroyer-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 200,
+        "shieldAft": 200,
+        "shieldRefresh": 120,
+        "armorFore": 45,
+        "armorAft": 45,
+        "armorPort": 10,
+        "armorStarboard": 10,
+        "body": 260
+      },
+      "hardpoints": [
+        {
+          "id": "Fk-L",
+          "arc": "fore",
+          "kind": "gun"
+        },
+        {
+          "id": "Fk-Lb",
+          "arc": "fore",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Enemy_Destroyer",
+      "gunners": 2,
+      "cargoHold": 750.0,
+      "names": [
+        "KIS Ralatha"
+      ]
+    },
+    "wc2.fralthi": {
+      "name": "Fralthi-class cruiser",
+      "role": "Cruiser",
+      "contactType": "capship",
+      "massKt": 20.0,
+      "profile": 0.95,
+      "stealth": 0.25,
+      "emission": 0.4,
+      "sensorQuality": 0.9,
+      "crew": 1400,
+      "blurb": "The Kilrathi answer to a line warship.",
+      "art": {
+        "action": "enemy-cruiser.png",
+        "vdu": "enemy-cruiser-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 340,
+        "shieldAft": 320,
+        "shieldRefresh": 204,
+        "armorFore": 55,
+        "armorAft": 50,
+        "armorPort": 15,
+        "armorStarboard": 15,
+        "body": 350
+      },
+      "hardpoints": [
+        {
+          "id": "HL1-FB",
+          "arc": "fore",
+          "kind": "gun"
+        },
+        {
+          "id": "HL1-SB",
+          "arc": "port",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Enemy_Cruiser",
+      "gunners": 2,
+      "cargoHold": 1000.0,
+      "names": [
+        "KIS Fralthi"
+      ]
+    },
+    "wc2.fralthi-carrier": {
+      "name": "Fralthi-class light carrier",
+      "role": "Light carrier",
+      "contactType": "carrier",
+      "massKt": 25.0,
+      "profile": 0.95,
+      "stealth": 0.25,
+      "emission": 0.4,
+      "sensorQuality": 0.9,
+      "crew": 1400,
+      "blurb": "A Fralthi hull cut down to fly fighters.",
+      "art": {
+        "action": "enemy-cruiser.png",
+        "vdu": "enemy-cruiser-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 340,
+        "shieldAft": 320,
+        "shieldRefresh": 204,
+        "armorFore": 55,
+        "armorAft": 50,
+        "armorPort": 15,
+        "armorStarboard": 15,
+        "body": 350
+      },
+      "hardpoints": [
+        {
+          "id": "HL1-FB",
+          "arc": "fore",
+          "kind": "gun"
+        },
+        {
+          "id": "HL1-SB",
+          "arc": "port",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Enemy_Cruiser",
+      "gunners": 2,
+      "cargoHold": 1000.0,
+      "names": [
+        "KIS Fralthi"
+      ]
+    },
+    "wc2.snakeir": {
+      "name": "Snakeir-class fleet carrier",
+      "role": "Supercarrier",
+      "contactType": "carrier",
+      "massKt": 100.0,
+      "profile": 0.92,
+      "stealth": 0.1,
+      "emission": 0.85,
+      "sensorQuality": 0.8,
+      "crew": 2400,
+      "blurb": "Launch decks, escorts, and a very long shadow.",
+      "art": {
+        "action": "friendly-carrier.png",
+        "vdu": "friendly-carrier-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 520,
+        "shieldAft": 520,
+        "shieldRefresh": 312,
+        "armorFore": 65,
+        "armorAft": 65,
+        "armorPort": 18,
+        "armorStarboard": 18,
+        "body": 460
+      },
+      "hardpoints": [
+        {
+          "id": "HL1-LB",
+          "arc": "port",
+          "kind": "gun"
+        },
+        {
+          "id": "HL1-RB",
+          "arc": "port",
+          "kind": "gun"
+        },
+        {
+          "id": "HL2-FB",
+          "arc": "fore",
+          "kind": "gun"
+        },
+        {
+          "id": "HL2-CB",
+          "arc": "port",
+          "kind": "gun"
+        },
+        {
+          "id": "HL2-AB",
+          "arc": "aft",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Friendly_Carrier",
+      "gunners": 5,
+      "cargoHold": 2200.0,
+      "names": [
+        "KIS Snakeir"
+      ]
+    },
+    "wc2.dorkir": {
+      "name": "Dorkir-class transport",
+      "role": "Transport",
+      "contactType": "freighter",
+      "massKt": 0.8,
+      "profile": 0.8,
+      "stealth": 0.1,
+      "emission": 0.55,
+      "sensorQuality": 0.5,
+      "crew": 24,
+      "blurb": "A transport with a broad gravidar arc and no pride left.",
+      "art": {
+        "action": "friendly-transport.png",
+        "vdu": "friendly-transport-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 15.0,
+        "shieldAft": 15.0,
+        "shieldRefresh": 9.0,
+        "armorFore": 7.0,
+        "armorAft": 7.0,
+        "armorPort": 3.0,
+        "armorStarboard": 3.0,
+        "body": 110
+      },
+      "hardpoints": [
+        {
+          "id": "Fk-L",
+          "arc": "fore",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Friendly_Transport",
+      "gunners": 1,
+      "cargoHold": 1000.0,
+      "names": [
+        "KIS Dorkir"
+      ]
+    },
+    "wc2.dorkathi": {
+      "name": "Dorkathi-class heavy transport",
+      "role": "Heavy transport",
+      "contactType": "freighter",
+      "massKt": 1.2,
+      "profile": 0.8,
+      "stealth": 0.2,
+      "emission": 0.5,
+      "sensorQuality": 0.55,
+      "crew": 300,
+      "blurb": "Fleet resupply, ordinary emissions, a very big hold.",
+      "art": {
+        "action": "enemy-heavy-transport.png",
+        "vdu": "enemy-heavy-transport-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 15.0,
+        "shieldAft": 15.0,
+        "shieldRefresh": 9.0,
+        "armorFore": 7.0,
+        "armorAft": 7.0,
+        "armorPort": 3.0,
+        "armorStarboard": 3.0,
+        "body": 110
+      },
+      "hardpoints": [
+        {
+          "id": "Fk-M",
+          "arc": "fore",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Enemy_HeavyTransport",
+      "gunners": 1,
+      "cargoHold": 3000.0,
+      "names": [
+        "KIS Dorkathi"
+      ]
+    },
+    "wc2.confederation": {
+      "name": "Confederation-class dreadnought",
+      "role": "Dreadnought",
+      "contactType": "capship",
+      "massKt": 73.0,
+      "profile": 0.92,
+      "stealth": 0.1,
+      "emission": 0.85,
+      "sensorQuality": 0.8,
+      "crew": 2400,
+      "blurb": "The fleet's heaviest hull: a dreadnought built to end arguments.",
+      "art": {
+        "action": "friendly-carrier.png",
+        "vdu": "friendly-carrier-vdu.gif"
+      },
+      "stats": {
+        "shieldFore": 520,
+        "shieldAft": 520,
+        "shieldRefresh": 312,
+        "armorFore": 65,
+        "armorAft": 65,
+        "armorPort": 18,
+        "armorStarboard": 18,
+        "body": 460
+      },
+      "hardpoints": [
+        {
+          "id": "HL1-LB",
+          "arc": "port",
+          "kind": "gun"
+        },
+        {
+          "id": "HL1-RB",
+          "arc": "port",
+          "kind": "gun"
+        },
+        {
+          "id": "HL2-FB",
+          "arc": "fore",
+          "kind": "gun"
+        },
+        {
+          "id": "HL2-CB",
+          "arc": "port",
+          "kind": "gun"
+        },
+        {
+          "id": "HL2-AB",
+          "arc": "aft",
+          "kind": "gun"
+        }
+      ],
+      "shipType": "Friendly_Carrier",
+      "gunners": 5,
+      "cargoHold": 2200.0,
+      "names": [
+        "TCS Confederation"
+      ]
+    }
+  },
+  "defaults": {
+    "unknown": "wc2.bengal",
+    "prospector": "wc2.tarsus",
+    "freighter": "wc2.drayman",
+    "liner": "wc2.drayman",
+    "escort": "wc2.kamekh",
+    "capship": "wc2.ralatha",
+    "fighter": "wc2.dralthi",
+    "carrier": "wc2.snakeir",
+    "asteroid": "",
+    "nebula": "",
+    "debris": "",
+    "dust": "",
+    "ice": ""
+  }
+}

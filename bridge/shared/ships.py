@@ -14,7 +14,7 @@ per-band amplitudes that passive listening paints in.  No two hulls share one.
 All hulls run on the shared 0-100 kps dial: 15 silent running, 60 cruise,
 100 flank (see ``SILENT_KPS``/``CRUISE_KPS``/``FLANK_KPS``).
 
-The catalog itself is **data**: ``flavors/<id>/ships.json``.  This module is the
+The catalog itself is **data**: ``mods/<id>/ships.json``.  This module is the
 flavor-aware view over it.  The module-level ``SHIP_CLASSES`` / ``SHIP_ART`` /
 ``HULL_STATS`` / ``SHIP_NAMES`` / ``DEFAULT_BY_TYPE`` are the ``core`` flavor's
 tables, kept for compatibility; anything that knows which room it is serving

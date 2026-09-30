@@ -1,0 +1,5 @@
+{
+  "title": "Wing Commander",
+  "extends": null,
+  "defaultMission": "wc.vega-patrol"
+}

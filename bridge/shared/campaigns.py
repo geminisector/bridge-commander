@@ -1,6 +1,6 @@
 """CAPTAIN campaigns, loaded from flavor mission data.
 
-A mission is **data**: ``flavors/<id>/missions/*.json``, a document that mirrors
+A mission is **data**: ``mods/<id>/missions/*.json``, a document that mirrors
 :class:`~bridge.shared.types.CampaignSeed` field-for-field.  The generic loader
 is ``CampaignSeed.model_validate(merged_json)``; a flavor never ships code and
 never introduces its own randomness (FLAVOR_PLUGIN_PLAN.md invariant 1).

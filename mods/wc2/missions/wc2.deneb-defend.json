@@ -1,0 +1,41 @@
+{
+  "id": "wc2.deneb-defend",
+  "title": "Deneb Defend",
+  "theater": "Deneb Sector, 2660",
+  "brief": "The Kilrathi have found the Deneb listening post and they want it gone. Bombers are already inbound behind a fighter sweep, and the Tiger's Claw is the only heavy hull in range to stand in front of it.",
+  "target": "Hold the listening post. Break the bomber runs. Weapons free is authorised inside the post's envelope.",
+  "startHour": 18,
+  "patrol": { "center": { "x": 0, "y": 0, "z": 0 }, "radiusKlik": 75 },
+  "clutter": 0.25,
+  "escalation": 60,
+  "zBand": { "min": 0, "max": 9 },
+  "shipClass": "wc2.bengal",
+  "contacts": [
+    { "x": -48, "y": 26, "z": 5, "heading": 45, "speed": 70, "type": "fighter", "faction": "enemy", "hostile": true, "emitting": true, "name": "KIS Gratha", "shipClass": "wc2.gratha", "radiusKlik": null },
+    { "x": 44, "y": 30, "z": 6, "heading": 300, "speed": 72, "type": "fighter", "faction": "enemy", "hostile": true, "emitting": true, "name": "KIS Gratha-2", "shipClass": "wc2.gratha", "radiusKlik": null },
+    { "x": -20, "y": -44, "z": 4, "heading": 20, "speed": 48, "type": "fighter", "faction": "enemy", "hostile": true, "emitting": true, "name": "KIS Grikath", "shipClass": "wc2.grikath", "radiusKlik": null },
+    { "x": 26, "y": -38, "z": 5, "heading": 340, "speed": 46, "type": "fighter", "faction": "enemy", "hostile": true, "emitting": true, "name": "KIS Grikath-2", "shipClass": "wc2.grikath", "radiusKlik": null },
+    { "x": 60, "y": -12, "z": 6, "heading": 250, "speed": 58, "type": "fighter", "faction": "enemy", "hostile": true, "emitting": true, "name": "KIS Gothri", "shipClass": "wc2.gothri", "radiusKlik": null },
+    { "x": 0, "y": 66, "z": 7, "heading": 180, "speed": 60, "type": "escort", "faction": "enemy", "hostile": true, "emitting": true, "name": "KIS Kamekh", "shipClass": "wc2.kamekh", "radiusKlik": null },
+    { "x": 6, "y": -6, "z": 0, "heading": 0, "speed": 0, "type": "asteroid", "faction": "neutral", "hostile": false, "emitting": false, "name": null, "shipClass": null, "radiusKlik": 12 }
+  ],
+  "events": [
+    { "atMinute": 40, "template": "weapons-warning" },
+    { "atMinute": 120, "template": "contactclose" },
+    { "atMinute": 220, "template": "fleetnet" }
+  ],
+  "hazards": [
+    { "id": "wc2.deneb.radiation", "type": "radiation-storm", "title": "Deneb radiation belt", "startMinute": 60, "endMinute": 280, "intensity": 1.0, "noise": 0.04, "exposure": 0.25, "concealment": 0.15 }
+  ],
+  "navPoints": [
+    { "id": "wc2.deneb.post", "name": "Deneb Listening Post", "kind": "nav", "pos": { "x": 0, "y": 0, "z": 0 }, "radiusKlik": 12, "chartAgeHours": 2, "note": "hold this position" },
+    { "id": "wc2.deneb.station", "name": "Picket Station", "kind": "nav", "pos": { "x": -60, "y": -28, "z": 0 }, "radiusKlik": 8, "chartAgeHours": 8, "note": "the post's sensor mast" }
+  ],
+  "layers": [
+    { "id": "surface", "name": "Surface duct", "zMin": 0, "zMax": 10, "note": "Loud and exposed: everyone above and below hears you." },
+    { "id": "gradient", "name": "Gradient layer", "zMin": 10, "zMax": 22, "note": "The boundary itself: crossing it hides you and blinds you." },
+    { "id": "deep", "name": "Deep channel", "zMin": 22, "zMax": 40, "note": "Quiet and hard to reach; your array rides well down here." }
+  ],
+  "environment": "clear-space",
+  "barriers": []
+}

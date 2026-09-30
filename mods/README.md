@@ -1,13 +1,14 @@
 # Flavors — adding a setting (a mod)
 
 A **flavor** is a setting: a folder of data that re-skins, re-scales and
-re-narrates the bridge without shipping a line of Python. The shipped default is
-`core/`.
+re-narrates the bridge without shipping a line of Python. Player mods live in
+this `mods/` folder at the project root; the shipped default is `core/`.
 
 ## Shipped examples
 
 Three worked examples live in this tree. They are demonstration re-skins, not
-published content (`core/` is the only flavor bundled into the built package):
+published content (the wheel ships only `core/`, copied out of this folder by
+`setup.py`):
 
 | Flavor | Setting | Shows off |
 |---|---|---|
@@ -30,19 +31,32 @@ to "create a mod" or "make a new setting", or invoke the skill by name.
 ## The 30-second version
 
 ```sh
-cp -r bridge/flavors/core bridge/flavors/mine
-$EDITOR bridge/flavors/mine/flavor.json     # { "id": "mine", "title": "My Setting" }
+cp -r mods/core mods/mine
 python -m bridge --list-flavors             # loads and validates every flavor
 ```
 
-That is a working flavor: a private copy of the shipped setting's hulls,
-missions and theme. Change only what your setting needs.
+That is a working flavor: **the folder name is the id**, so there is no id to
+rename and nothing else to edit first. It is a private copy of the shipped
+setting's hulls, missions and theme; change only what your setting needs.
+
+`flavor.json` is optional. A folder with a manifest, or any of the conventional
+files (`units.json`, `theme.css`, `ships.json`, `callsigns.json`, `missions/`),
+is discovered as a flavor. The manifest only carries what you want to say:
+
+```json
+{ "title": "My Setting", "extends": null, "defaultMission": "mine.first" }
+```
+
+The conventional filenames are found automatically, so no path needs listing;
+give a key an explicit path for a file in a non-standard place, or `null` to
+stop a copied file from overriding the parent. If you do write an `"id"`, it is
+an assertion that must match the folder, which catches a stale id left on a copy.
 
 ## Layout
 
 ```
-bridge/flavors/<id>/
-  flavor.json      # manifest: every field optional except "id"
+mods/<id>/
+  flavor.json      # optional manifest: title, extends, defaultMission, custom paths
   units.json       # optional: distance ladder + speed dial labels
   theme.css        # optional: a :root override, served after activity.css
   ships.json       # optional: hulls, art and the contact-type defaults

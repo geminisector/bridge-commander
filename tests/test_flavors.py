@@ -19,13 +19,13 @@ from pathlib import Path
 
 import pytest
 
-from bridge.paths import package_path
+from bridge.paths import PROJECT_ROOT, package_path
 from bridge.server import db, engine, mods, rooms as rooms_mod
 from bridge.shared import flavors
 from bridge.shared.campaigns import campaign_for
 from bridge.shared.ships import ship_art, ship_class, ship_classes
 
-CORE_DIR = package_path("flavors", "core")
+CORE_DIR = PROJECT_ROOT / "mods" / "core"
 
 
 @pytest.fixture(autouse=True)
@@ -86,6 +86,34 @@ def _hull(name: str, **overrides: object) -> dict:
     }
     hull.update(overrides)
     return hull
+
+
+def _mission(mission_id: str, hull_id: str) -> dict:
+    return {
+        "id": mission_id,
+        "title": mission_id,
+        "theater": "Nowhere",
+        "brief": "",
+        "target": "",
+        "startHour": 0,
+        "patrol": {"center": {"x": 0, "y": 0, "z": 0}, "radiusKlik": 50},
+        "clutter": 0,
+        "escalation": 10,
+        "shipClass": hull_id,
+        "contacts": [
+            {
+                "x": 0,
+                "y": 0,
+                "heading": 0,
+                "speed": 0,
+                "type": "fighter",
+                "faction": "enemy",
+                "hostile": True,
+                "emitting": False,
+                "shipClass": hull_id,
+            }
+        ],
+    }
 
 
 @pytest.fixture
@@ -601,6 +629,140 @@ def test_inheritance_is_opt_in(flavor_home):
     assert flavor_extends("unnamed") is None
 
 
+# ---------------------------------------------------------------------------
+# Folder-is-the-id: no hardcoded ids, copy/paste a folder into a new flavor
+# ---------------------------------------------------------------------------
+
+
+def test_the_directory_name_is_the_flavor_id(flavor_home):
+    """A manifest may omit ``id``; the folder supplies it."""
+    directory = flavor_home / "plain"
+    directory.mkdir()
+    _write(directory / "flavor.json", {"extends": "core", "title": "Plain Setting"})
+    _write(directory / "ships.json", {"hulls": {"home": {"name": "Plain"}}})
+    flavors.reset_cache()
+    plain = flavors.load_flavor("plain")
+    assert plain.id == "plain"
+    assert plain.title == "Plain Setting"
+
+
+def test_manifest_title_defaults_to_the_folder_name(flavor_home):
+    directory = flavor_home / "untitled"
+    directory.mkdir()
+    _write(directory / "flavor.json", {"extends": "core"})
+    _write(directory / "ships.json", {"hulls": {"home": {"name": "Reskinned"}}})
+    flavors.reset_cache()
+    assert flavors.load_flavor("untitled").title == "Untitled"
+
+
+def test_a_stale_id_on_a_copied_folder_fails_loudly(flavor_home):
+    """An explicit id is an assertion, so a copy that keeps the old one is caught."""
+    _flavor(flavor_home, "mine", {"id": "stale"})
+    with pytest.raises(flavors.FlavorError, match="does not match directory"):
+        flavors.load_flavor("mine")
+
+
+def test_conventional_files_are_discovered(flavor_home):
+    """A manifest may name no files: the conventional names win by default."""
+    directory = flavor_home / "conv"
+    directory.mkdir()
+    _write(directory / "flavor.json", {"extends": "core", "defaultMission": "conv.run"})
+    _write(directory / "units.json", _star_trek_units())
+    (directory / "theme.css").write_text(":root{--bg:#123}", encoding="utf-8")
+    _write(directory / "ships.json", {"hulls": {"home": {"name": "Conventional"}}})
+    _write(
+        directory / "callsigns.json",
+        {"adjectives": ["Zeta"], "nouns": ["Nine"], "vesselName": "surname"},
+    )
+    _write(directory / "missions" / "conv.run.json", _mission("conv.run", "home"))
+    flavors.reset_cache()
+    conv = flavors.load_flavor("conv")
+    assert conv.id == "conv"
+    assert conv.ship_classes["home"].name == "Conventional"
+    assert "conv.run" in conv.missions
+    assert conv.units.format_distance(40 * AU) == "40.0000 AU"
+    assert conv.theme_css == ":root{--bg:#123}"
+    assert conv.callsigns.vessel(1) == "Zeta Nine"
+
+
+def test_an_explicit_null_disables_a_conventional_file(flavor_home):
+    """Dropping a copied file need not override it: ``null`` says inherit."""
+    directory = flavor_home / "nounits"
+    directory.mkdir()
+    _write(directory / "flavor.json", {"extends": "core", "units": None})
+    _write(directory / "units.json", _star_trek_units())
+    flavors.reset_cache()
+    assert flavors.load_flavor("nounits").units.format_distance(40) == "40.0 klik"
+
+
+def test_a_folder_of_files_needs_no_manifest(flavor_home):
+    """Drop a complete folder in; the folder name is the id and title."""
+    shutil.copytree(flavor_home / "core", flavor_home / "loose")
+    (flavor_home / "loose" / "flavor.json").unlink()
+    flavors.reset_cache()
+    assert "loose" in flavors.available()
+    loose = flavors.get("loose")
+    assert loose.id == "loose"
+    assert loose.title == "Loose"
+    assert len(loose.hull_defs) == 15
+    assert len(loose.missions) == 9
+
+
+def test_copying_a_flavor_folder_makes_a_new_flavor(flavor_home):
+    """The headline workflow: ``cp -r``, no edits, and it is a new setting."""
+    shutil.copytree(flavor_home / "core", flavor_home / "mine")
+    flavors.reset_cache()
+    assert "mine" in flavors.available()
+    mine = flavors.get("mine")
+    assert mine.id == "mine"
+    assert len(mine.hull_defs) == 15
+    state = engine.create_state(
+        "mine-room", "inst", campaign_for(mine.first_mission_or(), "mine"), flavor_id="mine"
+    )
+    assert state.flavorId == "mine"
+    engine.advance(state, 30)
+
+
+def test_discovery_ignores_directories_that_are_not_flavors():
+    available = flavors.available()
+    assert "schema" not in available
+    assert "core" in available
+
+
+def test_discovery_uses_project_mods_then_the_packaged_fallback(tmp_path, monkeypatch):
+    """The checkout's project-root mods/ wins; a wheel's packaged tree falls back."""
+    project = tmp_path / "project"
+    (project / "mods" / "core").mkdir(parents=True)
+    (project / "mods" / "core" / "ships.json").write_text("{}", encoding="utf-8")
+    packaged = tmp_path / "packaged"
+    (packaged / "flavors" / "core").mkdir(parents=True)
+    (packaged / "flavors" / "core" / "ships.json").write_text("{}", encoding="utf-8")
+
+    from bridge import paths
+
+    monkeypatch.delenv("FLAVORS_DIR", raising=False)
+    monkeypatch.setattr(paths, "PROJECT_ROOT", project)
+    monkeypatch.setattr(paths, "package_path", lambda *parts: packaged.joinpath(*parts))
+
+    assert paths.flavor_roots() == [project / "mods", packaged / "flavors"]
+    # The project-root copy is the one an id resolves to.
+    assert paths.flavor_dir("core") == project / "mods" / "core"
+
+
+def test_available_merges_roots_without_duplicating_ids(tmp_path, monkeypatch):
+    first, second = tmp_path / "first", tmp_path / "second"
+    for root, name in (
+        (first, "dup"),
+        (first, "shared"),
+        (second, "dup"),
+        (second, "only"),
+    ):
+        (root / name).mkdir(parents=True)
+        (root / name / "ships.json").write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(flavors, "flavor_roots", lambda: [first, second])
+    assert sorted(flavors.available()) == ["dup", "only", "shared"]
+
+
 def test_the_example_universe_mods_are_standalone():
     """Mods are alternative universes: no core hull or mission may leak in."""
     core = flavors.get("core")
@@ -627,7 +789,7 @@ def test_art_urls_are_per_flavor_for_a_flavor_hull():
     assert wc.url_exists(action)
     # The registry name comes from the flavor's own ships.json.
     expected_name = json.loads(
-        (package_path("flavors", "wc", "ships.json")).read_text(encoding="utf-8")
+        (PROJECT_ROOT / "mods" / "wc" / "ships.json").read_text(encoding="utf-8")
     )["hulls"][crew]["names"][0]
     assert wc.ship_names[crew] == expected_name
 
@@ -852,7 +1014,7 @@ def test_check_flavor_cli_reports_failure(flavor_home, capsys):
 
 
 def test_shipped_schemas_are_valid_json():
-    schema_dir = package_path("flavors", "schema")
+    schema_dir = PROJECT_ROOT / "mods" / "schema"
     names = sorted(path.name for path in schema_dir.glob("*.json"))
     assert names == [
         "callsigns.schema.json",

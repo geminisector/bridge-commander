@@ -1,0 +1,8 @@
+# Source distribution contents.  The player mods folder ships the default
+# setting and the authoring schemas; the example settings (wc, stk, sw, wc2)
+# are not published (see pyproject.toml package-data).
+graft mods
+prune mods/wc
+prune mods/wc2
+prune mods/stk
+prune mods/sw

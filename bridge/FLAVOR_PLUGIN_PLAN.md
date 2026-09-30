@@ -72,7 +72,7 @@ These extend the ROADMAP list; a flavor that breaks one is a bad flavor.
 ## Layout
 
 ```
-bridge/flavors/
+mods/                          # player-facing, at the project root
   core/                        # today's catalog, unchanged, becomes the default
     flavor.json theme.css units.json ships.json callsigns.json missions/
   wc/ stk/ sw/ bsg/ farscape/
@@ -89,26 +89,31 @@ A flavor is standalone by default and carries its own catalog; naming `extends`
 opts into another setting's data. Art is optional either way: a flavor with no
 `assets/` falls back to the packaged `img/` tree.
 
+*Landed later:* the directory moved out of the package to the project-root
+`mods/` folder so a player can copy it; a wheel install falls back to the
+packaged `bridge/flavors` tree, which `setup.py` populates with `core` and the
+schemas. See the implementation notes at the end.
+
 ## Manifest
 
 ```json
 {
-  "id": "stk",
   "title": "Star Trek",
   "extends": "core",
-  "units": "units.json",
-  "theme": "theme.css",
-  "ships": "ships.json",
-  "callsigns": "callsigns.json",
-  "missions": "missions/"
+  "defaultMission": "stk.babel"
 }
 ```
 
-Every field is optional except `id`. `extends` is opt-in: omit it (or write
-`null`) for a standalone setting, or name a parent to chain onto. Ids are
-namespaced `<flavor>.<name>` (`stk.miranda`) to keep
-the flat id namespaces in `ships.py` and the state blob from colliding. Core ids
-keep their current names so existing scenarios keep resolving.
+The manifest is **optional** and every field in it is optional. The **directory
+name is the flavor id**, so there is no id to declare (an `id` key, if written,
+is an assertion that must match the folder). The conventional filenames —
+`units.json`, `theme.css`, `ships.json`, `callsigns.json`, `missions/` — are
+discovered automatically; a key only appears to point at a file in a
+non-standard place or to disable a copied file with `null`. `extends` is opt-in:
+omit it (or write `null`) for a standalone setting, or name a parent to chain
+onto. Ids are namespaced `<flavor>.<name>` (`stk.miranda`) to keep the flat id
+namespaces in `ships.py` and the state blob from colliding. Core ids keep their
+current names so existing scenarios keep resolving.
 
 ## Units
 
@@ -409,7 +414,7 @@ where the plan either works or does not.
    to have; not in this plan's scope.
 4. **Who owns flavor licensing?** A flavor naming a third-party universe has the
    same exposure `NEUTRAL_FLEET_RENAMING_PLAN.md` is about. Worth a
-   `flavors/README.md` stating that a contributed flavor is the contributor's
+   `mods/README.md` stating that a contributed flavor is the contributor's
    responsibility, with `wc` shipped as a local-only example not published with
    the app.
 
@@ -417,7 +422,7 @@ where the plan either works or does not.
 
 Landed with these decisions, which supersede the text above where they differ.
 
-- **Core is fully data.** `bridge/flavors/core/` carries `flavor.json`,
+- **Core is fully data.** `mods/core/` carries `flavor.json`,
   `units.json`, `theme.css`, `ships.json` (all 15 hulls with stats, hardpoints,
   art and registry names), `callsigns.json` and `missions/*.json` (all 9
   campaigns, each with its hazards, nav points, layers, barriers and events).
@@ -427,7 +432,7 @@ Landed with these decisions, which supersede the text above where they differ.
   `tools/export_core_flavor.py` records how the data was migrated.
 - **`min` is in canonical klik.** The plan's sample ladder gives the Mm rung
   `"min": 1.0`; that would render a 40-klik knife fight as `0.0 Mm`. It is a
-  typo for `1.0e3` (1 Mm). The schema and `flavors/README.md` state the
+  typo for `1.0e3` (1 Mm). The schema and `mods/README.md` state the
   canonical-units rule, and the validator only enforces ordering, positivity and
   a zero last rung.
 - **The legacy fallback maps are obsolete.** `art` is explicit per hull in
@@ -471,7 +476,7 @@ Landed with these decisions, which supersede the text above where they differ.
   core, namespaces its hulls (`wc.*`), supplies its own `defaults`, and
   demonstrates every seam (units, theme, ships, art fallback, callsigns,
   missions). It is allowlisted in `tests/test_no_wing_commander_names.py` and
-  excluded from the built package (see `flavors/README.md`).
+  excluded from the built package (see `mods/README.md`).
 - **Step 10 partly shipped as examples.** `stk/` (Star Trek) and `sw/` (Star
   Wars) are full reference flavors alongside `wc/`: each re-skins all 15 core
   roles with namespaced hulls and its own `defaults`, theme, units and two
@@ -482,4 +487,23 @@ Landed with these decisions, which supersede the text above where they differ.
 - **Callsign styles are now four**: `corporate`, `surname`, `callsign` and
   `registry` (prefix + proper name), so a setting with a registry convention
   does not need to fake it with the merchant generators.
+- **The folder is the id.** Landing the authoring ergonomics: `flavor.json` is
+  optional and `id` is gone from every shipped manifest; the loader derives the
+  id from the directory name. The conventional files (`units.json`, `theme.css`,
+  `ships.json`, `callsigns.json`, `missions/`) are auto-discovered, so a manifest
+  only carries `title`/`extends`/`defaultMission` or a non-standard path, and an
+  explicit `null` disables a conventional file. Discovery treats a directory as a
+  flavor when it has a manifest or any conventional file, which keeps the shipped
+  `schema/` tree out of `available()`. Copying a folder with `cp -r` is now the
+  whole "new flavor" workflow; a stale explicit `id` is a load error rather than
+  a silent mismatch, and `id` absent is the normal case.
+- **Mods moved to the project root.** The flavor tree now lives in `mods/` at
+  the project root, not inside the package, so a player can find and copy it.
+  `bridge/paths.flavor_roots()` discovers the project-root `mods/` first, then
+  falls back to the packaged `bridge/flavors/` tree — an installed wheel has no
+  project root, so `setup.py`'s `build_py` hook copies the shipped `core` and the
+  authoring schemas into `bridge/flavors/` in the wheel (the example settings are
+  pruned from the sdist and never published). `FLAVORS_DIR` still replaces
+  discovery wholesale, and `flavor_dir(id)` searches every root so an id resolves
+  wherever it is installed.
 

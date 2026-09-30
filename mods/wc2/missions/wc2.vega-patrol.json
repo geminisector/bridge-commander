@@ -1,0 +1,44 @@
+{
+  "id": "wc2.vega-patrol",
+  "title": "Vega Patrol",
+  "theater": "Vega Sector, 2660",
+  "brief": "The Tiger's Claw holds the Vega corridor while the convoy routes refill. Kilrathi raiders have been cutting through the dust lanes to snap at traffic, and command wants the pattern on the board before the next convoy sails.",
+  "target": "Identify every contact in the corridor. Track the raiders. Do not be fixed yourself.",
+  "startHour": 6,
+  "patrol": { "center": { "x": 0, "y": 0, "z": 0 }, "radiusKlik": 100 },
+  "clutter": 0.2,
+  "escalation": 30,
+  "zBand": { "min": 2, "max": 10 },
+  "shipClass": "wc2.bengal",
+  "contacts": [
+    { "x": -30, "y": 40, "z": 5, "heading": 200, "speed": 40, "type": "freighter", "faction": "neutral", "hostile": false, "emitting": false, "name": "MV Grey Drayman", "shipClass": "wc2.drayman", "radiusKlik": null },
+    { "x": 50, "y": 20, "z": 4, "heading": 150, "speed": 30, "type": "prospector", "faction": "neutral", "hostile": false, "emitting": false, "name": "MV Lucky Tarsus", "shipClass": "wc2.tarsus", "radiusKlik": null },
+    { "x": 18, "y": -45, "z": 6, "heading": 20, "speed": 62, "type": "escort", "faction": "enemy", "hostile": true, "emitting": true, "name": "KIS Kamekh", "shipClass": "wc2.kamekh", "radiusKlik": null },
+    { "x": -60, "y": -20, "z": 3, "heading": 300, "speed": 80, "type": "fighter", "faction": "enemy", "hostile": true, "emitting": true, "name": "KIS Sartha", "shipClass": "wc2.sartha", "radiusKlik": null },
+    { "x": 64, "y": 48, "z": 5, "heading": 240, "speed": 78, "type": "fighter", "faction": "enemy", "hostile": true, "emitting": true, "name": "KIS Sartha-2", "shipClass": "wc2.sartha", "radiusKlik": null },
+    { "x": 0, "y": 70, "z": 7, "heading": 180, "speed": 85, "type": "fighter", "faction": "enemy", "hostile": true, "emitting": true, "name": "KIS Dralthi", "shipClass": "wc2.dralthi", "radiusKlik": null },
+    { "x": -10, "y": -10, "z": 0, "heading": 0, "speed": 0, "type": "debris", "faction": "neutral", "hostile": false, "emitting": false, "name": null, "shipClass": null, "radiusKlik": 9 },
+    { "x": 35, "y": -30, "z": 0, "heading": 0, "speed": 0, "type": "dust", "faction": "neutral", "hostile": false, "emitting": false, "name": null, "shipClass": null, "radiusKlik": 14 }
+  ],
+  "events": [
+    { "atMinute": 60, "template": "fleetnet" },
+    { "atMinute": 150, "template": "unmarked" },
+    { "atMinute": 240, "template": "probe" }
+  ],
+  "hazards": [
+    { "id": "wc2.vega.dust", "type": "dust-front", "title": "Vega dust lane", "startMinute": 90, "endMinute": 260, "intensity": 0.8, "noise": 0.03, "exposure": 0.2, "concealment": 0.25 }
+  ],
+  "navPoints": [
+    { "id": "wc2.vega.relay", "name": "Vega Relay", "kind": "nav", "pos": { "x": 40, "y": 12, "z": 0 }, "radiusKlik": 8, "chartAgeHours": 6, "note": "convoy check-in" },
+    { "id": "wc2.vega.jump", "name": "Vega Jump Point", "kind": "jump", "pos": { "x": -70, "y": 80, "z": 0 }, "radiusKlik": 10, "chartAgeHours": 18, "note": "civilian egress" }
+  ],
+  "layers": [
+    { "id": "surface", "name": "Surface duct", "zMin": 0, "zMax": 10, "note": "Loud and exposed: everyone above and below hears you." },
+    { "id": "gradient", "name": "Gradient layer", "zMin": 10, "zMax": 22, "note": "The boundary itself: crossing it hides you and blinds you." },
+    { "id": "deep", "name": "Deep channel", "zMin": 22, "zMax": 40, "note": "Quiet and hard to reach; your array rides well down here." }
+  ],
+  "environment": "clear-space",
+  "barriers": [
+    { "id": "wc2.vega.picket", "name": "Vega Picket", "a": { "x": -50, "y": -90, "z": 0 }, "b": { "x": 60, "y": -70, "z": 0 }, "sensitivity": 0.6, "faction": "enemy", "note": "A listening line across the corridor mouth." }
+  ]
+}

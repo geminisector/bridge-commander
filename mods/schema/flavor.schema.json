@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bridge-commander.local/flavors/schema/flavor.schema.json",
+  "title": "Flavor manifest (flavor.json)",
+  "description": "An optional manifest for a setting (mod): a directory under bridge/flavors/<id>/. The directory name is the flavor id, and the conventional files (units.json, theme.css, ships.json, callsigns.json, missions/) are found automatically, so a manifest only needs the keys it wants to change. A flavor is standalone unless it names a parent with extends. A missing flavor.json is fine when the folder carries conventional data files.",
+  "type": "object",
+  "required": [],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$",
+      "description": "Optional assertion of the flavor id. Omit it: the directory name is the id. When present it must match the directory, so a stale id on a copied folder fails to load. Hull and mission ids are namespaced <id>.<name> by convention."
+    },
+    "title": { "type": "string", "description": "Human-readable setting name." },
+    "extends": {
+      "type": ["string", "null"],
+      "description": "Flavor id to inherit from. Omit it (or set null) for a standalone setting that carries its own complete catalog."
+    },
+    "units": {
+      "type": ["string", "null"],
+      "description": "Path (relative to the flavor directory) to a units.json document. Omit for units.json; null disables the conventional file."
+    },
+    "theme": {
+      "type": ["string", "null"],
+      "description": "Path to a CSS file overriding the :root theme block. Served after activity.css. Omit for theme.css; null disables the conventional file."
+    },
+    "ships": {
+      "type": ["string", "null"],
+      "description": "Path to a ships.json document (hulls, art, defaults). Omit for ships.json; null disables the conventional file."
+    },
+    "callsigns": {
+      "type": ["string", "null"],
+      "description": "Path to a callsigns.json document (name pools and naming style). Omit for callsigns.json; null disables the conventional file."
+    },
+    "missions": {
+      "type": ["string", "null"],
+      "description": "Path to a mission JSON file or a directory of *.json mission documents. Omit for missions/; null disables the conventional directory."
+    },
+    "defaultMission": {
+      "type": "string",
+      "description": "Mission id used when a room names no mission. Defaults to the first mission."
+    }
+  }
+}

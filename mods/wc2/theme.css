@@ -1,0 +1,259 @@
+/* wc — a Wing Commander II-flavoured re-skin of the core watch.
+   1992 VGA console: gunmetal-blue riveted plates with hard 2px bevels, black
+   recessed VDU screens, amber and cyan readouts, blocky bitmap type, no glow,
+   no blur, no rounded corners.  Served after activity.css, so every rule here
+   overrides the core look. */
+
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=VT323&display=swap');
+
+:root{
+  /* surfaces */
+  --bg:#05070d;
+  --bg-deep:#000;
+  --panel:#2c3650;            /* gunmetal blue plate */
+  --panel-2:#3a4664;          /* raised key / button face */
+  --line:#0d1222;             /* bevel shadow */
+  --bevel-hi:#8592b3;         /* bevel highlight */
+  --bevel-lo:#0d1222;
+
+  /* type + readouts */
+  --text:#ffb000;             /* readouts are amber, not white */
+  --text-dim:#b07c1c;
+  --dim:#8592b3;
+  --accent:#ff9c1a;
+  --accent-hover:#ffd060;
+  --cyan:#55e0ff;             /* data / route colour */
+  --amber:#ffb000;
+  --red:#ff3030;              /* hostile */
+  --green:#40ff70;            /* friendly */
+  --active:#000;
+
+  /* no bloom anywhere: the core tokens resolve to nothing */
+  --glow:none;
+  --glow-hover:none;
+  --radius:0;
+  --tint-rgb:255,156,26;
+  --panel-bg:var(--panel);
+  --wash:none;
+
+  --font-display:'Chakra Petch',system-ui,sans-serif;
+  --font-mono:'VT323','Courier New',monospace;
+}
+
+/* ---------- base ---------- */
+
+/* VGA space: black, with hard single-pixel stars instead of the soft nebula
+   starfield.svg.  Delete this block to keep the SVG starfield. */
+body{
+  font-size:18px;
+  line-height:1.3;
+  -webkit-font-smoothing:none;
+  background-image:
+    radial-gradient(1px 1px at 23px 41px,#fff,transparent),
+    radial-gradient(1px 1px at 97px 13px,#9db4ff,transparent),
+    radial-gradient(1px 1px at 151px 88px,#fff,transparent),
+    radial-gradient(1px 1px at 66px 132px,#ffd9a0,transparent),
+    radial-gradient(1px 1px at 178px 171px,#fff,transparent),
+    radial-gradient(1px 1px at 11px 190px,#9db4ff,transparent);
+  background-size:200px 200px;
+  background-attachment:fixed;
+}
+body::before{display:none}
+
+/* Faint CRT scanlines over the whole watch.  Remove for a cleaner read. */
+body::after{
+  content:'';
+  position:fixed;inset:0;
+  z-index:50;
+  pointer-events:none;
+  background:repeating-linear-gradient(to bottom,transparent 0 2px,rgba(0,0,0,.16) 2px 3px);
+}
+
+*{scrollbar-color:var(--bevel-hi) var(--bg-deep)}
+
+/* ---------- plates ---------- */
+
+header,
+.watch,
+.card{
+  background:var(--panel);
+  border:2px solid;
+  border-color:var(--bevel-hi) var(--bevel-lo) var(--bevel-lo) var(--bevel-hi);
+  border-radius:0;
+  box-shadow:none;
+}
+
+/* Recessed VDU screens: inverted bevel on black. */
+.contact,
+.catalogue-entry,
+.plot,.navmap,.gravscope,
+.voice-body:not(:empty){
+  background:#000;
+  border:2px solid;
+  border-color:var(--bevel-lo) var(--bevel-hi) var(--bevel-hi) var(--bevel-lo);
+  border-radius:0;
+  box-shadow:none;
+}
+.contact{border-left:4px solid var(--accent);color:var(--cyan)}
+.contact strong{color:var(--accent)}
+.contact:hover{border-color:var(--bevel-lo) var(--bevel-hi) var(--bevel-hi) var(--accent)}
+.contact.focus{
+  outline:2px solid var(--accent);
+  outline-offset:-6px;
+  box-shadow:none;
+}
+
+/* Cards don't float; a console doesn't lift when you look at it. */
+.card,.catalogue-entry{transition:none}
+.card:hover,.catalogue-entry:hover{transform:none;box-shadow:none;border-color:var(--bevel-hi) var(--bevel-lo) var(--bevel-lo) var(--bevel-hi)}
+.catalogue-entry:hover{border-color:var(--bevel-lo) var(--bevel-hi) var(--bevel-hi) var(--bevel-lo)}
+
+/* ---------- header ---------- */
+
+header{padding:22px 22px 20px}
+header::after{
+  left:0;right:0;height:4px;opacity:1;
+  background:repeating-conic-gradient(var(--panel) 0 25%,var(--panel-2) 0 50%) 0 0/2px 2px;
+}
+
+small,.label,.muted{
+  font-size:1rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--dim);
+}
+
+h1{
+  font-family:var(--font-display);
+  text-transform:uppercase;
+  letter-spacing:.24em;
+  color:var(--accent);
+  text-shadow:2px 2px 0 #000;
+}
+h1.danger{color:var(--red);text-shadow:2px 2px 0 #000}
+h1.good{color:var(--green);text-shadow:2px 2px 0 #000}
+
+.card h2,.card h3,.section-head h2,.sensor-card h3{
+  font-family:var(--font-display);
+  text-transform:uppercase;
+  letter-spacing:.18em;
+  color:var(--accent);
+  text-shadow:1px 1px 0 #000;
+  /* title strip: dark bar across the top of each plate */
+  background:var(--bg-deep);
+  margin:-16px -16px 14px;
+  padding:6px 16px;
+  border-bottom:2px solid var(--bevel-lo);
+}
+
+/* status dot: square, blinks on/off in hard frames */
+#status{color:var(--cyan);font-size:1rem}
+#status::before{
+  border-radius:0;
+  background:var(--cyan);
+  box-shadow:none;
+  animation:wc-blink 1s steps(1,end) infinite;
+}
+@keyframes wc-blink{0%{opacity:1}50%{opacity:0}}
+
+/* ---------- controls: raised keys that press in ---------- */
+
+button,select{
+  background:var(--panel-2);
+  color:var(--accent);
+  border:2px solid;
+  border-color:var(--bevel-hi) var(--bevel-lo) var(--bevel-lo) var(--bevel-hi);
+  border-radius:0;
+  box-shadow:none;
+  font-family:var(--font-mono);
+  font-size:1.05rem;
+  text-transform:uppercase;
+  letter-spacing:.09em;
+  font-weight:600;
+  transition:none;
+}
+button:hover:not(:disabled),select:hover{
+  background:var(--panel-2);
+  color:var(--accent-hover);
+  border-color:var(--bevel-hi) var(--bevel-lo) var(--bevel-lo) var(--bevel-hi);
+  box-shadow:none;
+}
+button:active:not(:disabled){
+  transform:none;
+  border-color:var(--bevel-lo) var(--bevel-hi) var(--bevel-hi) var(--bevel-lo);
+  padding:10px 12px 8px 14px; /* nudge the label 1px down-right like a pressed key */
+}
+button:disabled{opacity:1;color:#5a6688;background:var(--panel);cursor:not-allowed}
+select option{background:#000;color:var(--accent)}
+
+/* latched-down state: watch-bill / alert / heat-mode toggles */
+.watch button.active,
+.tabs button.active{
+  background:var(--active);
+  color:var(--accent-hover);
+  border-color:var(--bevel-lo) var(--bevel-hi) var(--bevel-hi) var(--bevel-lo);
+  box-shadow:none;
+}
+.watch strong{color:var(--accent);text-shadow:none}
+.tabs button{font-family:var(--font-display);font-size:.8rem}
+
+/* ---------- meters: segmented cells, like the shield/armor gauges ---------- */
+
+.bar{
+  height:12px;
+  background:#000;
+  border:2px solid;
+  border-color:var(--bevel-lo) var(--bevel-hi) var(--bevel-hi) var(--bevel-lo);
+  border-radius:0;
+}
+.bar i{
+  background:repeating-linear-gradient(90deg,var(--accent) 0 5px,transparent 5px 7px);
+  box-shadow:none;
+}
+.bar.red i{background:repeating-linear-gradient(90deg,var(--red) 0 5px,transparent 5px 7px);box-shadow:none}
+.bar.amber i{background:repeating-linear-gradient(90deg,var(--amber) 0 5px,transparent 5px 7px);box-shadow:none}
+.bar.good i{background:repeating-linear-gradient(90deg,var(--green) 0 5px,transparent 5px 7px);box-shadow:none}
+
+/* ---------- plots, nav map, gravidar: recolour the hardcoded SVG strokes ---------- */
+
+.plot rect{fill:var(--cyan)}
+.navmap text,.gravscope text{font-family:var(--font-mono);fill:var(--dim)}
+
+/* grid rings and axes: steel blue instead of teal */
+.navmap [stroke="#203442"],.gravscope [stroke="#203442"]{stroke:#4a5878}
+.navmap [stroke="#142733"],.gravscope [stroke="#142733"]{stroke:#252f4a}
+.gravscope circle[fill="#04090d"]{fill:#000}
+.gravscope [fill="#7890a0"],.gravscope [fill="#40536a"]{fill:var(--dim)}
+
+/* ---------- thumbnails: little VDU frames ---------- */
+
+.contact-thumb,.board-thumb,.catalogue-entry img{
+  background:#000;
+  border:2px solid;
+  border-color:var(--bevel-lo) var(--bevel-hi) var(--bevel-hi) var(--bevel-lo);
+  border-radius:0;
+  box-shadow:none;
+  image-rendering:pixelated;
+}
+.contact-thumb.unknown{border-color:var(--bevel-lo) var(--bevel-hi) var(--bevel-hi) var(--bevel-lo);opacity:.5}
+
+/* ---------- misc ---------- */
+
+.readout{font-size:1rem;color:var(--text-dim)}
+.candidate{border-bottom:2px solid var(--bevel-lo)}
+.catalogue-entry:hover{transform:none}
+.voice-body:not(:empty){box-shadow:none}
+
+.danger{color:var(--red)}
+.good{color:var(--green)}
+
+.legal-disclaimer{
+  background:var(--bg-deep);
+  border-top:2px solid var(--panel-2);
+  color:var(--dim);
+}
+.legal-disclaimer a{color:var(--accent)}
+
+@media(max-width:600px){
+  body{font-size:17px}
+}

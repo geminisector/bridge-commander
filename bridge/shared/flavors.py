@@ -1,18 +1,24 @@
 """Flavor plugin system: a setting is a data package, not a fork.
 
-See ``bridge/FLAVOR_PLUGIN_PLAN.md``.  A **flavor** is a directory under
-``bridge/flavors/<id>/`` containing a ``flavor.json`` manifest and the JSON,
-CSS and images it wants to change.  A flavor inherits from ``core`` by default,
-so the minimal one is a manifest plus the files it overrides::
+See ``bridge/FLAVOR_PLUGIN_PLAN.md``.  A **flavor** is a directory under the
+project-root ``mods/`` folder (the packaged ``bridge/flavors/`` tree is the
+fallback for a wheel install).  The **directory name is the flavor id** — there
+is no id to declare, so copying a folder is all it takes to make a new setting::
 
-    bridge/flavors/stk/
-      flavor.json      # { "id": "stk", "title": "Star Trek" }
+    mods/stk/
+      flavor.json      # optional manifest: title, extends, defaultMission
       units.json       # optional: distance/speed presentation
       theme.css        # optional: a :root override
       ships.json       # optional: hulls, art and the default map
       callsigns.json   # optional: name pools
       missions/*.json  # optional: CampaignSeed-shaped scenarios
       assets/          # optional: action/ and vdu/ images
+
+The conventional filenames above are discovered automatically, so a manifest
+only needs the keys it wants to change: an unusual path, a ``title`` or an
+``extends``.  ``id`` is optional and, when present, is a checked assertion that
+must match the folder — omit it.  A directory with a manifest or any of the
+conventional data files is a flavor; a manifest is not required.
 
 Design invariants (FLAVOR_PLUGIN_PLAN.md §"Design invariants"):
 
@@ -45,6 +51,7 @@ from ..paths import (
     flavor_chain,
     flavor_dir,
     flavor_extends,
+    flavor_roots,
     flavors_root,
 )
 from .constants import CRUISE_KPS, FLANK_KPS, FREQ_BANDS
@@ -75,6 +82,29 @@ NUMERIC_HULL_FIELDS = ("massKt", "profile", "stealth", "emission", "sensorQualit
 HARDPOINT_ARCS = ("fore", "aft", "port", "starboard", "all")
 HARDPOINT_KINDS = ("gun", "missile", "torpedo")
 TERRAIN_TYPES = ("asteroid", "nebula", "debris", "dust", "ice")
+
+#: Manifest keys whose files are found by convention when the manifest omits
+#: them, so a dropped-in folder of files needs no wiring to load.
+CONVENTIONAL_FILES: dict[str, str] = {
+    "units": "units.json",
+    "theme": "theme.css",
+    "ships": "ships.json",
+    "callsigns": "callsigns.json",
+    "missions": "missions",
+}
+
+
+def _looks_like_flavor(root: Path) -> bool:
+    """A directory is a flavor if it has a manifest or any conventional file.
+
+    ``flavor.json`` is optional: the folder name is the id.  The conventional
+    data files are the signal, so an unrelated sibling directory (the shipped
+    ``schema/`` tree, say) is not mistaken for a setting.
+    """
+    if (root / "flavor.json").is_file():
+        return True
+    return any((root / name).exists() for name in CONVENTIONAL_FILES.values())
+
 
 
 def _is_number(value: Any) -> bool:
@@ -480,22 +510,42 @@ def _ref_path(flavor_id: str, manifest: dict[str, Any], key: str) -> Path | None
     return candidate
 
 
+def _default_ref(flavor_id: str, key: str) -> Path | None:
+    """The conventional path for a manifest key (``None`` if it has none)."""
+    name = CONVENTIONAL_FILES.get(key)
+    return flavor_dir(flavor_id) / name if name else None
+
+
 def _optional_json(flavor_id: str, manifest: dict[str, Any], key: str) -> dict[str, Any]:
-    """Read an optional top-level manifest reference (a file, else {})."""
-    path = _ref_path(flavor_id, manifest, key)
+    """Read an optional manifest reference, falling back to the convention.
+
+    An absent key uses ``<flavor>/<key>.json``; an explicit ``null``/``""``
+    disables the conventional file, which lets a reskin drop a file it does not
+    want to override.
+    """
+    if key in manifest:
+        path = _ref_path(flavor_id, manifest, key)
+    else:
+        path = _default_ref(flavor_id, key)
     if path is None or not path.is_file():
         return {}
     return _read_json(path)
 
 
 def _read_missions(flavor_id: str, manifest: dict[str, Any]) -> dict[str, dict[str, Any]]:
-    value = manifest.get("missions")
+    root: Path | None
+    if "missions" in manifest:
+        value = manifest.get("missions")
+        if not isinstance(value, str) or not value:
+            return {}
+        root = Path(value)
+        if not root.is_absolute():
+            root = flavor_dir(flavor_id) / value
+    else:
+        root = _default_ref(flavor_id, "missions")
     missions: dict[str, dict[str, Any]] = {}
-    if not isinstance(value, str) or not value:
+    if root is None:
         return missions
-    root = Path(value)
-    if not root.is_absolute():
-        root = flavor_dir(flavor_id) / value
     if root.is_dir():
         paths = sorted(root.glob("*.json"))
     elif root.is_file():
@@ -540,13 +590,18 @@ def _load_flavor(flavor_id: str, seen: tuple[str, ...]) -> Flavor:
         chain = " -> ".join((*seen, flavor_id))
         raise FlavorError(f"extends cycle: {chain}")
     root = flavor_dir(flavor_id)
-    if not root.is_dir() or not (root / "flavor.json").is_file():
+    if not root.is_dir() or not _looks_like_flavor(root):
         raise FlavorError(f"no such flavor: {flavor_id}")
-    manifest = _read_json(root / "flavor.json")
+    manifest_path = root / "flavor.json"
+    manifest = _read_json(manifest_path) if manifest_path.is_file() else {}
+    # The directory name is the id.  An ``id`` in the manifest is an optional
+    # assertion, so a stale id left on a copied folder is caught rather than
+    # silently redirecting the setting.
     declared = manifest.get("id")
     if declared is not None and str(declared) != flavor_id:
         raise FlavorError(
-            f"flavor.json id {declared!r} does not match directory {flavor_id!r}"
+            f"flavor.json id {declared!r} does not match directory {flavor_id!r} "
+            f"(the directory name is the id; omit \"id\")"
         )
 
     extends = flavor_extends(flavor_id)
@@ -682,7 +737,11 @@ def _merge_missions(
 def _theme_path(
     flavor_id: str, manifest: dict[str, Any], parent: Flavor | None
 ) -> Path | None:
-    path = _ref_path(flavor_id, manifest, "theme")
+    path = (
+        _ref_path(flavor_id, manifest, "theme")
+        if "theme" in manifest
+        else _default_ref(flavor_id, "theme")
+    )
     if path is not None and path.is_file():
         return path
     return parent.theme_path if parent else None
@@ -907,12 +966,25 @@ def reset_cache() -> None:
 
 
 def available() -> list[str]:
-    """Every flavor directory with a manifest, core first."""
-    root = flavors_root()
+    """Every flavor in every root, core first.
+
+    Discovery walks the roots in priority order (project-root ``mods/`` first,
+    then the packaged fallback), and the first directory to claim an id wins.
+    A flavor is discovered by its manifest or its conventional data files; the
+    directory name is the id, so there is nothing to declare.
+    """
     ids: list[str] = []
-    if root.is_dir():
+    seen: set[str] = set()
+    for root in flavor_roots():
+        if not root.is_dir():
+            continue
         for child in sorted(root.iterdir()):
-            if child.is_dir() and (child / "flavor.json").is_file():
+            if (
+                child.is_dir()
+                and child.name not in seen
+                and _looks_like_flavor(child)
+            ):
+                seen.add(child.name)
                 ids.append(child.name)
     if CORE_FLAVOR_ID in ids:
         ids.remove(CORE_FLAVOR_ID)
@@ -923,7 +995,7 @@ def available() -> list[str]:
 def default_flavor_id() -> str:
     """``DEFAULT_FLAVOR`` when it names a real flavor, else ``core``."""
     configured = os.getenv("DEFAULT_FLAVOR", "").strip()
-    if configured and (flavor_dir(configured) / "flavor.json").is_file():
+    if configured and _looks_like_flavor(flavor_dir(configured)):
         return configured
     if configured:
         log.warning(
@@ -1009,7 +1081,8 @@ def _build_summaries() -> list[dict[str, Any]]:
 def format_summary() -> str:
     """A one-block startup summary of installed flavors."""
     rows = summaries()
-    lines = [f"[bridge] flavors: {len(rows)} installed under {flavors_root()}"]
+    roots = ", ".join(str(root) for root in flavor_roots()) or str(flavors_root())
+    lines = [f"[bridge] flavors: {len(rows)} installed under {roots}"]
     for row in rows:
         if row["valid"]:
             extends = f" extends {row['extends']}" if row.get("extends") else ""
@@ -1026,6 +1099,7 @@ __all__ = [
     "AssetLayer",
     "Callsigns",
     "CONTACT_TYPES",
+    "CONVENTIONAL_FILES",
     "DEFAULT_UNITS",
     "DistanceRung",
     "Flavor",

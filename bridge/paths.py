@@ -1,11 +1,15 @@
 """Filesystem layout for the app, the image tree and the flavor packages.
 
-A *flavor* is a setting (a mod): a directory under ``bridge/flavors/<id>/``
-holding a ``flavor.json`` manifest plus the JSON, CSS and images it overrides.
-The layout helpers here are deliberately free of flavor semantics — they only
-answer "where would this flavor's files live, and what does it extend?" — so the
-loader in :mod:`bridge.shared.flavors` can be the single place that decides what
-a flavor *means*.
+A *flavor* is a setting (a mod): a directory whose **directory name is the id**,
+holding an optional ``flavor.json`` manifest plus the JSON, CSS and images it
+overrides.  Player-facing mods live in ``mods/`` at the project root, beside the
+app, so a player can copy a folder and get a new setting.  A wheel install has
+no project root, so discovery falls back to the ``bridge/flavors`` tree packaged
+inside the distribution, which ships ``core``.  The layout helpers here are
+deliberately free of flavor semantics — they only answer "where would this
+flavor's files live, and what does it extend?" — so the loader in
+:mod:`bridge.shared.flavors` can be the single place that decides what a flavor
+*means*.
 
 ``core`` is the shipped default setting: its art lives in the historical
 ``bridge/img`` tree (still overridable with ``ASSET_DIR``), while every other
@@ -20,7 +24,14 @@ from pathlib import Path
 
 PACKAGE_ROOT = Path(__file__).resolve().parent
 
-#: Directory holding the shipped and user-installed flavors.
+#: Project root — the directory holding ``bridge/`` and the player ``mods/``.
+PROJECT_ROOT = PACKAGE_ROOT.parent
+
+#: Player-facing mods directory, at the project root.
+MODS_DIRNAME = "mods"
+
+#: Fallback directory inside the package, shipped in the wheel for installs
+#: that have no project-root ``mods/``.
 FLAVORS_DIRNAME = "flavors"
 
 #: The flavor every other flavor extends unless it says otherwise.
@@ -31,17 +42,45 @@ def package_path(*parts: str) -> Path:
     return PACKAGE_ROOT.joinpath(*parts)
 
 
-def flavors_root() -> Path:
-    """The directory flavors are discovered under (``FLAVORS_DIR`` overrides)."""
+def flavor_roots() -> list[Path]:
+    """Every directory flavors are discovered under, highest priority first.
+
+    ``FLAVORS_DIR`` replaces discovery entirely (alternate installs and tests).
+    Otherwise the project-root ``mods/`` comes first, with the packaged
+    ``bridge/flavors`` tree as the wheel fallback — so deleting a mod never
+    removes the shipped ``core``.
+    """
     configured = os.getenv("FLAVORS_DIR", "").strip()
     if configured:
         override = Path(configured).expanduser()
         if override.is_dir():
-            return override
-    return package_path(FLAVORS_DIRNAME)
+            return [override]
+    roots: list[Path] = []
+    mods = PROJECT_ROOT / MODS_DIRNAME
+    if mods.is_dir():
+        roots.append(mods)
+    packaged = package_path(FLAVORS_DIRNAME)
+    if packaged.is_dir():
+        roots.append(packaged)
+    return roots
+
+
+def flavors_root() -> Path:
+    """The primary flavor directory (discovery order, for display)."""
+    roots = flavor_roots()
+    return roots[0] if roots else package_path(FLAVORS_DIRNAME)
 
 
 def flavor_dir(flavor_id: str) -> Path:
+    """The directory a flavor id lives in, searching every root.
+
+    An id missing from every root resolves under the primary root, so the
+    caller's "no such flavor" handling still names a sensible path.
+    """
+    for root in flavor_roots():
+        candidate = root / flavor_id
+        if candidate.is_dir():
+            return candidate
     return flavors_root() / flavor_id
 
 
@@ -136,13 +175,16 @@ def asset_root(flavor: str | None = None) -> Path:
 __all__ = [
     "CORE_FLAVOR_ID",
     "FLAVORS_DIRNAME",
+    "MODS_DIRNAME",
     "PACKAGE_ROOT",
+    "PROJECT_ROOT",
     "asset_root",
     "asset_roots",
     "core_asset_dir",
     "flavor_chain",
     "flavor_dir",
     "flavor_extends",
+    "flavor_roots",
     "flavors_root",
     "package_path",
     "resource_path",
