@@ -33,7 +33,7 @@
     { "id": "wc2.gemini.exit", "name": "Gemini Exit", "kind": "jump", "pos": { "x": 84, "y": 66, "z": 0 }, "radiusKlik": 10, "chartAgeHours": 20, "note": "quiet egress" }
   ],
   "layers": [
-    { "id": "surface", "name": "Surface duct", "zMin": 0, "zMax": 10, "note": "Loud and exposed: everyone above and below hears you." },
+    { "id": "surface", "name": "Radiant band", "zMin": 0, "zMax": 10, "note": "Loud and exposed: everyone above and below hears you." },
     { "id": "gradient", "name": "Gradient layer", "zMin": 10, "zMax": 22, "note": "The boundary itself: crossing it hides you and blinds you." },
     { "id": "deep", "name": "Deep channel", "zMin": 22, "zMax": 40, "note": "Quiet and hard to reach; your array rides well down here." }
   ],

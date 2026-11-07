@@ -32,7 +32,7 @@
     { "id": "wc2.deneb.station", "name": "Picket Station", "kind": "nav", "pos": { "x": -60, "y": -28, "z": 0 }, "radiusKlik": 8, "chartAgeHours": 8, "note": "the post's sensor mast" }
   ],
   "layers": [
-    { "id": "surface", "name": "Surface duct", "zMin": 0, "zMax": 10, "note": "Loud and exposed: everyone above and below hears you." },
+    { "id": "surface", "name": "Radiant band", "zMin": 0, "zMax": 10, "note": "Loud and exposed: everyone above and below hears you." },
     { "id": "gradient", "name": "Gradient layer", "zMin": 10, "zMax": 22, "note": "The boundary itself: crossing it hides you and blinds you." },
     { "id": "deep", "name": "Deep channel", "zMin": 22, "zMax": 40, "note": "Quiet and hard to reach; your array rides well down here." }
   ],
