@@ -27,7 +27,7 @@ import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, HTMLResponse, Response
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse, Response
 
 from ..paths import asset_root, asset_roots, package_path
 from ..shared.flavors import format_summary, get as get_flavor
@@ -110,10 +110,45 @@ def _report_flavors() -> None:
 
 app = FastAPI(title="BRIDGE COMMANDER", lifespan=lifespan)
 
+_NOT_FOUND_HTML = """<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bridge Commander — Lost in space</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin:0; min-height:100vh; display:grid; place-items:center; background:#071018;
+         color:#d8f3ff; font:16px/1.5 system-ui,sans-serif; overflow:hidden; }
+  main { max-width:40rem; padding:3rem; text-align:center; }
+  .signal { color:#62d9ff; font:700 .8rem/1 monospace; letter-spacing:.2em; }
+  h1 { margin:.8rem 0; font-size:clamp(2.5rem,8vw,5rem); letter-spacing:.04em; }
+  p { color:#91aebb; }
+  a { display:inline-block; margin-top:1rem; padding:.75rem 1.1rem; border:1px solid #2a7892;
+      border-radius:4px; color:#9eeaff; text-decoration:none; }
+  a:hover { background:#103447; }
+</style></head><body><main>
+<div class="signal">NAVIGATION ALERT · 404</div>
+<h1>Turn back.</h1>
+<p>This sector is uncharted. Glory awaits on the bridge.</p>
+<a href="/">Return to the bridge</a>
+</main></body></html>"""
+
+
+@app.exception_handler(404)
+async def not_found(request: Request, exc: Exception) -> Response:
+    """Give browsers a useful themed page without changing API 404 responses."""
+    accept = request.headers.get("accept", "")
+    if "text/html" in accept:
+        return HTMLResponse(_NOT_FOUND_HTML, status_code=404)
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
 # Render exposes one public port per web service.  Mount the token-gated admin
 # app under the main service so it is reachable at https://host/admin while
 # retaining the separate-port development option below.
 if ADMIN_TOKEN.strip():
+    @app.get("/admin", include_in_schema=False)
+    async def admin_root_redirect() -> RedirectResponse:
+        """Make the public admin URL work with or without a trailing slash."""
+        return RedirectResponse(url="/admin/", status_code=307)
+
     app.mount("/admin", create_admin_app(ADMIN_TOKEN))
 
 _allow_origins = ["*"] if "*" in CORS_ORIGINS else list(CORS_ORIGINS)
