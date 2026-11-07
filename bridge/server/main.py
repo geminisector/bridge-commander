@@ -5,8 +5,8 @@ Direct port of ``apps/server/src/index.ts``.  Run with::
     python -m bridge
 
 which starts the FastAPI app (client websocket + health + optional static
-activity bundle) on ``PORT`` and, when ``ADMIN_PORT`` is set, the admin app on
-its own port in a background thread.
+activity bundle) on ``PORT``.  The admin app is also mounted at ``/admin``;
+when ``ADMIN_PORT`` is set it remains available on that legacy port too.
 """
 
 from __future__ import annotations
@@ -109,6 +109,12 @@ def _report_flavors() -> None:
 
 
 app = FastAPI(title="BRIDGE COMMANDER", lifespan=lifespan)
+
+# Render exposes one public port per web service.  Mount the token-gated admin
+# app under the main service so it is reachable at https://host/admin while
+# retaining the separate-port development option below.
+if ADMIN_TOKEN.strip():
+    app.mount("/admin", create_admin_app(ADMIN_TOKEN))
 
 _allow_origins = ["*"] if "*" in CORS_ORIGINS else list(CORS_ORIGINS)
 app.add_middleware(

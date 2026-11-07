@@ -294,7 +294,8 @@
 
   function connect() {
     token = $('token').value;
-    ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/`);
+    const adminPath = new URL('.', location.href).pathname;
+    ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}${adminPath}`);
     status('connecting');
     ws.onopen = () => send({ type: 'admin.hello', token });
     ws.onclose = () => status('offline');
