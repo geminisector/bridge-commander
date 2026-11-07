@@ -1,0 +1,6 @@
+[submodule "lobbylink"]
+	path = lobbylink
+	url = https://github.com/danielrh/lobbylink.git
+[submodule "libs/lobbylink"]
+	path = libs/lobbylink
+	url = https://github.com/danielrh/lobbylink.git
