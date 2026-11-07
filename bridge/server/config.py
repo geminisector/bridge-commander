@@ -44,6 +44,9 @@ DEFAULT_FLAVOR: str = os.getenv("DEFAULT_FLAVOR", "")
 # plays.  Unset means the public ``meet.jit.si``; an *empty* value disables the
 # voice tab entirely (useful for an offline or locked-down table).
 JITSI_DOMAIN: str = os.getenv("JITSI_DOMAIN", "meet.jit.si")
+# Optional LobbyLink matchmaking service.  When set, the activity client joins
+# the LobbyLink room before opening the authoritative Bridge websocket.
+LOBBYLINK_URL: str = os.getenv("LOBBYLINK_URL", "")
 # ``Number(process.env.ADMIN_PORT) || 0`` — an unset/blank/invalid value is 0.
 try:
     ADMIN_PORT: int = int(os.getenv("ADMIN_PORT") or "0")
@@ -67,6 +70,7 @@ class Config:
     flavorsDir: str = FLAVORS_DIR
     defaultFlavor: str = DEFAULT_FLAVOR
     jitsiDomain: str = JITSI_DOMAIN
+    lobbyLinkUrl: str = LOBBYLINK_URL
     adminPort: int = ADMIN_PORT
     adminToken: str = ADMIN_TOKEN
     adminHost: str = ADMIN_HOST
@@ -83,6 +87,7 @@ config = Config(
     flavorsDir=FLAVORS_DIR,
     defaultFlavor=DEFAULT_FLAVOR,
     jitsiDomain=JITSI_DOMAIN,
+    lobbyLinkUrl=LOBBYLINK_URL,
     adminPort=ADMIN_PORT,
     adminToken=ADMIN_TOKEN,
     adminHost=ADMIN_HOST,
@@ -103,6 +108,7 @@ __all__ = [
     "FLAVORS_DIR",
     "DEFAULT_FLAVOR",
     "JITSI_DOMAIN",
+    "LOBBYLINK_URL",
     "ADMIN_PORT",
     "ADMIN_TOKEN",
     "ADMIN_HOST",

@@ -43,6 +43,7 @@ from .config import (
     DEFAULT_FLAVOR,
     HOST,
     JITSI_DOMAIN,
+    LOBBYLINK_URL,
     PORT,
 )
 from .db import init_db
@@ -200,6 +201,12 @@ def _voice_bootstrap() -> str:
     return f"<script>window.__BRIDGE_VOICE__={payload.replace('<', chr(92) + 'u003c')};</script>"
 
 
+def _lobbylink_bootstrap() -> str:
+    """Expose the optional LobbyLink service URL to the activity client."""
+    payload = json.dumps(LOBBYLINK_URL.strip())
+    return f"<script>window.__BRIDGE_LOBBYLINK__={payload};</script>"
+
+
 def _render_index(dist: Path, flavor_id: str) -> str:
     """Inject the flavor theme after activity.css, so it overrides cleanly.
 
@@ -218,6 +225,9 @@ def _render_index(dist: Path, flavor_id: str) -> str:
             html = html.replace(marker, marker + "\n  " + link, 1)
         else:
             html = html.replace("</head>", "  " + link + "\n</head>", 1)
+    bootstrap = _lobbylink_bootstrap()
+    if bootstrap not in html:
+        html = html.replace("</head>", "  " + bootstrap + "\n</head>", 1)
     voice = _voice_bootstrap()
     if voice and voice not in html:
         html = html.replace("</head>", "  " + voice + "\n</head>", 1)

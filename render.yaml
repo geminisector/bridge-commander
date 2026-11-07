@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: bridge-commander
+    runtime: python
+    buildCommand: pip install -e .
+    startCommand: uvicorn bridge.server.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+      - key: CORS_ORIGINS
+        value: '*'
+      - key: DATA_DIR
+        value: /tmp/bridge-data
+      - key: LOBBYLINK_URL
+        fromService:
+          type: web
+          name: bridge-commander-lobby
+          envVar: RENDER_EXTERNAL_URL
+
+  - type: web
+    name: bridge-commander-lobby
+    runtime: go
+    rootDir: libs/lobbylink
+    buildCommand: go build -trimpath -ldflags "-s -w" -o dist/p2p-lobby-server ./cmd/p2p-lobby-server
+    startCommand: ./dist/p2p-lobby-server --listen-http 0.0.0.0:$PORT --behind-proxy --public-url $RENDER_EXTERNAL_URL --allowed-origin $BRIDGE_COMMANDER_ORIGIN
+    envVars:
+      - key: BRIDGE_COMMANDER_ORIGIN
+        fromService:
+          type: web
+          name: bridge-commander
+          envVar: RENDER_EXTERNAL_URL
